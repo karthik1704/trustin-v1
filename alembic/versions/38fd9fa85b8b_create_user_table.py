@@ -1,8 +1,8 @@
-"""create tables
+"""create user table
 
-Revision ID: 0caaa15e44e8
+Revision ID: 38fd9fa85b8b
 Revises: 
-Create Date: 2024-01-14 20:05:41.321135
+Create Date: 2024-01-15 21:28:19.066177
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '0caaa15e44e8'
+revision: str = '38fd9fa85b8b'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,6 +26,14 @@ def upgrade() -> None:
     sa.Column('last_name', sa.String(), nullable=True),
     sa.Column('email', sa.String(), nullable=True),
     sa.Column('password', sa.String(), nullable=True),
+    sa.Column('phone', sa.String(), nullable=True),
+    sa.Column('date_joined', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('last_login', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=True),
+    sa.Column('is_staff', sa.Boolean(), nullable=True),
+    sa.Column('is_superuser', sa.Boolean(), nullable=True),
+    sa.Column('role', sa.Enum('HOD', 'MARKETING', 'ADMIN', 'MANAGEMENT', 'ANALYST', name='roletype'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
