@@ -23,3 +23,7 @@ class ChangePassword(BaseModel):
     current_password: str
     password: str
     password2: str
+
+class Token(BaseModel):
+    access_token:str
+    token_type: str

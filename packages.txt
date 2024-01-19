@@ -3,5 +3,7 @@ uvicorn[standard]
 sqlalchemy
 email-validator
 python-multipart
-psycopg-binary
+psycopg
 alembic
+python-jose[cryptography]
+passlib[bcrypt]

@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, func, Enum
+from sqlalchemy.orm import relationship
 from app.models import Base
 from enum import Enum as PyEnum
 
@@ -28,3 +29,5 @@ class User(Base):
     is_superuser = Column(Boolean(), default=False)
 
     role = Column(Enum(RoleType), default=RoleType.ADMIN)
+    
+    assingee = relationship("CustomerFollowUp", back_populates="marketing_user")

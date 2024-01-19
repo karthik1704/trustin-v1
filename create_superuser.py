@@ -1,6 +1,6 @@
 import click
 from app.database import SessionLocal
-
+from app.utils import get_hashed_password
 from app.models.users import User  # Import your User model
 
 @click.command()
@@ -17,7 +17,7 @@ def create_super_user(email, password):
         # Create a new superuser
         superuser = User(
             email=email,
-            password=password,
+            password=get_hashed_password(password),
             is_active=True,
             is_superuser=True
         )
