@@ -28,9 +28,9 @@ class Product(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     branch = relationship('Branch', back_populates='products')
-    parameters = relationship('Product',back_populates="product")
+    parameters = relationship('TestingParameter',back_populates="product")
     trfs = relationship('TRF', back_populates='product')
-    followups = relationship("Product", back_populates="product")
+    followups = relationship("CustomerFollowUp", back_populates="product")
 
 class TestType(Base):
     __tablename__ = "testtypes"

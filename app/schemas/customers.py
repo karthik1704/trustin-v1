@@ -1,8 +1,17 @@
 
+from typing import List
 from pydantic import BaseModel, EmailStr
+
 from datetime import date
 from app.models.customers import MarketingStatus
 
+class ContactPersonCreate(BaseModel):
+    person_name :str
+    designation :str
+    mobile_number : str
+    landline_number : str
+    email : str
+    customer_id: int
 
 class CustomerCreate(BaseModel):
     customer_code :str
@@ -22,13 +31,7 @@ class CustomerCreate(BaseModel):
     pan :str
     gst :str
 
-class ContactPersonCreate(BaseModel):
-    person_name :str
-    designation :str
-    mobile_number : str
-    landline_number : str
-    email : str
-    customer_id: int
+    contact_persons: List[ContactPersonCreate]
   
 class CustomerFollowupCreate(BaseModel):
 
