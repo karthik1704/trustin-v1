@@ -13,3 +13,6 @@ class Branch(BaseModel):
     gstin: str
     bank_details: str
     ifsc_code: str
+
+class BranchCreate(BaseModel):
+    branch_name: str
