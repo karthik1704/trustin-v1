@@ -4,7 +4,6 @@ from pydantic import BaseModel
 
 class ProductCreate(BaseModel):
     branch_id: int
-
     product_code : str
     product_name : str
     description : str

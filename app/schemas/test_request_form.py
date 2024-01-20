@@ -6,13 +6,20 @@ from typing import List
 from pydantic import BaseModel
 from ..models.test_request_forms import SamplingByEnum, YesOrNoEnum, ReportSentByEnum, DocumentsTypeEnum, TestingProcessEnum, DisposalProcessEnum
 
+class TestDetail(BaseModel):
+
+    priority_order : int
+    parameter_id : int
+
+
+
 class TRFCreate(BaseModel):
 
     trf_code : str
     date_of_registration : date
     sample_id : str
     sample_name : str
-    description : strcoll
+    description : str
     manufactured_by : str
     batch_or_lot_no : str
     manufactured_date : date
@@ -21,7 +28,7 @@ class TRFCreate(BaseModel):
     format_name : str
     nabl_logo : bool
     no_of_samples :int
-    sample_storage_condition : strcoll
+    sample_storage_condition : str
 
     sampling_by :SamplingByEnum
     testing_process : List[TestingProcessEnum]
@@ -36,6 +43,9 @@ class TRFCreate(BaseModel):
     branch_id : int
     product_id : int
     customer_id : int
+
+    test_types_ids: List[int]
+    test_details: List[TestDetail]
 
 class TestDetailCreate(BaseModel):
 

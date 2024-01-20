@@ -11,7 +11,6 @@ class ContactPersonCreate(BaseModel):
     mobile_number : str
     landline_number : str
     email : str
-    customer_id: int
 
 class CustomerCreate(BaseModel):
     customer_code :str
