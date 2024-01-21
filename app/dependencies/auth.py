@@ -1,14 +1,19 @@
 from typing import Annotated
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 from ..utils import decode_access_token
 
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth')
+# oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/login')
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
+async def get_current_user(authorization: str = Header(...)):
+    # authorization: str = Header(...)
+    print(authorization)
     try:
+        token = authorization.replace("Bearer ","")
+        print(token)
         payload = decode_access_token(token)
+        print(payload)
         email: str|None = payload.get('sub')
         user_id: int|None = payload.get('id')
         role: str|None = payload.get('role')

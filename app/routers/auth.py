@@ -3,6 +3,7 @@ from datetime import timedelta
 from fastapi import Depends, status, APIRouter, HTTPException
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 from ..models.users import User
@@ -16,6 +17,9 @@ router = APIRouter(
 
 
 
+class UserLogin(BaseModel):
+    username: str
+    password:str
 
 
 
@@ -43,3 +47,27 @@ async def login_access_token(form_data:Annotated[OAuth2PasswordRequestForm, Depe
 
     token = create_access_token(user.email, user.id, user.role,timedelta(minutes=30))
     return {'access_token': token, 'token_type':'bearer'}
+
+
+@router.post("/login", status_code=status.HTTP_201_CREATED)
+async def get_token_for_user(user: UserLogin, db: db_dep):
+    _user = authenticate_user(user.username, user.password, db)
+
+    # TODO: out exception handling to external module
+    if not _user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+  
+    # TODO: add refresh token
+    _token =  create_access_token(_user.email, _user.id, _user.role,timedelta(minutes=30))
+    return {'access_token': _token, 'token_type':'bearer'}
+
+# @router.post("/logout", status_code=status.HTTP_201_CREATED, response_model=UserLogoutResponse)
+# async def user_logout(user: UserLogout, request: Request, db_session: AsyncSession = Depends(get_db)):
+#     _user: User = await User.find(db_session, [User.email == user.email])
+
+#     # TODO: out exception handling to external module
+#     if not _user:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+#     # TODO: remove access token
+#     _token = await unset_jwt(request)
+#     return {"message": "logged out"}
