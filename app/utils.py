@@ -24,9 +24,9 @@ def verify_password(password: str, hashed_pass: str) -> bool:
 
 def create_access_token(email:str, user_id:int, role:str,  expires_delta: int = None) -> str:
     if expires_delta is not None:
-        expires_delta = datetime.utcnow() + expires_delta
+        expires_delta = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_MINUTES)
     else:
-        expires_delta = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expires_delta = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_MINUTES)
     
     encode = {'sub':email, 'id':user_id, 'role':role}
     encode.update({'exp':expires_delta})
@@ -37,7 +37,7 @@ def create_refresh_token(email:str, user_id:int, role:str, expires_delta: int = 
     if expires_delta is not None:
         expires_delta = datetime.utcnow() + expires_delta
     else:
-        expires_delta = datetime.utcnow() + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
+        expires_delta = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_MINUTES)
     
     encode = {'sub':email, 'id':user_id, 'role':role}
     encode.update({'exp':expires_delta})
