@@ -24,6 +24,13 @@ async def get_all_products(db: db_dep, user: user_dep):
 
     return products
 
+@router.get("/trf", status_code=status.HTTP_200_OK)
+async def get_all_products_for_trf(db: db_dep):
+
+    products = db.query(Product).all()
+
+    return products
+
 @router.get('/{product_id}', status_code=status.HTTP_200_OK)
 async def get_product(db:db_dep, user:user_dep, product_id:int = Path(gt=0)):
     if user is None:

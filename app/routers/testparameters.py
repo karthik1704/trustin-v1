@@ -1,5 +1,5 @@
-from typing import Annotated
-from fastapi import APIRouter, Depends, Path, status, HTTPException
+from typing import Annotated, List
+from fastapi import APIRouter, Depends, Path, Query, status, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from app.dependencies.auth import get_current_user
@@ -22,6 +22,20 @@ async def get_all_testing_parameters(db: db_dep, user: user_dep):
 
     parameters = (
         db.query(TestingParameter)
+        .options(joinedload(TestingParameter.branch))
+        .options(joinedload(TestingParameter.test_type))
+        .options(joinedload(TestingParameter.product))
+        .all()
+    )
+
+    return parameters
+
+@router.get("/trf", status_code=status.HTTP_200_OK)
+async def get_all_testing_parameters_with_query_trf(db: db_dep, test_type:List[int]=Query(..., description="List of test_type IDs")):
+  
+
+    parameters = (
+        db.query(TestingParameter).filter(TestingParameter.test_type_id.in_(test_type)  )
         .options(joinedload(TestingParameter.branch))
         .options(joinedload(TestingParameter.test_type))
         .options(joinedload(TestingParameter.product))

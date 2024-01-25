@@ -1,7 +1,6 @@
 
 
 from datetime import date
-from locale import strcoll
 from typing import List
 from pydantic import BaseModel
 from ..models.test_request_forms import SamplingByEnum, YesOrNoEnum, ReportSentByEnum, DocumentsTypeEnum, TestingProcessEnum, DisposalProcessEnum
