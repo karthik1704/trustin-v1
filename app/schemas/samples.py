@@ -4,7 +4,6 @@ from pydantic import BaseModel
 
 class ProductCreate(BaseModel):
     branch_id: int
-    product_code : str
     product_name : str
     description : str
 
@@ -18,7 +17,7 @@ class TestParameterCreate(BaseModel):
     test_type_id : int
     product_id : int
     
-    parameter_code:str
+    # parameter_code:str
     testing_parameters:str
     amount : Decimal
     method_or_spec:str

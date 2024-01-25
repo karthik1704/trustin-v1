@@ -15,4 +15,4 @@ class Branch(BaseModel):
     ifsc_code: str
 
 class BranchCreate(BaseModel):
-    branch_name: str
+    pass

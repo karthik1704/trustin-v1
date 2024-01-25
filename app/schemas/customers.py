@@ -10,12 +10,10 @@ class ContactPersonCreate(BaseModel):
     designation :str
     mobile_number : str
     landline_number : str
-    email : str
+    contact_email : str
 
 class CustomerCreate(BaseModel):
-    customer_code :str
     company_name :str
-    company_id :str
     customer_address_line1 :str
     customer_address_line2 :str
     city :str
@@ -40,4 +38,3 @@ class CustomerFollowupCreate(BaseModel):
     assign_to : int
     date: date
     remarks: str
-    trf_id: int

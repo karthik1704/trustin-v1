@@ -64,7 +64,7 @@ class ContactPerson(Base):
     designation =Column(String)
     mobile_number = Column(String)
     landline_number = Column(String)
-    email =  Column(String)
+    contact_email =  Column(String)
 
     created_at =Column(DateTime(timezone=True), server_default=func.now())
     updated_at =  Column(DateTime(timezone=True), onupdate=func.now())

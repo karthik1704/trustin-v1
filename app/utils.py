@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Union, Any
 from jose import jwt
 from passlib.context import CryptContext
@@ -24,10 +24,12 @@ def verify_password(password: str, hashed_pass: str) -> bool:
 
 def create_access_token(email:str, user_id:int, role:str,  expires_delta: int = None) -> str:
     if expires_delta is not None:
-        expires_delta = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_MINUTES)
+        expires_delta = datetime.now(UTC) + timedelta(days=30)
     else:
-        expires_delta = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_MINUTES)
+        expires_delta = datetime.now(UTC) + timedelta(days=30)
     
+    print(expires_delta)
+
     encode = {'sub':email, 'id':user_id, 'role':role}
     encode.update({'exp':expires_delta})
     encoded_jwt = jwt.encode(encode, JWT_SECRET_KEY, ALGORITHM)
@@ -35,10 +37,10 @@ def create_access_token(email:str, user_id:int, role:str,  expires_delta: int = 
 
 def create_refresh_token(email:str, user_id:int, role:str, expires_delta: int = None) -> str:
     if expires_delta is not None:
-        expires_delta = datetime.utcnow() + expires_delta
+        expires_delta = datetime.now(UTC) + expires_delta
+    
     else:
         expires_delta = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_MINUTES)
-    
     encode = {'sub':email, 'id':user_id, 'role':role}
     encode.update({'exp':expires_delta})
     encoded_jwt = jwt.encode(encode, JWT_SECRET_KEY, ALGORITHM)
