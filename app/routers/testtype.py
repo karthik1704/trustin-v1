@@ -24,6 +24,15 @@ async def get_all_testtypes(db: db_dep, user: user_dep):
 
     return test_types
 
+@router.get("/trf", status_code=status.HTTP_200_OK)
+async def get_all_testtypes_for_trf(db: db_dep):
+    
+
+    test_types = db.query(TestType).all()
+
+    return test_types
+
+
 @router.get('/{testtype_id}', status_code=status.HTTP_200_OK)
 async def get_test_type(db:db_dep, user:user_dep, testtype_id:int = Path(gt=0)):
     if user is None:

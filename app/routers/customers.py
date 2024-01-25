@@ -25,6 +25,7 @@ async def get_all_Customers(db: db_dep, user: user_dep):
     return customers
 
 
+
 @router.get("/{customer_id}", status_code=status.HTTP_200_OK)
 async def get_Customer(db: db_dep, user: user_dep, customer_id: int = Path(gt=0)):
     if user is None:
