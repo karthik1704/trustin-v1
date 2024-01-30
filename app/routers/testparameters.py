@@ -30,12 +30,17 @@ async def get_all_testing_parameters(db: db_dep, user: user_dep):
 
     return parameters
 
-@router.get("/trf", status_code=status.HTTP_200_OK)
-async def get_all_testing_parameters_with_query_trf(db: db_dep, test_type:List[int]=Query(..., description="List of test_type IDs")):
-  
 
+@router.get("/trf/{product_id}", status_code=status.HTTP_200_OK)
+async def get_all_testing_parameters_with_query_trf(
+    db: db_dep,
+    test_type: List[int] = Query(..., description="List of test_type IDs"),
+    product_id:int=Path(gt=0),
+):
     parameters = (
-        db.query(TestingParameter).filter(TestingParameter.test_type_id.in_(test_type)  )
+        db.query(TestingParameter)
+        .filter(TestingParameter.product_id == product_id)
+        .filter(TestingParameter.test_type_id.in_(test_type))
         .options(joinedload(TestingParameter.branch))
         .options(joinedload(TestingParameter.test_type))
         .options(joinedload(TestingParameter.product))
@@ -69,3 +74,33 @@ async def create_parameter(db: db_dep, data: TestParameterCreate, user: user_dep
     parameter = TestingParameter(**data.model_dump())
     db.add(parameter)
     db.commit()
+
+@router.put("/{para_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def update_test_parameter(
+    db: db_dep,
+    user: user_dep,
+    data: TestParameterCreate,
+    para_id: int = Path(gt=0),
+):
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+        )
+
+    parameter = (
+        db.query(TestingParameter).filter(TestingParameter.id == para_id).first()
+    )
+
+    if parameter is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Testing Parameter Not Found"
+        )
+
+     
+
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(parameter, field, value)
+
+
+    db.commit()
+    db.refresh(parameter)

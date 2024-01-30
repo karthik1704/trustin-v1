@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Path, status, HTTPException, Header
 from sqlalchemy.orm import Session, joinedload
 
 from app.dependencies.auth import get_current_user
+from app.utils import get_unique_code
 from ..schemas.customers import CustomerCreate
 from app.database import get_db
 from ..models.customers import Customer, ContactPerson
@@ -20,7 +21,7 @@ async def get_all_Customers(db: db_dep, user: user_dep):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
 
-    customers = db.query(Customer).all()
+    customers = db.query(Customer).order_by(Customer.updated_at.desc()).all()
 
     return customers
 
@@ -59,6 +60,9 @@ async def create_Customers(db: db_dep, data: CustomerCreate, user: user_dep):
     db.commit()
     db.refresh(customer)
 
+    customer.customer_code = get_unique_code('CUS', customer.id) # type: ignore
+    db.commit()
+
     contacts = [
         ContactPerson(**contact.model_dump(), customer_id=customer.id)
         for contact in contact_persons
@@ -72,39 +76,31 @@ async def create_Customers(db: db_dep, data: CustomerCreate, user: user_dep):
     return {"customer": customer, "contacts": contacts}
 
 
-@router.put("/{customer_id}", status_code=status.HTTP_200_OK)
-async def update_Customer(
+@router.put("/{customer_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def update_customer(
     db: db_dep, user: user_dep, data: CustomerCreate, customer_id: int = Path(gt=0)
 ):
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
-    contact_persons = data.contact_persons
-    data_dict = data.model_dump()
-    data_dict.pop("contact_persons")
+    data_in_modified = data.copy(exclude={"contact_persons", })
     customer = (
         db.query(Customer)
         .options(joinedload(Customer.contact_persons))
         .filter(Customer.id == customer_id)
         .first()
     )
-    contact = (
-        db.query(ContactPerson).filter(ContactPerson.customer_id == customer_id).first()
-    )
+
 
     if customer is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Customer Not Found"
         )
 
-    # if contact is None:
-    #     contact_person = contact_persons[0].model_dump()
-    #     contact_model =  ContactPerson(**contact_person, customer_id=customer.id)
-    #     db.add(contact_model)
-    #     db.commit()
+ 
 
-    for field, value in data.model_dump(exclude_unset=True).items():
+    for field, value in data_in_modified.model_dump(exclude_unset=True).items():
         setattr(customer, field, value)
 
     # Update or add the children

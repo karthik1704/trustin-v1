@@ -50,3 +50,37 @@ async def create_product(db: db_dep, data: ProductCreate, user: user_dep):
     product = Product(**data.model_dump())
     db.add(product)
     db.commit()
+    db.refresh(product)
+    product.product_code = get_unique_code('SAM', customer.id) # type: ignore
+    db.commit()
+
+
+@router.put("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def update_product(
+    db: db_dep,
+    user: user_dep,
+    data: ProductCreate,
+    product_id: int = Path(gt=0),
+):
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+        )
+
+    product = (
+        db.query(Product).filter(Product.id == product_id).first()
+    )
+
+    if product is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Product Not Found"
+        )
+
+     
+
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(product, field, value)
+
+
+    db.commit()
+    db.refresh(product)

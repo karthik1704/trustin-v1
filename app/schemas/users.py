@@ -12,6 +12,14 @@ class UserCreate(BaseModel):
     role:RoleType 
 
 
+class UserUpdate(BaseModel):
+    first_name:str
+    last_name:str
+    email: EmailStr
+    phone: str
+    role:RoleType 
+
+
 class ForgotPassword(BaseModel):
     password: str
     password2: str

@@ -52,3 +52,33 @@ async def create_test_type(db: db_dep, data: TestTypeCreate, user: user_dep):
     test_type = TestType(**data.model_dump())
     db.add(test_type)
     db.commit()
+
+@router.put("/{testtype_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def update_test_type(
+    db: db_dep,
+    user: user_dep,
+    data: TestTypeCreate,
+    testtype_id: int = Path(gt=0),
+):
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+        )
+
+    test_type = (
+        db.query(TestType).filter(TestType.id == testtype_id).first()
+    )
+
+    if test_type is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Test type Not Found"
+        )
+
+     
+
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(test_type, field, value)
+
+
+    db.commit()
+    db.refresh(test_type)

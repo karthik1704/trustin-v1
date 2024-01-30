@@ -3,9 +3,11 @@ from fastapi import APIRouter, Depends, Path, status, HTTPException, Header
 from sqlalchemy.orm import Session, joinedload
 
 from app.dependencies.auth import get_current_user
+from app.models.test_request_forms import TRF
+from app.utils import get_unique_code
 from ..schemas.customers import CustomerFollowupCreate
 from app.database import get_db
-from ..models.customers import CustomerFollowUp
+from ..models.customers import CustomerFollowUp, MarketingStatus
 
 router = APIRouter(prefix="/followups", tags=["Customers Followup"])
 
@@ -45,6 +47,7 @@ async def get_Customer_followup(
         .options(joinedload(CustomerFollowUp.customer))
         .options(joinedload(CustomerFollowUp.marketing_user))
         .options(joinedload(CustomerFollowUp.product))
+        .options(joinedload(CustomerFollowUp.trf))
         .filter(CustomerFollowUp.id == followup_id)
         .first()
     )
@@ -67,8 +70,8 @@ async def create_followup(db: db_dep, data: CustomerFollowupCreate, user: user_d
     db.refresh(followup)
 
 
-@router.put("/{followup_id}", status_code=status.HTTP_200_OK)
-async def update_Customer_followup(
+@router.put("/{followup_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def update_customer_followup(
     db: db_dep,
     user: user_dep,
     data: CustomerFollowupCreate,
@@ -88,8 +91,26 @@ async def update_Customer_followup(
             status_code=status.HTTP_404_NOT_FOUND, detail="Customer Not Found"
         )
 
+     
+
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(followup, field, value)
 
+
     db.commit()
     db.refresh(followup)
+
+    if followup.marketing_status == MarketingStatus.WON: # type: ignore
+
+        trf = TRF(product_id=followup.product_id, customer_id=followup.customer_id, )
+        followup.trf=trf
+        db.commit()
+        db.refresh(followup)
+        db.refresh(trf)
+
+        trf.trf_code = get_unique_code('TRF', trf.id)
+        db.commit()
+        
+
+
+        

@@ -55,3 +55,33 @@ async def create_branch(db: db_dep, data: BranchCreate, user: user_dep):
     branch = Branch(**data.model_dump())
     db.add(branch)
     db.commit()
+
+@router.put("/{branch_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def update_branch(
+    db: db_dep,
+    user: user_dep,
+    data: BranchCreate,
+    branch_id: int = Path(gt=0),
+):
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+        )
+
+    branch = (
+        db.query(Branch).filter(Branch.id == branch_id).first()
+    )
+
+    if branch is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Branch Not Found"
+        )
+
+     
+
+    for field, value in data.model_dump(exclude_unset=True).items():
+        setattr(branch, field, value)
+
+
+    db.commit()
+    db.refresh(branch)

@@ -3,19 +3,21 @@
 from datetime import date
 from typing import List
 from pydantic import BaseModel
-from ..models.test_request_forms import SamplingByEnum, YesOrNoEnum, ReportSentByEnum, DocumentsTypeEnum, TestingProcessEnum, DisposalProcessEnum
+from ..models.test_request_forms import SamplingByEnum, TestingDetail, YesOrNoEnum, ReportSentByEnum, DocumentsTypeEnum, TestingProcessEnum, DisposalProcessEnum
 
 class TestDetail(BaseModel):
 
     priority_order : int
     parameter_id : int
 
+    class Meta:
+        orm_model=TestingDetail
+
 
 
 class TRFCreate(BaseModel):
 
-    trf_code : str
-    date_of_registration : date
+
     sample_id : str
     sample_name : str
     description : str
@@ -38,13 +40,8 @@ class TRFCreate(BaseModel):
     binary_decision_rule :YesOrNoEnum
     submission_of_documents :List[DocumentsTypeEnum]
 
-
-    branch_id : int
-    product_id : int
-    customer_id : int
-
     test_types_ids: List[int]
-    test_details: List[TestDetail]
+    testing_details: List[TestDetail]
 
 class TestDetailCreate(BaseModel):
 
