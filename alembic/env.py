@@ -16,7 +16,7 @@ host = os.getenv('DB_HOST')
 db_name = os.getenv('DB_NAME')
 
 
-SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{username}:{password}@{host}:5432/{db_name}"
+SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{username}:{password}@{host}/{db_name}"
 print(SQLALCHEMY_DATABASE_URL)
 
 # this is the Alembic Config object, which provides
