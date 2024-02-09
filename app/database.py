@@ -9,7 +9,7 @@ password = os.getenv('DB_PASSWORD')
 host = os.getenv('DB_HOST')
 db_name = os.getenv('DB_NAME')
 
-SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{username}:{password}@{host}:5432/{db_name}"
+SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://postgres:CT65f3It@qei@localhost/trustin_fa"
 print(SQLALCHEMY_DATABASE_URL)
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL
