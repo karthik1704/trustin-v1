@@ -1,5 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+load_dotenv()
 import os
 
 username = os.getenv('DB_USER')
@@ -7,8 +9,8 @@ password = os.getenv('DB_PASSWORD')
 host = os.getenv('DB_HOST')
 db_name = os.getenv('DB_NAME')
 
-SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{username}:{password}@{host}/{db_name}"
-
+SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg://{username}:{password}@{host}:5432/{db_name}"
+print(SQLALCHEMY_DATABASE_URL)
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL
 )
