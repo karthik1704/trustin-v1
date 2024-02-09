@@ -3,7 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 from .routers import users, auth , customers, branches, products, test_request_forms, followups, testtype, testparameters
+from dotenv import load_dotenv
 
+load_dotenv()
 
 app = FastAPI()
 
@@ -11,6 +13,7 @@ app = FastAPI()
 origins = [
     "http://localhost",
     "http://localhost:3000",
+
 ]
 
 app.add_middleware(

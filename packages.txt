@@ -7,3 +7,4 @@ psycopg
 alembic
 python-jose[cryptography]
 passlib[bcrypt]
+python-dotenv   
