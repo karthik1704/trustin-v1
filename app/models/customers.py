@@ -1,7 +1,11 @@
+import datetime
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, func, Enum, Text
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from app.models import Base
 from enum import Enum as PyEnum
+from typing import List, Optional
+from test_request_forms import TRF
 
 class MarketingStatus(PyEnum):
     NONE = ''
@@ -22,54 +26,54 @@ class MarketingStatus(PyEnum):
 
 class Customer(Base):
     __tablename__ = "customers"
-    id = Column(Integer, primary_key=True)
+    id:Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
 
     # branch = models.ForeignKey(Branch, related_name='customer_branch',on_delete=models.CASCADE)
     
-    customer_code =  Column(String)
-    company_name =  Column(String)
-    company_id =  Column(String)
-    customer_address_line1 =  Column(String)
-    customer_address_line2 =  Column(String)
-    city =  Column(String)
-    state =  Column(String)
-    pincode_no =  Column(String)
-    website =  Column(String)
-    email =   Column(String)
+    customer_code :Mapped[str] = mapped_column(unique=True)
+    company_name :Mapped[str]
+    company_id :Mapped[str]
+    customer_address_line1 :Mapped[str]
+    customer_address_line2 :Mapped[Optional[str]]
+    city :Mapped[str]
+    state :Mapped[str]
+    pincode_no :Mapped[str]
+    website :Mapped[Optional[str]]
+    email:Mapped[str] = mapped_column(unique=True)
 
 
-    nature_of_business =  Column(String)
-    product_details =  Column(String)
-    market =  Column(String)
-    regulatory =  Column(String)
-    pan =  Column(String)
-    gst =  Column(String)
+    nature_of_business :Mapped[Optional[str]]
+    product_details :Mapped[Optional[str]]
+    market :Mapped[Optional[str]]
+    regulatory :Mapped[Optional[str]]
+    pan :Mapped[Optional[str]]
+    gst :Mapped[Optional[str]]
 
     created_at =Column(DateTime(timezone=True), server_default=func.now())
     updated_at =  Column(DateTime(timezone=True), onupdate=func.now())
     
-    contact_persons = relationship("ContactPerson", back_populates="customer")
-    followups = relationship("CustomerFollowUp", back_populates="customer")
-    trfs = relationship('TRF', back_populates='customer')
+    contact_persons:Mapped[List['ContactPerson']] = relationship( back_populates="customer")
+    followups:Mapped[List['CustomerFollowUp']] = relationship( back_populates="customer")
+    trfs:Mapped[List['TRF']] = relationship( back_populates='customer')
 
 
 class ContactPerson(Base):
     __tablename__ = "contactpersons"
-    id = Column(Integer, primary_key=True)
+    id:Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
 
-    customer_id = Column(Integer, ForeignKey('customers.id'))
+    customer_id:Mapped[int] = mapped_column(ForeignKey('customers.id'))
     
     
-    person_name =Column(String)
-    designation =Column(String)
-    mobile_number = Column(String)
-    landline_number = Column(String)
-    contact_email =  Column(String)
+    person_name :Mapped[str]
+    designation :Mapped[Optional[str]]
+    mobile_number :Mapped[str]
+    landline_number:Mapped[Optional[str]]
+    contact_email:Mapped[str]
 
-    created_at =Column(DateTime(timezone=True), server_default=func.now())
-    updated_at =  Column(DateTime(timezone=True), onupdate=func.now())
+    created_at:Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at:Mapped[datetime.datetime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
     
-    customer = relationship("Customer", back_populates="contact_persons")
+    customer:Mapped['Customer'] = relationship( back_populates="contact_persons")
 
 
    
@@ -87,7 +91,7 @@ class CustomerFollowUp(Base):
     
     date = Column(DateTime(timezone=True), default=func.now())
 
-    remarks = Column(Text)
+    remarks:Mapped[str] = mapped_column(Text)
 
 
     customer = relationship("Customer", back_populates="followups")
@@ -97,7 +101,6 @@ class CustomerFollowUp(Base):
     product = relationship("Product", back_populates="followups")
 
     
-    created_at =Column(DateTime(timezone=True), server_default=func.now())
-    updated_at =  Column(DateTime(timezone=True), onupdate=func.now())
-    
+    created_at:Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at:Mapped[datetime.datetime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
 
