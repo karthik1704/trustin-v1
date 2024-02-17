@@ -1,3 +1,5 @@
+from decimal import Decimal
+from typing import List, Optional, TYPE_CHECKING
 from sqlalchemy import (
     Column,
     Integer,
@@ -10,59 +12,67 @@ from sqlalchemy import (
     Text,
     DECIMAL
 )
-from sqlalchemy.orm import relationship
+import datetime
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 from app.models import Base
 from enum import Enum as PyEnum
-from .test_request_forms import testtype_association_table
+from .test_request_forms import testtype_association_table, TRF
+
+if TYPE_CHECKING:
+    from .test_request_forms import  TRF
+    from .branches import Branch
+    from .customers  import CustomerFollowUp
+    from .test_request_forms  import TestingDetail
 
 class Product(Base):
     __tablename__ = "products"
-    id = Column(Integer, primary_key=True)
-    branch_id = Column(Integer, ForeignKey("branches.id"))
+    id:Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
+    branch_id:Mapped[int] = mapped_column(ForeignKey("branches.id"))
 
-    product_code = Column(String)
-    product_name = Column(String)
-    description = Column(Text)
+    product_code :Mapped[str]
+    product_name :Mapped[str]
+    description:Mapped[str] = mapped_column(Text)
+    
+    created_at:Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at:Mapped[datetime.datetime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    branch = relationship('Branch', back_populates='products')
-    parameters = relationship('TestingParameter',back_populates="product")
-    trfs = relationship('TRF', back_populates='product')
-    followups = relationship("CustomerFollowUp", back_populates="product")
+    branch:Mapped['Branch'] = relationship( back_populates='products')
+    parameters:Mapped['TestingParameter'] = relationship(back_populates="product")
+    trfs:Mapped['TRF'] = relationship( back_populates='product')
+    followups:Mapped['CustomerFollowUp'] = relationship( back_populates="product")
 
 class TestType(Base):
     __tablename__ = "testtypes"
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    description = Column(Text)
+    id:Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
+    name:Mapped[str]
+    description:Mapped[Optional[str]] = mapped_column(Text)
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_at:Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at:Mapped[datetime.datetime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
 
-
-    parameters = relationship('TestingParameter',back_populates="test_type" )
-    trfs = relationship('TRF', secondary=testtype_association_table, back_populates='test_types')
+    parameters:Mapped[List['TestingParameter']] = relationship(back_populates="test_type" )
+    trfs:Mapped['TRF'] = relationship( secondary=testtype_association_table, back_populates='test_types') # work needed
 
 class TestingParameter(Base):
     __tablename__ = "testingparameters"
-    id = Column(Integer, primary_key=True)
+    id:Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
 
-    branch_id = Column(Integer, ForeignKey("branches.id"))
-    test_type_id = Column(Integer, ForeignKey("testtypes.id"))
-    product_id = Column(Integer, ForeignKey("products.id"))
+    branch_id:Mapped[int] = mapped_column( ForeignKey("branches.id"))
+    test_type_id:Mapped[int] = mapped_column( ForeignKey("testtypes.id"))
+    product_id:Mapped[int] = mapped_column( ForeignKey("products.id"))
     
-    parameter_code = Column(String)
-    testing_parameters = Column(String)
-    amount = Column(DECIMAL(precision=19, scale=4))
-    method_or_spec = Column(String)
+    parameter_code :Mapped[str]
+    testing_parameters:Mapped[str]
+    amount:Mapped[Decimal] = mapped_column(DECIMAL(precision=19, scale=4))
+    method_or_spec  :Mapped[str]
 
-    group_of_test_parameters = Column(Text)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-
-    branch = relationship('Branch',back_populates="parameters" )
-    test_type = relationship('TestType',back_populates="parameters" )
-    product = relationship('Product',back_populates="parameters")
-    test_details = relationship('TestingDetail', back_populates='parameter')
+    group_of_test_parameters :Mapped[str] = mapped_column(Text)
+    created_at:Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at:Mapped[datetime.datetime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
+    
+    
+    branch :Mapped['Branch'] = relationship(back_populates="parameters" )
+    test_type :Mapped['TestType'] = relationship(back_populates="parameters" )
+    product :Mapped['Product'] = relationship(back_populates="parameters")
+    test_details :Mapped[List['TestingDetail']] = relationship( back_populates='parameter')

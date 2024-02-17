@@ -1,9 +1,11 @@
-from typing import List
+from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.orm import relationship
 from app.models import Base
-from .samples import Product, TestingParameter
-from .test_request_forms import TRF
+
+if TYPE_CHECKING:
+    from .samples import Product, TestingParameter
+    from .test_request_forms import TRF
 
 class Branch(Base):
     __tablename__ = "branches"

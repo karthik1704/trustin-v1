@@ -1,17 +1,23 @@
 import click
-from app.database import SessionLocal
+from fastapi import Depends
+from app.database import  sessionmanager
 from app.utils import get_hashed_password
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app.models.users import User  # Import your User model
+from typing import Annotated
 
+# db_dep =
 @click.command()
 @click.option('--email', prompt='Enter email', help='Superuser email')
 @click.option('--password', prompt=True, hide_input=True, help='Superuser password')
-def create_super_user(email, password):
+def create_super_user(email, password,  ):
 
-    db = SessionLocal()
 
+    db = Annotated[AsyncSession, get_db()]
     # Check if the superuser already exists
-    existing_superuser = db.query(User).filter(User.email == email).first()
+
+    existing_superuser =  db.execute(select(User.fullname).where(User.id == 2)).scalar_one()
 
     if not existing_superuser:
         # Create a new superuser
@@ -24,8 +30,6 @@ def create_super_user(email, password):
         
         # Add the superuser to the database
         db.add(superuser)
-        db.commit()
-        db.refresh(superuser)
 
         print("Superuser created successfully.")
     else:

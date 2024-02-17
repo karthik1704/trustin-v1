@@ -4,8 +4,13 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.orm import Mapped, mapped_column
 from app.models import Base
 from enum import Enum as PyEnum
-from typing import List, Optional
-from test_request_forms import TRF
+from typing import List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .test_request_forms import TRF
+    from .users import User
+    from .samples import Product
+
 
 class MarketingStatus(PyEnum):
     NONE = ''
@@ -49,8 +54,9 @@ class Customer(Base):
     pan :Mapped[Optional[str]]
     gst :Mapped[Optional[str]]
 
-    created_at =Column(DateTime(timezone=True), server_default=func.now())
-    updated_at =  Column(DateTime(timezone=True), onupdate=func.now())
+ 
+    created_at:Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at:Mapped[datetime.datetime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
     
     contact_persons:Mapped[List['ContactPerson']] = relationship( back_populates="customer")
     followups:Mapped[List['CustomerFollowUp']] = relationship( back_populates="customer")
@@ -80,25 +86,26 @@ class ContactPerson(Base):
 
 class CustomerFollowUp(Base):
     __tablename__ = "customerfollowups"
-    id = Column(Integer, primary_key=True)
+    id:Mapped[int] = mapped_column( primary_key=True, autoincrement=True, index=True)
 
-    customer_id = Column(Integer, ForeignKey('customers.id'))
-    product_id = Column(Integer, ForeignKey('products.id'))
+    customer_id:Mapped[int] =mapped_column( ForeignKey('customers.id'))
+    product_id:Mapped[int] =mapped_column( ForeignKey('products.id'))
 
-    marketing_status = Column(Enum(MarketingStatus), default=MarketingStatus.NONE)
+    marketing_status:Mapped[MarketingStatus]
+    assign_to:Mapped[int] = mapped_column( ForeignKey('users.id'))
     
-    assign_to = Column(Integer, ForeignKey('users.id'))
-    
-    date = Column(DateTime(timezone=True), default=func.now())
+    date:Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), default=func.now())
 
     remarks:Mapped[str] = mapped_column(Text)
 
 
-    customer = relationship("Customer", back_populates="followups")
-    marketing_user = relationship("User", back_populates="assingee")
-    trf_id = Column(Integer, ForeignKey('test_request_forms.id'), unique=True)
-    trf = relationship("TRF", back_populates="followup")
-    product = relationship("Product", back_populates="followups")
+    customer:Mapped['Customer'] = relationship( back_populates="followups")
+    marketing_user:Mapped['User'] = relationship( back_populates="assingee")
+    
+    trf_id:Mapped[int] = mapped_column(ForeignKey('test_request_forms.id'), unique=True)
+    trf:Mapped['TRF'] = relationship( back_populates="followup")
+
+    product:Mapped['Product'] = relationship( back_populates="followups")
 
     
     created_at:Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

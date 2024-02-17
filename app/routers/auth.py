@@ -4,7 +4,9 @@ from fastapi import Depends, Response, status, APIRouter, HTTPException
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from jose import jwt, JWTError
 from ..models.users import User
 from ..schemas.users import Token
@@ -19,11 +21,12 @@ class UserLogin(BaseModel):
     password: str
 
 
-db_dep = Annotated[Session, Depends(get_db)]
+db_dep = Annotated[AsyncSession, Depends(get_db)]
 
 
-def authenticate_user(email: str, password: str, db):
-    user = db.query(User).filter(User.email == email).first()
+async def authenticate_user(email: str, password: str, db: db_dep) -> User | bool:
+    user = await db.scalar(select(User).where(User.email==email))
+    print(user)
     if not user:
         return False
     if not verify_password(password, user.password):
