@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Path, status, HTTPException
 from sqlalchemy.orm import Session
 
 from app.dependencies.auth import get_current_user
+from app.utils import get_unique_code
 from ..schemas.samples import ProductCreate
 from app.database import get_db
 from ..models.samples import Product
@@ -51,7 +52,7 @@ async def create_product(db: db_dep, data: ProductCreate, user: user_dep):
     db.add(product)
     db.commit()
     db.refresh(product)
-    product.product_code = get_unique_code('SAM', customer.id) # type: ignore
+    product.product_code = get_unique_code('SAM', product.id) # type: ignore
     db.commit()
 
 
