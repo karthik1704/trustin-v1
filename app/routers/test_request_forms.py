@@ -106,9 +106,9 @@ async def get_trf(db: db_dep, user: user_dep, trf_id: int = Path(gt=0)):
         .filter(TRF.id == trf_id)
         .first()
     )
-    trf_dict = trf.__dict__
-
-    trf_dict["test_types_ids"] = [item.id for item in trf.test_types]
+    if trf is not None:
+        trf_dict = trf.__dict__
+        trf_dict["test_types_ids"] = [item.id for item in trf.test_types]
 
     return trf_dict
 
