@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 
-from .routers import users, auth , customers, branches, products, test_request_forms, followups, testtype, testparameters
+from .routers import users, auth , customers, branches, products, test_request_forms, followups, testtype, testparameters, registrations
 
 
 app = FastAPI()
@@ -30,3 +30,4 @@ app.include_router(products.router)
 app.include_router(testtype.router)
 app.include_router(testparameters.router)
 app.include_router(test_request_forms.router)
+app.include_router(registrations.router)

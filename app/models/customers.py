@@ -51,6 +51,7 @@ class Customer(Base):
     contact_persons = relationship("ContactPerson", back_populates="customer")
     followups = relationship("CustomerFollowUp", back_populates="customer")
     trfs = relationship('TRF', back_populates='customer')
+    parameters = relationship('TestingParameter', back_populates='customer')
 
 
 class ContactPerson(Base):

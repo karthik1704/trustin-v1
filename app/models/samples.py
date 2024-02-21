@@ -52,6 +52,7 @@ class TestingParameter(Base):
     branch_id = Column(Integer, ForeignKey("branches.id"))
     test_type_id = Column(Integer, ForeignKey("testtypes.id"))
     product_id = Column(Integer, ForeignKey("products.id"))
+    customer_id = Column(Integer, ForeignKey("customers.id"))
     
     parameter_code = Column(String)
     testing_parameters = Column(String)
@@ -66,3 +67,4 @@ class TestingParameter(Base):
     test_type = relationship('TestType',back_populates="parameters" )
     product = relationship('Product',back_populates="parameters")
     test_details = relationship('TestingDetail', back_populates='parameter')
+    customer = relationship('Customer',back_populates = 'parameters')

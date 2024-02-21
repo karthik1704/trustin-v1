@@ -106,6 +106,7 @@ class TRF(Base):
         "TestType", secondary=testtype_association_table, back_populates="trfs"
     )  # many to many
     test_details = relationship("TestingDetail", back_populates="trf")
+    registrations = relationship("Registration", back_populates="trf")
 
 
 class TestingDetail(Base):
