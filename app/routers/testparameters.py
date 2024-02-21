@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Path, Query, status, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from app.dependencies.auth import get_current_user
+from app.utils import get_unique_code
 from ..schemas.samples import TestParameterCreate
 from app.database import get_db
 from ..models.samples import TestingParameter
@@ -73,6 +74,9 @@ async def create_parameter(db: db_dep, data: TestParameterCreate, user: user_dep
 
     parameter = TestingParameter(**data.model_dump())
     db.add(parameter)
+    db.commit()
+    db.refresh(parameter)
+    parameter.parameter_code =  get_unique_code('PARA', parameter.id)
     db.commit()
 
 @router.put("/{para_id}", status_code=status.HTTP_204_NO_CONTENT)

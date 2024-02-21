@@ -1,5 +1,5 @@
-from typing import Annotated
-from fastapi import APIRouter, Depends, Path, status, HTTPException
+from typing import Annotated, List
+from fastapi import APIRouter, Depends, Path, Query, status, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from app.dependencies.auth import get_current_user
@@ -50,6 +50,38 @@ async def get_trf_customer(db: db_dep, trf_id: str):
     )
 
     return trf
+
+
+# @router.get("/test-details/{trf_code}", status_code=status.HTTP_200_OK)
+# async def get_test_details(
+#     db: db_dep,
+#     user: user_dep,
+#     trf_code: str,
+#     test_type: List[int] = Query(..., description="List of test_type IDs"),
+# ):
+#     if user is None:
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+#         )
+    
+#     trf = db.query(TRF).filter(TRF.trf_code==trf_code).first()
+
+#     if trf is None:
+#         raise HTTPException(
+#             status_code=status.HTTP_404_NOT_FOUND, detail="TRF not found"
+#         )
+    
+#     test_details = (
+#         db.query(TestingParameter)
+#         .filter(TestingParameter.product_id == trf.product_id)
+#         .filter(TestingParameter.test_type_id.in_(test_type))
+#         .options(joinedload(TestingParameter.branch))
+#         .options(joinedload(TestingParameter.test_type))
+#         .options(joinedload(TestingParameter.product))
+#         .all()
+#     )
+
+#     return test_details
 
 
 @router.get("/{trf_id}", status_code=status.HTTP_200_OK)
@@ -161,9 +193,6 @@ async def update_trf_admin(db: db_dep, data: TRFCreate, user: user_dep, trf_id: 
     db.commit()
     db.refresh(trf)
 
-    
-
-
 
 @router.put("/{trf_code}", status_code=status.HTTP_204_NO_CONTENT)
 async def update_trf(db: db_dep, data: TRFCreate, trf_code: str):
@@ -199,4 +228,3 @@ async def update_trf(db: db_dep, data: TRFCreate, trf_code: str):
     # Commit changes
     db.commit()
     db.refresh(trf)
-
