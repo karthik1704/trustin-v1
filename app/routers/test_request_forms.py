@@ -106,10 +106,12 @@ async def get_trf(db: db_dep, user: user_dep, trf_id: int = Path(gt=0)):
         .filter(TRF.id == trf_id)
         .first()
     )
-    if trf is not None:
-        trf_dict = trf.__dict__
-        trf_dict["test_types_ids"] = [item.id for item in trf.test_types]
-
+    if trf is  None:
+       raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Not Found"
+        )
+    trf_dict = trf.__dict__
+    trf_dict["test_types_ids"] = [item.id for item in trf.test_types]
     return trf_dict
 
 
