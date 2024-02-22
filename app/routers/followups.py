@@ -27,6 +27,7 @@ async def get_all_customer_followups(db: db_dep, user: user_dep):
         .options(joinedload(CustomerFollowUp.customer))
         .options(joinedload(CustomerFollowUp.marketing_user))
         .options(joinedload(CustomerFollowUp.product))
+        .options(joinedload(CustomerFollowUp.trf))
         .all()
     )
 
