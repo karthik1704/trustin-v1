@@ -112,6 +112,7 @@ async def get_trf(db: db_dep, user: user_dep, trf_id: int = Path(gt=0)):
         )
     trf_dict = trf.__dict__
     trf_dict["test_types_ids"] = [item.id for item in trf.test_types]
+    print(trf_dict)
     return trf_dict
 
 
