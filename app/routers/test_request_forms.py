@@ -98,7 +98,6 @@ async def get_trf(db: db_dep, user: user_dep, trf_id: int = Path(gt=0)):
             .joinedload(TestingDetail.parameter)
             .joinedload(TestingParameter.test_type)
         )
-        .order_by(TestingDetail.priority_order)
         .options(joinedload(TRF.customer))
         .options(joinedload(TRF.product))
         .options(joinedload(TRF.followup))
