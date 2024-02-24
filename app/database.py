@@ -4,8 +4,30 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
 # from app.config import settings as global_settings
+from dotenv import load_dotenv
+from .settings import Debug
+import os
+load_dotenv()
 
-SQLALCHEMY_DATABASE_URL = "postgresql+psycopg://postgres:postgres@localhost/trustin_fa"
+username = os.getenv('DB_USER')
+password = os.getenv('DB_PASSWORD')
+host = os.getenv('DB_HOST')
+db_name = os.getenv('DB_NAME')
+
+
+
+def get_database_url():
+    print(Debug)
+    if Debug:
+        return f"postgresql+psycopg://postgres:postgres@localhost/trustin_fa"
+    else:
+
+        return f"postgresql+psycopg://{username}:{password}@{host}/{db_name}"
+
+
+
+SQLALCHEMY_DATABASE_URL = get_database_url()
+
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL
