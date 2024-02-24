@@ -8,6 +8,20 @@ from typing import List
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
+from ..models.registrations import Registration, Batch
+
+class BatchSchema(BaseModel):
+    id: int
+    registration_id: int
+    batch_no: str
+    manufactured_date: datetime
+    expiry_date: datetime
+    batch_size: int
+    received_quantity: int
+    created_at: datetime
+    updated_at: datetime
+    created_by: int
+    updated_by: int
 
 class RegistrationSchema(BaseModel):
     id: int
@@ -29,19 +43,9 @@ class RegistrationSchema(BaseModel):
     updated_by: int
     test_type: str
     product: int
+    batches : Optional[list[BatchSchema]]
 
-class BatchSchema(BaseModel):
-    id: int
-    registration_id: int
-    batch_no: str
-    manufactured_date: datetime
-    expiry_date: datetime
-    batch_size: int
-    received_quantity: int
-    created_at: datetime
-    updated_at: datetime
-    created_by: int
-    updated_by: int
+
 
 class SampleSchema(BaseModel):
     id: int
@@ -104,15 +108,17 @@ class RegistrationCreate(BaseModel):
     pincode_no: str
     gst: str
     date_of_received: datetime
-    created_by: int
-    updated_by: int
+    # created_by: int
+    # updated_by: int
+    # created_at: datetime
+    # updated_at: datetime
     test_type: str
     product: int
     batches: List[BatchCreate]
 
-class RegistrationWithBatchesCreate(BaseModel):
-    registration: RegistrationCreate
-    batches: List[BatchCreate]
+# class RegistrationWithBatchesCreate(BaseModel):
+#     registration: RegistrationCreate
+#     batches: List[BatchCreate]
 
 class BatchUpdate(BaseModel):
     id: Optional[int]
@@ -134,16 +140,23 @@ class RegistrationUpdate(BaseModel):
     pincode_no: Optional[str]
     gst: Optional[str]
     date_of_received: Optional[datetime]
-    created_by: Optional[int]
-    updated_by: Optional[int]
+    # created_by: Optional[int]
+    # updated_by: Optional[int]
     test_type: Optional[str]
     product: Optional[int]
     batches: Optional[List[BatchUpdate]]
 
-class RegistrationWithBatchesUpdate(BaseModel):
-    registration: Optional[RegistrationUpdate]
-    batches: Optional[List[BatchUpdate]]
+# class RegistrationWithBatchesUpdate(BaseModel):
+#     registration: Optional[RegistrationUpdate]
+#     batches: Optional[List[BatchUpdate]]
+
+# class RegistrationWithBatchesGet(BaseModel):
+#     registration: Optional[RegistrationSchema]
+#     batches: Optional[List[BatchSchema]]
 
 class RegistrationWithBatchesGet(BaseModel):
-    registration: Optional[RegistrationSchema]
-    batches: Optional[List[BatchSchema]]
+    registrations: Optional[RegistrationSchema]
+    # batches: Optional[List[BatchSchema]]
+
+class RegistrationsGet(BaseModel):
+    registrations: Optional[RegistrationWithBatchesGet]

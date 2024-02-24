@@ -1,7 +1,11 @@
 import uuid
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime,Date, func,  UUID
+from typing import Any
+import datetime
 # from sqlalchemy.orm import relationship
 from sqlalchemy.orm import mapped_column, Mapped, relationship, joinedload,Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app.models import Base, Branch, TRF, Customer, TestingParameter
 from enum import Enum as PyEnum
 
@@ -31,33 +35,57 @@ class Registration(Base):
     product : Mapped[int] = mapped_column(Integer, ForeignKey("products.id"))
 
     trf = relationship("TRF", back_populates="registrations")
-    batches = relationship("Batch", back_populates="registration")
+    batches = relationship("Batch", back_populates="registration", lazy="selectin")
+
+    @classmethod
+    async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars()
+
+    @classmethod
+    async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().first()
 
     def update_registration(self, updated_data):
+        
         for field, value in updated_data.items():
-            setattr(self, field, value)
+            setattr(self, field, value) if value else None
 
-    def update_batches(self, db: Session, batches_data):
+    async def update_batches(self, database_session: AsyncSession, batches_data, current_user):
+        print("update batches")
+        time = datetime.datetime.now()
         for batch_data in batches_data:
             batch_id = batch_data.pop('id', None)
+            batch = None
             if batch_id:
-                batch = db.query(Batch).filter(Batch.id == batch_id, Batch.registration_id == self.id).first()
-                if batch:
-                    batch.update_batch(batch_data)
-                else:
-                    Batch.create_batch(db,batch_data)
+                batch = await Batch.get_one(database_session,[Batch.id == batch_id])
+                print(batch)
+            if batch:
+                print("u[date]")
+                update_dict = {
+                        "updated_at" : time,
+                        "updated_by" : current_user["id"],
+                    }
+                batch_data = {**batch_data, **update_dict}
+                batch.update_batch(batch_data)
+            else:
+                print("create")
+                print(batch_data)
+                
+                update_dict = {
+                        "created_at" :time ,
+                        "updated_at" : time,
+                        "created_by" : current_user["id"],
+                        "updated_by" : current_user["id"],
+                    }
+                batch_data = {**batch_data, **update_dict}
+                batch = Batch(**batch_data, registration_id=self.id)
+                Batch.create_batch(database_session,batch)
 
-    def patch_registration(self, patched_data):
-        for field, value in patched_data.items():
-            setattr(self, field, value)
 
-    def patch_batches(self, db: Session, batches_data):
-        for batch_data in batches_data:
-            batch_id = batch_data.pop('id', None)
-            if batch_id:
-                batch = db.query(Batch).filter(Batch.id == batch_id, Batch.registration_id == self.id).first()
-                if batch:
-                    batch.patch_batch(batch_data)
 
     
 
@@ -79,16 +107,30 @@ class Batch(Base):
     registration = relationship("Registration", back_populates="batches")
 
     @classmethod
-    def create_batch(cls,db: Session,batch):
+    async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().all()
+    
+    @classmethod
+    async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().first()
+    
+    @classmethod
+    def create_batch(cls,db: AsyncSession,batch):
         db.add(batch)
 
     def update_batch(self, updated_data):
         for field, value in updated_data.items():
             setattr(self, field, value)
 
-    def patch_batch(self, patched_data):
-        for field, value in patched_data.items():
-            setattr(self, field, value)
+
+        
+    
+    
+    
 
 
 class Sample(Base):
