@@ -26,6 +26,16 @@ async def get_all_users(db: db_dep, user: user_dep):
 
     return users
 
+@router.get("/me", status_code=status.HTTP_200_OK)
+async def get_loggedin_user(db: db_dep, user: user_dep):
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+        )
+    print(user)
+    users = db.query(User).filter(User.id==user['id']).first()
+
+    return users
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK)
 async def get_user(db: db_dep, user: user_dep, user_id: int = Path(gt=0)):
