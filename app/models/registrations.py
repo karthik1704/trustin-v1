@@ -129,7 +129,10 @@ class Batch(Base):
 
         
     
-    
+class SampleStatus(Base):
+    __tablename__ = "sample_status"
+    id : Mapped[int]= mapped_column(Integer, primary_key=True)
+    name : Mapped[str]= mapped_column(String)
     
 
 
@@ -139,13 +142,16 @@ class Sample(Base):
     sample_id : Mapped[str]= mapped_column(String)
     name : Mapped[str]= mapped_column(String)
     batch_id : Mapped[int]  = mapped_column(Integer, ForeignKey(Batch.id))
+    assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
+    status_id : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at  : Mapped[DateTime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
-    sample_requests = relationship("SampleRequest", back_populates="sample")
+    sample_workflows = relationship("SampleWorkflow", back_populates="sample")
     sample_test_parameters = relationship("SampleTestParameter", back_populates="sample")
+    sample_history = relationship("SampleHistory", back_populates="sample")
 
 
 class SampleTestParameter(Base):
@@ -163,33 +169,32 @@ class SampleTestParameter(Base):
 
 
 
-class SampleStatus(Base):
-    __tablename__ = "sample_status"
-    id : Mapped[int]= mapped_column(Integer, primary_key=True)
-    name : Mapped[str]= mapped_column(String)
+
     
-class SampleRequest(Base):
-    __tablename__ = "sample_requests"
+class SampleWorkflow(Base):
+    __tablename__ = "sample_workflows"
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     sample_id : Mapped[int]  =  mapped_column(Integer, ForeignKey(Sample.id))
     sample_status_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
+    assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at  : Mapped[DateTime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+    status :Mapped[str] = mapped_column(String,server_default='Yet to start')
 
-    sample = relationship("Sample", back_populates="sample_requests")
-    sample_request_history= relationship("SampleRequestHistory", back_populates="sample_request")
+    sample = relationship("Sample", back_populates="sample_workflows")
+    # sample_workflow_history= relationship("SampleRequestHistory", back_populates="sample_request")
 
 
-class SampleRequestHistory(Base):
-    __tablename__ = "sample_requests_history"
+class SampleHistory(Base):
+    __tablename__ = "sample_history"
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
-    sample_request_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleRequest.id))
+    sample_id : Mapped[int] = mapped_column(Integer, ForeignKey(Sample.id))
     from_status_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
     to_status_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
     comments : Mapped[str] = mapped_column(String)
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     
-    sample_request= relationship("SampleRequest", back_populates="sample_request_history")
+    sample = relationship("Sample", back_populates="sample_history")
