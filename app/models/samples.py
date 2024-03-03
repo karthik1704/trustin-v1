@@ -10,7 +10,7 @@ from sqlalchemy import (
     Text,
     DECIMAL
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 from app.models import Base
 from enum import Enum as PyEnum
 from .test_request_forms import testtype_association_table
@@ -54,7 +54,7 @@ class TestingParameter(Base):
     product_id = Column(Integer, ForeignKey("products.id"))
     customer_id = Column(Integer, ForeignKey("customers.id"))
     
-    parameter_code = Column(String)
+    parameter_code : Mapped[str]= mapped_column(String)
     testing_parameters = Column(String)
     amount = Column(DECIMAL(precision=19, scale=4))
     method_or_spec = Column(String)
@@ -68,3 +68,6 @@ class TestingParameter(Base):
     product = relationship('Product',back_populates="parameters")
     test_details = relationship('TestingDetail', back_populates='parameter')
     customer = relationship('Customer',back_populates = 'parameters')
+    registration_test_parameters = relationship('RegistrationTestParameters',back_populates = 'test_parameter')
+
+    

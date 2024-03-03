@@ -8,7 +8,7 @@ from typing import List, Optional
 
 from app.dependencies.auth import get_current_user
 from app.models.samples import TestType, TestingParameter
-from app.models.registrations import Registration, Batch
+from app.models.registrations import Registration, Batch, RegistrationTestParameters
 from ..schemas.test_request_form import TRFCreate
 from app.database import get_db, get_async_db
 from ..models.test_request_forms import TRF, TestingDetail
@@ -23,7 +23,8 @@ from app.schemas.registrations import (
     BatchSchema,
     BatchCreate,
     BatchUpdate,
-    RegistrationsGet
+    RegistrationsGet,
+    RegistrationListSchema
     )
 
 
@@ -33,7 +34,7 @@ db_dep = Annotated[Session, Depends(get_db)]
 user_dep = Annotated[dict, Depends(get_current_user)]
 
 
-@router.get("/", response_model=list[RegistrationSchema])
+@router.get("/", response_model=list[RegistrationListSchema])
 async def get_all_registrations(request: Request, db_session: AsyncSession = Depends(get_async_db), current_user: dict = Depends(get_current_user)):
     try:
         _registrations = await Registration.get_all(db_session,[])
@@ -70,6 +71,7 @@ async def create_registration_with_batches(registration_with_batches: Registrati
     registration_data = registration_with_batches.model_dump()
     registration_data = {**registration_data, **update_dict}
     batches_data = registration_data.pop('batches')
+    test_params_data = registration_data.pop('test_params')
     registration = Registration(**registration_data)
     db_session.add(registration)
     await db_session.commit()
@@ -79,10 +81,17 @@ async def create_registration_with_batches(registration_with_batches: Registrati
         batch_data = {**batch_data, **update_dict}
         batch = Batch(**batch_data, registration_id=registration.id)
         db_session.add(batch)
+    for params_data in test_params_data:
+        # batch_data = batch_data.model_dump()
+        params_data = {**params_data, **update_dict}
+        print(params_data)
+        test_param = RegistrationTestParameters(**params_data, registration_id=registration.id)
+        db_session.add(test_param)
     
 
     await db_session.commit()
     await db_session.refresh(registration)
+    print(registration)
     return registration
 
 # PUT method to update an existing registration

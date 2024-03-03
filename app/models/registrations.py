@@ -7,6 +7,7 @@ from sqlalchemy.orm import mapped_column, Mapped, relationship, joinedload,Sessi
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models import Base, Branch, TRF, Customer, TestingParameter
+from pydantic import BaseModel, ConfigDict, ValidationError
 from enum import Enum as PyEnum
 
 
@@ -36,6 +37,7 @@ class Registration(Base):
 
     trf = relationship("TRF", back_populates="registrations")
     batches = relationship("Batch", back_populates="registration", lazy="selectin")
+    test_params = relationship("RegistrationTestParameters", back_populates="registration", lazy="selectin")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
@@ -127,7 +129,43 @@ class Batch(Base):
             setattr(self, field, value)
 
 
-        
+
+class RegistrationTestParameters(Base):
+    __tablename__ = "registration_test_parameters"
+    id : Mapped[int]= mapped_column(Integer, primary_key=True)
+    # name : Mapped[str]= mapped_column(String)
+    registration_id  : Mapped[int]  = mapped_column(Integer, ForeignKey(Registration.id))
+    test_params_id : Mapped[str]= mapped_column(Integer, ForeignKey(TestingParameter.id))
+    created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at  : Mapped[DateTime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
+    created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+    updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+
+    registration = relationship("Registration", back_populates="test_params")
+    test_parameter = relationship("TestingParameter", back_populates="registration_test_parameters",  lazy="selectin")
+    # model_config = ConfigDict(from_attributes=True)
+
+    @classmethod
+    async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().all()
+    
+    @classmethod
+    async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().first()
+    
+    @classmethod
+    def create_registration_test_param(cls,db: AsyncSession,batch):
+        db.add(batch)
+
+    def update_registration_test_param(self, updated_data):
+        for field, value in updated_data.items():
+            setattr(self, field, value)
+
+      
     
 class SampleStatus(Base):
     __tablename__ = "sample_status"
@@ -159,7 +197,7 @@ class SampleTestParameter(Base):
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     sample_id : Mapped[int]  =  mapped_column(Integer, ForeignKey(Sample.id))
     test_parameter_id : Mapped[int] = mapped_column(Integer, ForeignKey(TestingParameter.id))
-    test_type :Mapped[str] = mapped_column(Integer, ForeignKey(TestingParameter.id))
+    test_type :Mapped[str] =  mapped_column(String)
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at  : Mapped[DateTime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
