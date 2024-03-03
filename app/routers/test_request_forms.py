@@ -98,7 +98,6 @@ async def get_trf(db: db_dep, user: user_dep, trf_id: int = Path(gt=0)):
             .joinedload(TestingDetail.parameter)
             .joinedload(TestingParameter.test_type)
         )
-        .order_by(TestingDetail.priority_order)
         .options(joinedload(TRF.customer))
         .options(joinedload(TRF.product))
         .options(joinedload(TRF.followup))
@@ -106,10 +105,13 @@ async def get_trf(db: db_dep, user: user_dep, trf_id: int = Path(gt=0)):
         .filter(TRF.id == trf_id)
         .first()
     )
+    if trf is  None:
+       raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Not Found"
+        )
     trf_dict = trf.__dict__
-
     trf_dict["test_types_ids"] = [item.id for item in trf.test_types]
-
+    print(trf_dict)
     return trf_dict
 
 
