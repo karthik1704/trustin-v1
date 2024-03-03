@@ -23,7 +23,7 @@ def upgrade() -> None:
     op.create_table('registration_test_parameters',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('registration_id', sa.Integer(), nullable=False),
-    sa.Column('test_params_id', sa.String(), nullable=False),
+    sa.Column('test_params_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_by', sa.Integer(), nullable=False),

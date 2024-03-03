@@ -27,7 +27,7 @@ def upgrade() -> None:
     op.create_foreign_key(None, 'registration_test_parameters', 'testingparameters', ['test_params_id'], ['id'])
     op.alter_column('sample_test_parameters', 'test_type',
                existing_type=sa.INTEGER(),
-               type_=sa.String(),
+               type_=sa.Integer(),
                existing_nullable=False)
     # op.drop_constraint('sample_test_parameters_test_type_fkey', 'sample_test_parameters', type_='foreignkey')
     # ### end Alembic commands ###
