@@ -54,7 +54,7 @@ class TestingParameter(Base):
     product_id = Column(Integer, ForeignKey("products.id"))
     customer_id = Column(Integer, ForeignKey("customers.id"))
     
-    parameter_code : Mapped[str]= mapped_column(String)
+    parameter_code : Mapped[str]= mapped_column(String, nullable=True)
     testing_parameters = Column(String)
     amount = Column(DECIMAL(precision=19, scale=4))
     method_or_spec = Column(String)
@@ -68,6 +68,7 @@ class TestingParameter(Base):
     product = relationship('Product',back_populates="parameters")
     test_details = relationship('TestingDetail', back_populates='parameter')
     customer = relationship('Customer',back_populates = 'parameters')
-    registration_test_parameters = relationship('RegistrationTestParameters',back_populates = 'test_parameter')
+    registration_test_parameters = relationship('RegistrationTestParameter',back_populates = 'test_parameter')
+    sample_test_parameters = relationship('SampleTestParameter',back_populates = 'test_parameter')
 
     

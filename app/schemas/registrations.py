@@ -97,17 +97,6 @@ class RegistrationSchema(BaseModel):
     test_params : Optional[list[RegistrationTestParamsSchema]]
 
 
-
-class SampleSchema(BaseModel):
-    id: int
-    sample_id: str
-    name: str
-    batch_id: int
-    created_at: datetime
-    updated_at: datetime
-    created_by: int
-    updated_by: int
-
 class SampleTestParameterSchema(BaseModel):
     id: int
     sample_id: int
@@ -117,6 +106,32 @@ class SampleTestParameterSchema(BaseModel):
     updated_at: datetime
     created_by: int
     updated_by: int
+    test_parameter : Optional[TestParameterSchema]
+
+class SampleSchema(BaseModel):
+    id: int
+    sample_id: str
+    name: str
+    registration_id : int
+    batch_id: int
+    created_at: datetime
+    updated_at: datetime
+    created_by: int
+    updated_by: int
+    sample_test_parameters : Optional[list[SampleTestParameterSchema]]
+
+class SampleListSchema(BaseModel):
+    id: int
+    sample_id: str
+    name: str
+    registration_id : int
+    batch_id: int
+    created_at: datetime
+    updated_at: datetime
+    created_by: int
+    updated_by: int
+    
+
 
 class SampleStatusSchema(BaseModel):
     id: int
@@ -131,14 +146,7 @@ class SampleRequestSchema(BaseModel):
     created_by: int
     updated_by: int
 
-class SampleRequestHistorySchema(BaseModel):
-    id: int
-    sample_request_id: int
-    from_status_id: int
-    to_status_id: int
-    comments: str
-    created_at: datetime
-    created_by: int
+
 
 class BatchCreate(BaseModel):
     batch_no: str
@@ -220,3 +228,14 @@ class RegistrationWithBatchesGet(BaseModel):
 
 class RegistrationsGet(BaseModel):
     registrations: Optional[RegistrationWithBatchesGet]
+
+class SampleTestParamsCreate(BaseModel):
+    test_parameter_id : int
+    test_type  :  Optional[str]
+
+
+class SampleCreate(BaseModel):
+    sample_id: str
+    name: str
+    batch_id: int
+    test_params : list[SampleTestParamsCreate]
