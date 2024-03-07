@@ -142,8 +142,8 @@ class SampleRequestHistorySchema(BaseModel):
 
 class BatchCreate(BaseModel):
     batch_no: str
-    manufactured_date: datetime
-    expiry_date: datetime
+    manufactured_date: date
+    expiry_date: date
     batch_size: int
     received_quantity: int
 
@@ -161,7 +161,7 @@ class RegistrationCreate(BaseModel):
     state: str
     pincode_no: str
     gst: str
-    date_of_received: datetime
+    date_of_received: date
     # created_by: int
     # updated_by: int
     # created_at: datetime
