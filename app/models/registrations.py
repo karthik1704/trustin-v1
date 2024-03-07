@@ -37,7 +37,7 @@ class Registration(Base):
 
     trf = relationship("TRF", back_populates="registrations")
     batches = relationship("Batch", back_populates="registration", lazy="selectin")
-    test_params = relationship("RegistrationTestParameters", back_populates="registration", lazy="selectin")
+    test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
@@ -130,7 +130,7 @@ class Batch(Base):
 
 
 
-class RegistrationTestParameters(Base):
+class RegistrationTestParameter(Base):
     __tablename__ = "registration_test_parameters"
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     # name : Mapped[str]= mapped_column(String)
@@ -171,6 +171,8 @@ class SampleStatus(Base):
     __tablename__ = "sample_status"
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     name : Mapped[str]= mapped_column(String)
+
+    # ["Draft", "Review Pending", "Requested","Received","Under Testing", "Verification Pending", "Done"]
     
 
 
@@ -179,17 +181,69 @@ class Sample(Base):
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     sample_id : Mapped[str]= mapped_column(String)
     name : Mapped[str]= mapped_column(String)
+    registration_id : Mapped[int]= mapped_column(Integer, ForeignKey(Registration.id), nullable=True)
     batch_id : Mapped[int]  = mapped_column(Integer, ForeignKey(Batch.id))
-    assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
-    status_id : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+    assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id), nullable=True)
+    status_id : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"),  nullable = True)
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at  : Mapped[DateTime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
-    sample_workflows = relationship("SampleWorkflow", back_populates="sample")
-    sample_test_parameters = relationship("SampleTestParameter", back_populates="sample")
-    sample_history = relationship("SampleHistory", back_populates="sample")
+    sample_workflows = relationship("SampleWorkflow", back_populates="sample", lazy="selectin")
+    sample_test_parameters = relationship("SampleTestParameter", back_populates="sample", lazy="selectin")
+    sample_history = relationship("SampleHistory", back_populates="sample", lazy="selectin")
+
+    @classmethod
+    async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars()
+
+    @classmethod
+    async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().first()
+
+    async def update_sample(self, updated_data):
+        
+        for field, value in updated_data.items():
+            setattr(self, field, value) if value else None
+
+    async def update_test_params(self, database_session: AsyncSession, batches_data, current_user):
+        print("update batches")
+        time = datetime.datetime.now()
+        for batch_data in batches_data:
+            batch_id = batch_data.pop('id', None)
+            batch = None
+            if batch_id:
+                batch = await Batch.get_one(database_session,[Batch.id == batch_id])
+                print(batch)
+            if batch:
+                print("u[date]")
+                update_dict = {
+                        "updated_at" : time,
+                        "updated_by" : current_user["id"],
+                    }
+                batch_data = {**batch_data, **update_dict}
+                batch.update_batch(batch_data)
+            else:
+                print("create")
+                print(batch_data)
+                
+                update_dict = {
+                        "created_at" :time ,
+                        "updated_at" : time,
+                        "created_by" : current_user["id"],
+                        "updated_by" : current_user["id"],
+                    }
+                batch_data = {**batch_data, **update_dict}
+                batch = Batch(**batch_data, registration_id=self.id)
+                Batch.create_batch(database_session,batch)
+
+
+
 
 
 class SampleTestParameter(Base):
@@ -204,8 +258,27 @@ class SampleTestParameter(Base):
     updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
     sample = relationship("Sample", back_populates="sample_test_parameters")
+    test_parameter = relationship("TestingParameter", back_populates="sample_test_parameters",  lazy="selectin")
 
+    @classmethod
+    async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().all()
+    
+    @classmethod
+    async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().first()
+    
+    @classmethod
+    def create_sample_test_param(cls,db: AsyncSession,test_params):
+        db.add(test_params)
 
+    def update_sample_test_param(self, updated_data):
+        for field, value in updated_data.items():
+            setattr(self, field, value)
 
 
     
