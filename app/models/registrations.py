@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime,Date, func,  UUID
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime,Date, func,  UUID, Enum
 from typing import Any
 import datetime
 # from sqlalchemy.orm import relationship
@@ -9,6 +9,7 @@ from sqlalchemy import select
 from app.models import Base, Branch, TRF, Customer, TestingParameter
 from pydantic import BaseModel, ConfigDict, ValidationError
 from enum import Enum as PyEnum
+from .users import Department
 
 
 
@@ -107,6 +108,7 @@ class Batch(Base):
     updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
     registration = relationship("Registration", back_populates="batches")
+    sample_batch = relationship("Sample", back_populates="batch", lazy="selectin")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
@@ -172,9 +174,21 @@ class SampleStatus(Base):
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     name : Mapped[str]= mapped_column(String)
 
+    sample = relationship("Sample", back_populates="status_data", lazy="selectin")
+
     # ["Draft", "Review Pending", "Requested","Received","Under Testing", "Verification Pending", "Done"]
     
-
+    @classmethod
+    async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().all()
+    
+    @classmethod
+    async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().first()
 
 class Sample(Base):
     __tablename__ = "samples"
@@ -183,16 +197,22 @@ class Sample(Base):
     name : Mapped[str]= mapped_column(String)
     registration_id : Mapped[int]= mapped_column(Integer, ForeignKey(Registration.id), nullable=True)
     batch_id : Mapped[int]  = mapped_column(Integer, ForeignKey(Batch.id))
-    assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id), nullable=True)
-    status_id : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"),  nullable = True)
+    department = Column(Enum(Department), nullable=True)
+    assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
+    status_id : Mapped[int] = mapped_column(Integer, ForeignKey("sample_status.id"),  nullable = True)
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at  : Mapped[DateTime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+    status : Mapped[str] = mapped_column(String, default='Draft', nullable=True)
 
     sample_workflows = relationship("SampleWorkflow", back_populates="sample", lazy="selectin")
     sample_test_parameters = relationship("SampleTestParameter", back_populates="sample", lazy="selectin")
     sample_history = relationship("SampleHistory", back_populates="sample", lazy="selectin")
+    status_data = relationship("SampleStatus", back_populates="sample", lazy="selectin")
+    assignee = relationship("User", back_populates="sample_assignee",  foreign_keys=[assigned_to], lazy="selectin")
+    # created = relationship("User", back_populates="sample_created",  foreign_keys=[created_by], lazy="selectin")
+    batch = relationship("Batch", back_populates="sample_batch", lazy="selectin")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
@@ -243,6 +263,39 @@ class Sample(Base):
                 Batch.create_batch(database_session,batch)
 
 
+    async def create_workflow(self,db_session, current_user):
+        status_list = await SampleStatus.get_all(db_session, [])
+        time = datetime.datetime.now()
+        update_dict = {
+            "created_at" :time ,
+            "updated_at" : time,
+            "created_by" : current_user["id"],
+            "updated_by" : current_user["id"], 
+        }
+        for status in status_list:
+            workflow_dict = {
+                'sample_id' : self.id,
+                'sample_status_id' : status.id,
+                'assigned_to' : current_user["id"],
+                'status' : 'Done' if status.name == 'Draft' else 'In Progress'\
+                      if status.name == 'Review Pending' else 'Yet To Start'
+            }
+            workflow_dict ={**workflow_dict, **update_dict}
+            print(workflow_dict)
+            workflow = SampleWorkflow(**workflow_dict)
+            db_session.add(workflow)
+        await db_session.commit()
+
+    async def create_history(self,db_session, current_user, history):
+        time = datetime.datetime.now()
+        update_dict = {
+            "created_at" :time ,
+            "created_by" : current_user["id"],
+        }
+        
+        history = SampleHistory(**history)
+        db_session.add(history)
+        await db_session.commit()
 
 
 
@@ -251,7 +304,7 @@ class SampleTestParameter(Base):
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     sample_id : Mapped[int]  =  mapped_column(Integer, ForeignKey(Sample.id))
     test_parameter_id : Mapped[int] = mapped_column(Integer, ForeignKey(TestingParameter.id))
-    test_type :Mapped[str] =  mapped_column(String)
+    test_type :Mapped[str] =  mapped_column(String, nullable=True)
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at  : Mapped[DateTime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
@@ -287,7 +340,7 @@ class SampleWorkflow(Base):
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     sample_id : Mapped[int]  =  mapped_column(Integer, ForeignKey(Sample.id))
     sample_status_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
-    assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+    assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"),  nullable=True)
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at  : Mapped[DateTime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
@@ -297,6 +350,21 @@ class SampleWorkflow(Base):
     sample = relationship("Sample", back_populates="sample_workflows")
     # sample_workflow_history= relationship("SampleRequestHistory", back_populates="sample_request")
 
+    @classmethod
+    async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars()
+
+    @classmethod
+    async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().first()
+    
+    async def update_workflow(self, updated_data):
+        for field, value in updated_data.items():
+            setattr(self, field, value) if value else None
 
 class SampleHistory(Base):
     __tablename__ = "sample_history"
@@ -304,6 +372,7 @@ class SampleHistory(Base):
     sample_id : Mapped[int] = mapped_column(Integer, ForeignKey(Sample.id))
     from_status_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
     to_status_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
+    assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     comments : Mapped[str] = mapped_column(String)
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))

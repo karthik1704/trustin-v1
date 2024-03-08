@@ -29,7 +29,8 @@ from app.schemas.registrations import (
 
     SampleCreate,
     SampleSchema,
-    SampleListSchema
+    SampleListSchema,
+    PatchSample
     )
 
 
@@ -205,15 +206,16 @@ async def update_batch(registration_id: int,batch_id:int, updated_batch: BatchUp
 
 
 
-# GET method to retrieve all batches
+# GET method to retrieve all samples
 @router.get("/{registration_id}/samples", response_model=list[SampleListSchema])
-async def get_all_samples(registration_id: int, db_session: AsyncSession = Depends(get_async_db), current_user: dict = Depends(get_current_user)):
+async def get_registration_samples(registration_id: int, db_session: AsyncSession = Depends(get_async_db), current_user: dict = Depends(get_current_user)):
+    print("coming inside-reg")
     samples = await Sample.get_all(db_session,[Sample.registration_id == registration_id])
     return samples
 
 # GET method to retrieve a specific registration by ID
 @router.get("/{registration_id}/samples/{sample_id}", response_model=SampleSchema)
-async def get_sample(registration_id: int, sample_id:int, db_session: AsyncSession = Depends(get_async_db), current_user: str = Depends(get_current_user)):
+async def get_registration_sample(registration_id: int, sample_id:int, db_session: AsyncSession = Depends(get_async_db), current_user: str = Depends(get_current_user)):
     sample = await Sample.get_one(db_session,[Sample.id == sample_id])
     if sample is None:
         raise HTTPException(status_code=404, detail="Batch not found")
@@ -258,4 +260,46 @@ async def create_sample_with_testparams(registration_id : int, sample_with_testp
     await db_session.refresh(sample)
     print(sample)
     return sample
+
+# # GET method to retrieve all samples
+# @router.get("/samples1", response_model=list[SampleListSchema])
+# async def get_all_samples(db_session: AsyncSession = Depends(get_async_db), current_user: dict = Depends(get_current_user)):
+#     print("coming inside")
+#     samples = await Sample.get_all(db_session,[])
+#     return samples
+
+# # GET method to retrieve a specific sample by ID
+# @router.get("/samples/{sample_id}", response_model=SampleSchema)
+# async def get_sample(sample_id:int, db_session: AsyncSession = Depends(get_async_db), current_user: str = Depends(get_current_user)):
+#     sample = await Sample.get_one(db_session,[Sample.id == sample_id])
+#     if sample is None:
+#         raise HTTPException(status_code=404, detail="Sample not found")
+#     return sample
+
+# # PUT method to update an existing registration
+# @router.patch("/samples/{sample_id}", response_model=SampleSchema)
+# async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: AsyncSession = Depends(get_async_db), current_user: dict = Depends(get_current_user)):
+    
+#     sample_data = updated_sample.model_dump()
+    
+#     sample = await Sample.get_one(db_session,[Batch.id == sample_id])
+#     if sample is None:
+#         raise HTTPException(status_code=404, detail="Sample not found")
+#     time = datetime.datetime.now()
+#     update_dict = {
+#                         "updated_at" : time,
+#                         "updated_by" : current_user["id"],
+#                     }
+#     # if "comment" in sample_data:
+#     comment = sample_data.pop("comment","")
+#     sample_data = {**sample_data, **update_dict}
+#     await sample.update_sample(sample_data)
+#     if sample_data.get("status","") == "Submitted":
+#         await sample.create_workflow(db_session, current_user)
+#     await sample.create_history(db_session, current_user)
+#     await db_session.commit()
+#     await db_session.refresh(sample)
+
+#     return sample
+
 
