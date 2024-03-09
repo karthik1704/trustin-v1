@@ -186,8 +186,8 @@ class RegistrationCreate(BaseModel):
 class BatchUpdate(BaseModel):
     id: Optional[int]
     batch_no: Optional[str]
-    manufactured_date: Optional[datetime]
-    expiry_date: Optional[datetime]
+    manufactured_date: Optional[date]
+    expiry_date: Optional[date]
     batch_size: Optional[int]
     received_quantity: Optional[int]
 
@@ -206,7 +206,7 @@ class RegistrationUpdate(BaseModel):
     state: Optional[str]
     pincode_no: Optional[str]
     gst: Optional[str]
-    date_of_received: Optional[datetime]
+    date_of_received: Optional[date]
     # created_by: Optional[int]
     # updated_by: Optional[int]
     test_type: Optional[str]
