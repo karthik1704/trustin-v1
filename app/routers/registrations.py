@@ -107,6 +107,8 @@ async def update_registration_with_batches(registration_id: int, registration: R
                                            current_user: dict = Depends(get_current_user)):
     registration_data = registration.model_dump()
     batches_data = registration_data.pop("batches",[])
+    test_params_data = registration_data.pop("test_params",[])
+    print("reg with batches update")
     registration = await Registration.get_one(db_session,[Registration.id == registration_id])
     if registration is None:
         raise HTTPException(status_code=404, detail="Registration not found")
@@ -119,6 +121,9 @@ async def update_registration_with_batches(registration_id: int, registration: R
     registration.update_registration(registration_data)
     if batches_data:
         await registration.update_batches(db_session, batches_data, current_user)
+    if test_params_data:
+        await registration.update_test_prams(db_session, test_params_data, current_user)
+
     await db_session.commit()
     await db_session.refresh(registration)
 
@@ -222,44 +227,65 @@ async def get_registration_sample(registration_id: int, sample_id:int, db_sessio
     return sample
 
 # POST method to create a new registration
-@router.post("/{registration_id}/samples", response_model=SampleSchema)
-async def create_sample_with_testparams(registration_id : int, sample_with_testparams: SampleCreate, 
+@router.post("/{registration_id}/samples", response_model=list[SampleListSchema])
+async def create_sample_with_testparams(registration_id : int, sample_with_testparams_list: list[SampleCreate], 
                                            db_session: AsyncSession = Depends(get_async_db), 
-                                           current_user: dict = Depends(get_current_user)) -> SampleSchema:
+                                           current_user: dict = Depends(get_current_user)) -> list[SampleListSchema]:
     time = datetime.datetime.now()
     update_dict = {
+        "status_id" : 1,
+        "assigned_to" : current_user["id"],
         "created_at" :time ,
         "updated_at" : time,
         "created_by" : current_user["id"],
         "updated_by" : current_user["id"], 
     }
     print("samplae creattion")
-    sample_data = sample_with_testparams.model_dump()
-    sample_data = {**sample_data, **update_dict}
-    test_params_data = sample_data.pop('test_params')
-    # test_params_data = sample_data.pop('test_params')
-    print(sample_data)
-    sample = Sample(**sample_data, registration_id = registration_id)
-    db_session.add(sample)
-    await db_session.commit()
-    # Create batches associated with the registration
-    # for batch_data in batches_data:
-    #     # batch_data = batch_data.model_dump()
-    #     batch_data = {**batch_data, **update_dict}
-    #     batch = Batch(**batch_data, registration_id=registration.id)
-    #     db_session.add(batch)
-    for params_data in test_params_data:
-        # batch_data = batch_data.model_dump()
-        params_data = {**params_data, **update_dict}
-        print(params_data)
-        test_param = SampleTestParameter(**params_data, sample_id=sample.id)
-        db_session.add(test_param)
-    
+    result = []
+    for sample_with_testparams in sample_with_testparams_list:
+        sample_data = sample_with_testparams.model_dump()
+        sample_data = {**sample_data, **update_dict}
+        test_params_data = sample_data.pop('test_params')
+        # test_params_data = sample_data.pop('test_params')
+        print(sample_data)
+        sample = Sample(**sample_data, registration_id = registration_id)
+        db_session.add(sample)
+        await db_session.commit()
+        # Create batches associated with the registration
+        # for batch_data in batches_data:
+        #     # batch_data = batch_data.model_dump()
+        #     batch_data = {**batch_data, **update_dict}
+        #     batch = Batch(**batch_data, registration_id=registration.id)
+        #     db_session.add(batch)
+        for params_data in test_params_data:
+            # batch_data = batch_data.model_dump()
+            params_data = {**params_data, **update_dict}
+            print(params_data)
+            test_param = SampleTestParameter(**params_data, sample_id=sample.id)
+            db_session.add(test_param)
+        
 
-    await db_session.commit()
-    await db_session.refresh(sample)
-    print(sample)
-    return sample
+        await db_session.commit()
+        await db_session.refresh(sample)
+        result.append(sample)
+        # result.append({
+        #     "id": sample.id,
+        #     "sample_id": sample.sample_id,
+        #     "name": sample.name,
+        #     "registration_id" : sample.registration_id,
+        #     "status_id" : sample.status_id,
+        #     "department" : sample.department,
+        #     "assigned_to" : sample.assigned_to,
+        #     "batch_id": sample.batch_id,
+        #     "status": sample.registration_id,
+        #     "created_at": sample.created_at,
+        #     "updated_at": sample.updated_at,
+        #     "created_by": sample.created_by,
+        #     "updated_by": sample.updated_by
+    
+        # })
+    print(result)
+    return result
 
 # # GET method to retrieve all samples
 # @router.get("/samples1", response_model=list[SampleListSchema])

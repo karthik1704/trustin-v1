@@ -88,6 +88,37 @@ class Registration(Base):
                 batch = Batch(**batch_data, registration_id=self.id)
                 Batch.create_batch(database_session,batch)
 
+    async def update_test_prams(self, database_session: AsyncSession, test_params_data, current_user):
+        print("update test params")
+        time = datetime.datetime.now()
+        for test_param_data in test_params_data:
+            test_param_id = test_param_data.pop('test_params_id', None)
+            test_param = None
+            if test_param_id:
+                test_param = await RegistrationTestParameter.get_one(database_session,[RegistrationTestParameter.test_params_id == test_param_id])
+                print(test_param)
+            if test_param:
+                print("u[date]")
+                update_dict = {
+                        "updated_at" : time,
+                        "updated_by" : current_user["id"],
+                    }
+                test_param_data = {**test_param_data, **update_dict}
+                test_param.update_registration_test_param(test_param_data)
+            else:
+                print("create")
+                print(test_param_data)
+                
+                update_dict = {
+                        "created_at" :time ,
+                        "updated_at" : time,
+                        "created_by" : current_user["id"],
+                        "updated_by" : current_user["id"],
+                    }
+                test_param_data = {**test_param_data, **update_dict}
+                test_param = RegistrationTestParameter(**test_param_data, registration_id=self.id)
+                RegistrationTestParameter.create_registration_test_param(database_session,test_param)
+
 
 
     
@@ -292,7 +323,7 @@ class Sample(Base):
             "created_at" :time ,
             "created_by" : current_user["id"],
         }
-        
+        history = {**history, **update_dict}
         history = SampleHistory(**history)
         db_session.add(history)
         await db_session.commit()
@@ -310,7 +341,7 @@ class SampleTestParameter(Base):
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
-    sample = relationship("Sample", back_populates="sample_test_parameters")
+    sample = relationship("Sample", back_populates="sample_test_parameters", lazy="selectin")
     test_parameter = relationship("TestingParameter", back_populates="sample_test_parameters",  lazy="selectin")
 
     @classmethod

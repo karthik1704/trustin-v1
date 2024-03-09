@@ -270,7 +270,7 @@ class SampleCreate(BaseModel):
     sample_id: str
     name: str
     batch_id: int
-    department : int
+    department : str
     test_params : list[SampleTestParamsCreate]
 
 class PatchSample(BaseModel):

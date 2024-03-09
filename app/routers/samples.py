@@ -62,7 +62,7 @@ async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: A
     
     sample_data = updated_sample.model_dump()
     
-    sample = await Sample.get_one(db_session,[Batch.id == sample_id])
+    sample = await Sample.get_one(db_session,[Sample.id == sample_id])
     if sample is None:
         raise HTTPException(status_code=404, detail="Sample not found")
     time = datetime.datetime.now()
@@ -74,8 +74,9 @@ async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: A
     comments = sample_data.pop("comments","")
     sample_data = {**sample_data, **update_dict}
     print(sample_data)
+    prev_status = sample.status
     await sample.update_sample(sample_data)
-    if sample_data.get("status","") == "Submitted":
+    if sample_data.get("status","") == "Submitted" and prev_status != "Submitted":
         await sample.create_workflow(db_session, current_user)
         history = {
             "sample_id" : sample_id,
@@ -153,8 +154,8 @@ async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: A
                 "sample_id" : sample_id,
                 "created_at" : time,
                 "created_by": current_user["id"],
-                "from_status_id" : progress.sample_status_id,
                 "to_status_id" : sample_data.get("status_id",""),
+                "from_status_id" : progress.sample_status_id
                 }
                 if sample_data.get("assigned_to",""):
                     history.update({
