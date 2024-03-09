@@ -103,6 +103,8 @@ class SampleTestParameterSchema(BaseModel):
     sample_id: int
     test_parameter_id: int
     test_type: str
+    value : Optional[str]
+    result : Optional[bool]
     created_at: datetime
     updated_at: datetime
     created_by: int
@@ -273,9 +275,15 @@ class SampleCreate(BaseModel):
     department : str
     test_params : list[SampleTestParamsCreate]
 
+class PatchSampleTestParameterSchema(BaseModel):
+    id: int
+    value : str
+    result : bool
+
 class PatchSample(BaseModel):
     status : Optional[str]
     status_id: Optional[int]
     assigned_to: Optional[int]
     comments : Optional[str]
+    test_params : Optional[list[PatchSampleTestParameterSchema]]
     

@@ -31,7 +31,8 @@ from app.schemas.registrations import (
     SampleCreate,
     SampleSchema,
     SampleListSchema,
-    PatchSample
+    PatchSample,
+    SampleTestParameterSchema
     )
 
 router = APIRouter(prefix="/samples", tags=["samples"])
@@ -72,7 +73,15 @@ async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: A
                     }
     # if "comment" in sample_data:
     comments = sample_data.pop("comments","")
+    test_params = sample_data.pop("test_params",[])
     sample_data = {**sample_data, **update_dict}
+    for test_param_data in test_params:
+        # test_param_data = test_param_data.model_dump()
+        test_param_data = {**test_param_data, **update_dict}
+        test_param_id = test_param_data.get("id")
+        test_param = await SampleTestParameter.get_one(db_session,[SampleTestParameter.id == test_param_id])
+        if test_param:
+            await test_param.update_sample_test_param(test_param_data)
     print(sample_data)
     prev_status = sample.status
     await sample.update_sample(sample_data)

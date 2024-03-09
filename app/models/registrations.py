@@ -336,6 +336,8 @@ class SampleTestParameter(Base):
     sample_id : Mapped[int]  =  mapped_column(Integer, ForeignKey(Sample.id))
     test_parameter_id : Mapped[int] = mapped_column(Integer, ForeignKey(TestingParameter.id))
     test_type :Mapped[str] =  mapped_column(String, nullable=True)
+    value :Mapped[str] =  mapped_column(String, nullable=True)
+    result :Mapped[bool] =  mapped_column(Boolean, nullable=True)
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at  : Mapped[DateTime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
@@ -360,7 +362,7 @@ class SampleTestParameter(Base):
     def create_sample_test_param(cls,db: AsyncSession,test_params):
         db.add(test_params)
 
-    def update_sample_test_param(self, updated_data):
+    async def update_sample_test_param(self, updated_data):
         for field, value in updated_data.items():
             setattr(self, field, value)
 
