@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from ..models.users import RoleType
+from typing import List, Optional
 
 
 class UserCreate(BaseModel):
@@ -33,3 +34,8 @@ class ChangePassword(BaseModel):
 class Token(BaseModel):
     access_token:str
     token_type: str
+
+class UserSchema(BaseModel):
+    first_name: Optional[str]
+    last_name: Optional[str]
+    department : Optional[str]

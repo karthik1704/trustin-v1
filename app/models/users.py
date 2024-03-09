@@ -10,6 +10,11 @@ class RoleType(str, PyEnum):
     MANAGEMENT = 'MANAGEMENT'
     ANALYST = 'ANALYST'
 
+class Department(str, PyEnum):
+    MECH = 'MECH'
+    MICRO = 'MICRO'
+    
+
 
 class User(Base):
     __tablename__ = "users"
@@ -29,5 +34,8 @@ class User(Base):
     is_superuser = Column(Boolean(), default=False)
 
     role = Column(Enum(RoleType), default=RoleType.ADMIN)
+    department = Column(Enum(Department), nullable=True)
     
     assingee = relationship("CustomerFollowUp", back_populates="marketing_user")
+    sample_assignee = relationship("Sample", foreign_keys="[Sample.assigned_to]", back_populates="assignee")
+    # sample_created = relationship("Sample", foreign_keys="[Sample.created_by]", back_populates="created")

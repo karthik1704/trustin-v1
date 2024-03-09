@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 from ..models.registrations import Registration, Batch
+from ..schemas.users import UserSchema
 # from .samples import TestParameterCreate
 
 class BatchSchema(BaseModel):
@@ -102,30 +103,65 @@ class SampleTestParameterSchema(BaseModel):
     sample_id: int
     test_parameter_id: int
     test_type: str
+    value : Optional[str]
+    result : Optional[bool]
     created_at: datetime
     updated_at: datetime
     created_by: int
     updated_by: int
     test_parameter : Optional[TestParameterSchema]
 
+class SampleWorkflowSchema(BaseModel):
+    id: int
+    sample_status_id: int
+    assigned_to : int
+    status: str
+    
+class SampleHistorySchema(BaseModel):
+    id: int
+    from_status_id: int
+    to_status_id: int
+    comments: str
+    created_at: datetime
+    created_by: int
+    
+class SampleStatusSchema(BaseModel):
+    id: int
+    name: str
+
+
+
 class SampleSchema(BaseModel):
     id: int
     sample_id: str
     name: str
     registration_id : int
+    status_id : Optional[int]
+    department : Optional[str]
+    assigned_to : Optional[int]
     batch_id: int
     created_at: datetime
     updated_at: datetime
     created_by: int
     updated_by: int
+    status : Optional[str]
     sample_test_parameters : Optional[list[SampleTestParameterSchema]]
+    sample_workflows : Optional[list[SampleWorkflowSchema]]
+    sample_history : Optional[list[SampleHistorySchema]]
+    status_data : Optional[SampleStatusSchema]
+    assignee : Optional[UserSchema]
+    batch : Optional[BatchSchema]
 
 class SampleListSchema(BaseModel):
     id: int
     sample_id: str
     name: str
     registration_id : int
+    status_id : Optional[int]
+    department : Optional[str]
+    assigned_to : Optional[int]
     batch_id: int
+    status: Optional[str]
     created_at: datetime
     updated_at: datetime
     created_by: int
@@ -133,9 +169,7 @@ class SampleListSchema(BaseModel):
     
 
 
-class SampleStatusSchema(BaseModel):
-    id: int
-    name: str
+
 
 class SampleRequestSchema(BaseModel):
     id: int
@@ -238,4 +272,18 @@ class SampleCreate(BaseModel):
     sample_id: str
     name: str
     batch_id: int
+    department : str
     test_params : list[SampleTestParamsCreate]
+
+class PatchSampleTestParameterSchema(BaseModel):
+    id: int
+    value : str
+    result : bool
+
+class PatchSample(BaseModel):
+    status : Optional[str]
+    status_id: Optional[int]
+    assigned_to: Optional[int]
+    comments : Optional[str]
+    test_params : Optional[list[PatchSampleTestParameterSchema]]
+    
