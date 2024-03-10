@@ -257,6 +257,12 @@ async def create_sample_with_testparams(registration_id : int, sample_with_testp
         #     batch_data = {**batch_data, **update_dict}
         #     batch = Batch(**batch_data, registration_id=registration.id)
         #     db_session.add(batch)
+        update_dict = {
+            "created_at" :time ,
+            "updated_at" : time,
+            "created_by" : current_user["id"],
+            "updated_by" : current_user["id"], 
+            }
         for params_data in test_params_data:
             # batch_data = batch_data.model_dump()
             params_data = {**params_data, **update_dict}
