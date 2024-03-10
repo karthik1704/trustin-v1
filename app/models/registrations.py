@@ -36,7 +36,7 @@ class Registration(Base):
     test_type  : Mapped[str] =  mapped_column(String)
     product : Mapped[int] = mapped_column(Integer, ForeignKey("products.id"))
 
-    trf = relationship("TRF", back_populates="registrations")
+    trf = relationship("TRF", back_populates="registrations", lazy="selectin")
     batches = relationship("Batch", back_populates="registration", lazy="selectin")
     test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
 

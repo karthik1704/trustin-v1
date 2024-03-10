@@ -17,7 +17,7 @@ db_name = os.getenv('DB_NAME')
 
 
 def get_database_url():
-    print(Debug)
+    # print(Debug)
     if Debug:
         return f"postgresql+psycopg://postgres:postgres@localhost/trustin_fa"
     else:
@@ -32,7 +32,7 @@ SQLALCHEMY_DATABASE_URL = get_database_url()
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL
 )
-print(engine)
+# print(engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -61,8 +61,8 @@ AsyncSessionFactory = async_sessionmaker(
 
 # Dependency
 async def get_async_db() -> AsyncGenerator:
-    print("calling async db")
+    # print("calling async db")
     async with AsyncSessionFactory() as session:
         # logger.debug(f"ASYNC Pool: {engine.pool.status()}")
-        print(session)
+        # print(session)
         yield session

@@ -11,6 +11,7 @@ from typing import List, Optional
 from datetime import datetime
 from ..models.registrations import Registration, Batch
 from ..schemas.users import UserSchema
+from ..schemas.test_request_form import TRFSchema
 # from .samples import TestParameterCreate
 
 class BatchSchema(BaseModel):
@@ -96,6 +97,7 @@ class RegistrationSchema(BaseModel):
     product: int
     batches : Optional[list[BatchSchema]]
     test_params : Optional[list[RegistrationTestParamsSchema]]
+    trf : TRFSchema
 
 
 class SampleTestParameterSchema(BaseModel):
