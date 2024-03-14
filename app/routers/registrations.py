@@ -63,10 +63,10 @@ async def get_registration(registration_id: int, db_session: AsyncSession = Depe
 
 
 # POST method to create a new registration
-@router.post("/", response_model=RegistrationSchema)
+@router.post("/")
 async def create_registration_with_batches(registration_with_batches: RegistrationCreate, 
                                            db_session: AsyncSession = Depends(get_async_db), 
-                                           current_user: dict = Depends(get_current_user)) -> RegistrationSchema:
+                                           current_user: dict = Depends(get_current_user)):
     time = datetime.datetime.now()
     update_dict = {
         "created_at" :time ,
@@ -265,6 +265,7 @@ async def create_sample_with_testparams(registration_id : int, sample_with_testp
             }
         for params_data in test_params_data:
             # batch_data = batch_data.model_dump()
+            # params_data["test_parameter_id"] = 2
             params_data = {**params_data, **update_dict}
             print(params_data)
             test_param = SampleTestParameter(**params_data, sample_id=sample.id)
