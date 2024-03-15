@@ -69,6 +69,6 @@ class TestingParameter(Base):
     test_details = relationship('TestingDetail', back_populates='parameter')
     customer = relationship('Customer',back_populates = 'parameters')
     registration_test_parameters = relationship('RegistrationTestParameter',back_populates = 'test_parameter')
-    sample_test_parameters = relationship('SampleTestParameter',back_populates = 'test_parameter', lazy="selectin")
+    sample_test_parameters = relationship('SampleTestParameter',back_populates = 'test_parameter')
 
     

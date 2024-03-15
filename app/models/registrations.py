@@ -174,7 +174,7 @@ class RegistrationTestParameter(Base):
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
-    registration = relationship("Registration", back_populates="test_params")
+    registration = relationship("Registration", back_populates="test_params", lazy="selectin")
     test_parameter = relationship("TestingParameter", back_populates="registration_test_parameters",  lazy="selectin")
     # model_config = ConfigDict(from_attributes=True)
 
