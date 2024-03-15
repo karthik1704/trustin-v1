@@ -48,7 +48,7 @@ engine = create_async_engine(
     # global_settings.asyncpg_url.unicode_string(),
     SQLALCHEMY_DATABASE_URL,
     future=True,
-    echo=True,
+    # echo=True,
 )
 
 # expire_on_commit=False will prevent attributes from being expired
