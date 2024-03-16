@@ -9,7 +9,7 @@ from sqlalchemy import select
 from app.models import Base, Branch, TRF, Customer, TestingParameter
 from pydantic import BaseModel, ConfigDict, ValidationError
 from enum import Enum as PyEnum
-from .users import Department
+# from .users import Department
 
 
 
@@ -228,7 +228,7 @@ class Sample(Base):
     name : Mapped[str]= mapped_column(String)
     registration_id : Mapped[int]= mapped_column(Integer, ForeignKey(Registration.id), nullable=True)
     batch_id : Mapped[int]  = mapped_column(Integer, ForeignKey(Batch.id))
-    department = Column(Enum(Department), nullable=True)
+    department_id = Column(Integer, ForeignKey("testtypes.id"))
     assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     status_id : Mapped[int] = mapped_column(Integer, ForeignKey("sample_status.id"),  nullable = True)
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())

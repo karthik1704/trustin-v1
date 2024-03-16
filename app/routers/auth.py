@@ -43,7 +43,7 @@ async def login_access_token(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user."
         )
 
-    token = create_access_token(user.email, user.id, user.role, timedelta(minutes=30))
+    token = create_access_token(user.email, user.id, user.role_id,user.department_id, timedelta(minutes=30))
     response.set_cookie(
         key="access_token",
         value=token,
@@ -69,7 +69,7 @@ async def get_token_for_user(user: UserLogin, db: db_dep):
 
     # TODO: add refresh token
     _token = create_access_token(
-        _user.email, _user.id, _user.role, timedelta(minutes=30)
+        _user.email, _user.id, _user.role_id,_user.department_id, timedelta(minutes=30)
     )
     return {"access_token": _token, "token_type": "bearer"}
 

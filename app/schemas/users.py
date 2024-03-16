@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from ..models.users import RoleType
+# from ..models.users import RoleType
 from typing import List, Optional
 
 
@@ -10,7 +10,9 @@ class UserCreate(BaseModel):
     password: str
     password2: str
     phone: str
-    role:RoleType 
+    role_id:int 
+    department_id:int
+    qa_type_id : Optional[int]
 
 
 class UserUpdate(BaseModel):
@@ -18,7 +20,8 @@ class UserUpdate(BaseModel):
     last_name:str
     email: EmailStr
     phone: str
-    role:RoleType 
+    department_id:int
+    qa_type_id : Optional[int]
 
 
 class ForgotPassword(BaseModel):
@@ -39,3 +42,14 @@ class UserSchema(BaseModel):
     first_name: Optional[str]
     last_name: Optional[str]
     department : Optional[str]
+
+class RoleSchema(BaseModel):
+    id: int
+    name: str
+
+class DepartmentSchema(BaseModel):
+    id: int
+    name: str
+    
+
+
