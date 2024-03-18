@@ -1,15 +1,18 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends, Path, status, HTTPException
+from fastapi import APIRouter, Depends, Path, status, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.dependencies.auth import get_current_user
 from app.utils import get_hashed_password
-from ..schemas.users import UserCreate, ChangePassword, ForgotPassword, UserUpdate
+from ..schemas.users import UserCreate, ChangePassword, ForgotPassword, UserUpdate, RoleSchema, DepartmentSchema
 from app.database import get_db
-from ..models.users import RoleType, User
+from sqlalchemy.ext.asyncio import AsyncSession
+from ..models.users import MenuControlList, User
 from app.utils import get_hashed_password
+from app.models import Role, Department
 
 router = APIRouter(prefix="/users", tags=["Users"])
+from app.database import get_db, get_async_db
 
 db_dep = Annotated[Session, Depends(get_db)]
 user_dep = Annotated[dict, Depends(get_current_user)]
@@ -50,13 +53,13 @@ async def get_user(db: db_dep, user: user_dep, user_id: int = Path(gt=0)):
 
 
 @router.get("/role/{role}", status_code=status.HTTP_200_OK)
-async def get_all_users_by_role(db: db_dep, user: user_dep, role:RoleType):
+async def get_all_users_by_role(db: db_dep, user: user_dep, role_id:int):
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
 
-    users = db.query(User).filter(User.role==role).all()
+    users = db.query(User).filter(User.role==role_id).all()
 
     return users
 
@@ -84,7 +87,7 @@ async def create_user(db: db_dep, user: user_dep, data: UserCreate):
             status_code=status.HTTP_403_FORBIDDEN, detail="User already Exists"
         )
     is_superuser=False
-    if user_dict.get('role') == RoleType.ADMIN:
+    if user_dict.get('role') == 1:
         is_superuser=True
 
     user = User(
@@ -128,3 +131,17 @@ async def update_user(
 
     db.commit()
     db.refresh(user)
+
+@router.get("/{user_id}/menus", status_code=status.HTTP_200_OK)
+async def get_menus(user_id:int, db_session: AsyncSession = Depends(get_async_db), current_user: dict = Depends(get_current_user)):
+    if current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+        )
+    print(current_user)
+    role_id = current_user.get("role_id",0)
+    department_id = current_user.get("dept_id",0)
+    print("sss")
+    menus = await MenuControlList.get_menus_for_role_and_department(db_session,role_id, department_id)
+    
+    return menus

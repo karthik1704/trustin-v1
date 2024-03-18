@@ -78,7 +78,7 @@ def upgrade() -> None:
     sa.Column('is_active', sa.Boolean(), nullable=True),
     sa.Column('is_staff', sa.Boolean(), nullable=True),
     sa.Column('is_superuser', sa.Boolean(), nullable=True),
-    sa.Column('role', sa.Enum('HOD', 'MARKETING', 'ADMIN', 'MANAGEMENT', 'ANALYST', name='roletype'), nullable=True),
+    sa.Column('role', sa.Enum('QAHOD', 'MARKETING_ASST', 'MARKETING_HEAD', 'ADMIN', 'MANAGEMENT', 'ANALYST', 'FINANCETEAM', name='roletype'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
