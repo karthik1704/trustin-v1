@@ -40,6 +40,20 @@ async def get_loggedin_user(db: db_dep, user: user_dep):
 
     return users
 
+@router.get("/menus", status_code=status.HTTP_200_OK)
+async def get_menus(db_session: AsyncSession = Depends(get_async_db), current_user: dict = Depends(get_current_user)):
+    if current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+        )
+    print(current_user)
+    role_id = current_user.get("role_id",0)
+    department_id = current_user.get("dept_id",0)
+    print("sss")
+    menus = await MenuControlList.get_menus_for_role_and_department(db_session,role_id, department_id)
+    
+    return menus
+
 @router.get("/{user_id}", status_code=status.HTTP_200_OK)
 async def get_user(db: db_dep, user: user_dep, user_id: int = Path(gt=0)):
     if user is None:
@@ -132,16 +146,3 @@ async def update_user(
     db.commit()
     db.refresh(user)
 
-@router.get("/{user_id}/menus", status_code=status.HTTP_200_OK)
-async def get_menus(user_id:int, db_session: AsyncSession = Depends(get_async_db), current_user: dict = Depends(get_current_user)):
-    if current_user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
-        )
-    print(current_user)
-    role_id = current_user.get("role_id",0)
-    department_id = current_user.get("dept_id",0)
-    print("sss")
-    menus = await MenuControlList.get_menus_for_role_and_department(db_session,role_id, department_id)
-    
-    return menus

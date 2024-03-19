@@ -21,7 +21,7 @@ from app.database import get_db, get_async_db
 
 # GET method to retrieve all the roles
 @router.get("/", response_model=list[RoleSchema])
-async def get_roles(request: Request,db_session: AsyncSession = Depends(get_async_db),  current_user: dict = Depends(get_current_user)):
+async def get_departments(request: Request,db_session: AsyncSession = Depends(get_async_db),  current_user: dict = Depends(get_current_user)):
     roles = await Department.get_all(db_session,[])
     return roles
 
