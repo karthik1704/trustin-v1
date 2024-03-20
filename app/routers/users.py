@@ -46,8 +46,6 @@ async def get_loggedin_user(db: db_dep, user: user_dep):
     print(user)
     users = (
         db.query(User)
-        .options(joinedload(Role))
-        .options(joinedload(Department))
         .filter(User.id == user["id"])
         .first()
     )
