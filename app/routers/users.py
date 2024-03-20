@@ -1,10 +1,17 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Path, status, HTTPException, Request
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.dependencies.auth import get_current_user
 from app.utils import get_hashed_password
-from ..schemas.users import UserCreate, ChangePassword, ForgotPassword, UserUpdate, RoleSchema, DepartmentSchema
+from ..schemas.users import (
+    UserCreate,
+    ChangePassword,
+    ForgotPassword,
+    UserUpdate,
+    RoleSchema,
+    DepartmentSchema,
+)
 from app.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..models.users import MenuControlList, User
@@ -29,6 +36,7 @@ async def get_all_users(db: db_dep, user: user_dep):
 
     return users
 
+
 @router.get("/me", status_code=status.HTTP_200_OK)
 async def get_loggedin_user(db: db_dep, user: user_dep):
     if user is None:
@@ -36,23 +44,36 @@ async def get_loggedin_user(db: db_dep, user: user_dep):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
     print(user)
-    users = db.query(User).filter(User.id==user['id']).first()
+    users = (
+        db.query(User)
+        .options(joinedload(Role))
+        .options(joinedload(Department))
+        .filter(User.id == user["id"])
+        .first()
+    )
 
     return users
 
+
 @router.get("/menus", status_code=status.HTTP_200_OK)
-async def get_menus(db_session: AsyncSession = Depends(get_async_db), current_user: dict = Depends(get_current_user)):
+async def get_menus(
+    db_session: AsyncSession = Depends(get_async_db),
+    current_user: dict = Depends(get_current_user),
+):
     if current_user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
     print(current_user)
-    role_id = current_user.get("role_id",0)
-    department_id = current_user.get("dept_id",0)
+    role_id = current_user.get("role_id", 0)
+    department_id = current_user.get("dept_id", 0)
     print("sss")
-    menus = await MenuControlList.get_menus_for_role_and_department(db_session,role_id, department_id)
-    
+    menus = await MenuControlList.get_menus_for_role_and_department(
+        db_session, role_id, department_id
+    )
+
     return menus
+
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK)
 async def get_user(db: db_dep, user: user_dep, user_id: int = Path(gt=0)):
@@ -67,15 +88,16 @@ async def get_user(db: db_dep, user: user_dep, user_id: int = Path(gt=0)):
 
 
 @router.get("/role/{role}", status_code=status.HTTP_200_OK)
-async def get_all_users_by_role(db: db_dep, user: user_dep, role_id:int):
+async def get_all_users_by_role(db: db_dep, user: user_dep, role_id: int):
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
 
-    users = db.query(User).filter(User.role==role_id).all()
+    users = db.query(User).filter(User.role == role_id).all()
 
     return users
+
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dep, user: user_dep, data: UserCreate):
@@ -100,9 +122,9 @@ async def create_user(db: db_dep, user: user_dep, data: UserCreate):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="User already Exists"
         )
-    is_superuser=False
-    if user_dict.get('role') == 1:
-        is_superuser=True
+    is_superuser = False
+    if user_dict.get("role") == 1:
+        is_superuser = True
 
     user = User(
         **user_dict,
@@ -128,21 +150,15 @@ async def update_user(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
 
-    user = (
-        db.query(User).filter(User.id == user_id).first()
-    )
+    user = db.query(User).filter(User.id == user_id).first()
 
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found"
         )
 
-     
-
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(user, field, value)
 
-
     db.commit()
     db.refresh(user)
-
