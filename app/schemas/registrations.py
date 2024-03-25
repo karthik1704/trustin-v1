@@ -89,6 +89,9 @@ class RegistrationListSchema(BaseModel):
     product: int
 
 
+class RegistrationCodeSchema(BaseModel):    
+    code : str
+    
 
 
 class RegistrationSchema(BaseModel):
@@ -178,6 +181,7 @@ class SampleSchema(BaseModel):
     status_data : Optional[SampleStatusSchema]
     assignee : Optional[UserSchema]
     batch : Optional[BatchSchema]
+    registration : Optional[RegistrationListSchema]
 
 class SampleListSchema(BaseModel):
     id: int
@@ -193,6 +197,7 @@ class SampleListSchema(BaseModel):
     updated_at: datetime
     created_by: int
     updated_by: int
+    registration : Optional[RegistrationCodeSchema]
     
 
 

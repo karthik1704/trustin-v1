@@ -42,6 +42,7 @@ class Registration(Base):
     batches = relationship("Batch", back_populates="registration", lazy="selectin")
     test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
     test_types = relationship("RegistrationTestType", back_populates="registration", lazy="selectin")
+    sample = relationship("Sample", back_populates="registration", lazy="selectin")
     
     @classmethod
     async def generate_next_code(cls,database_session ):
@@ -341,6 +342,7 @@ class Sample(Base):
     assignee = relationship("User", back_populates="sample_assignee",  foreign_keys=[assigned_to], lazy="selectin")
     # created = relationship("User", back_populates="sample_created",  foreign_keys=[created_by], lazy="selectin")
     batch = relationship("Batch", back_populates="sample_batch", lazy="selectin")
+    registration = relationship("Registration", back_populates="sample", lazy="selectin")
 
     @classmethod
     async def generate_next_code(cls,database_session ):
