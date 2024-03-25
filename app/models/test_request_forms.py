@@ -108,6 +108,20 @@ class TRF(Base):
     test_details = relationship("TestingDetail", back_populates="trf")
     registrations = relationship("Registration", back_populates="trf")
 
+    @classmethod
+    def generate_next_code(cls,database_session ):
+        # session = Session()
+        # Query the database for the highest existing code
+        highest_code = database_session.query(cls.trf_code).order_by(cls.trf_code.desc()).first()
+        if highest_code:
+            highest_code_int = int(highest_code[0].split("TRF")[-1]) + 1
+        else:
+            highest_code_int = 1
+        # Generate the new code by combining the prefix and the incremented integer
+        new_code = f"{'TRF'}{highest_code_int:04}"  # Adjust the format based on your requirements
+        # session.close()
+        return new_code
+
 
 class TestingDetail(Base):
     __tablename__ = "testing_detail"

@@ -41,6 +41,11 @@ class TestParameterSchema(BaseModel):
     method_or_spec : Optional[str]
     group_of_test_parameters : str
 
+class TestTypeSchema(BaseModel):
+    id: int
+    name : str
+    
+
 class RegistrationTestParamsSchema(BaseModel):
     id: int
     registration_id: int
@@ -50,6 +55,16 @@ class RegistrationTestParamsSchema(BaseModel):
     created_by: int
     updated_by: int
     test_parameter : Optional[TestParameterSchema]
+
+class RegistrationTestTypeSchema(BaseModel):
+    id: int
+    registration_id: int
+    test_type_id: int
+    created_at: datetime
+    updated_at: datetime
+    created_by: int
+    updated_by: int
+    # test_type : Optional[TestTypeSchema]
 
 class RegistrationListSchema(BaseModel):
     id: int
@@ -69,7 +84,7 @@ class RegistrationListSchema(BaseModel):
     updated_at: datetime
     created_by: int
     updated_by: int
-    test_type: str
+    # test_type: str
     product: int
 
 
@@ -93,10 +108,11 @@ class RegistrationSchema(BaseModel):
     updated_at: datetime
     created_by: int
     updated_by: int
-    test_type: str
+    # test_type: str
     product: int
     batches : Optional[list[BatchSchema]]
     test_params : Optional[list[RegistrationTestParamsSchema]]
+    test_types : Optional[list[RegistrationTestTypeSchema]]
     trf : TRFSchema
 
 
@@ -139,7 +155,7 @@ class SampleSchema(BaseModel):
     name: str
     registration_id : int
     status_id : Optional[int]
-    department : Optional[str]
+    test_type_id : Optional[int]
     assigned_to : Optional[int]
     batch_id: int
     created_at: datetime
@@ -160,7 +176,7 @@ class SampleListSchema(BaseModel):
     name: str
     registration_id : int
     status_id : Optional[int]
-    department : Optional[str]
+    test_type_id : Optional[int]
     assigned_to : Optional[int]
     batch_id: int
     status: Optional[str]
@@ -173,17 +189,6 @@ class SampleListSchema(BaseModel):
 
 
 
-class SampleRequestSchema(BaseModel):
-    id: int
-    sample_id: int
-    sample_status_id: int
-    created_at: datetime
-    updated_at: datetime
-    created_by: int
-    updated_by: int
-
-
-
 class BatchCreate(BaseModel):
     batch_no: str
     manufactured_date: date
@@ -193,6 +198,9 @@ class BatchCreate(BaseModel):
 
 class RegistrationTestParamsCreate(BaseModel):
    test_params_id : int
+
+class RegistrationTestTypeCreate(BaseModel):
+   test_type_id : int
 
 class RegistrationCreate(BaseModel):
     branch_id: int
@@ -210,10 +218,11 @@ class RegistrationCreate(BaseModel):
     # updated_by: int
     # created_at: datetime
     # updated_at: datetime
-    test_type: str
+    # test_type: str
     product: int
     batches: List[BatchCreate]
     test_params : List[RegistrationTestParamsCreate]
+    test_types : List[RegistrationTestTypeCreate]
 
 # class RegistrationWithBatchesCreate(BaseModel):
 #     registration: RegistrationCreate
@@ -229,6 +238,9 @@ class BatchUpdate(BaseModel):
 
 class RegistrationTestParamsUpdate(BaseModel):
     test_params_id: Optional[int]
+
+class RegistrationTestTypeUpdate(BaseModel):
+    test_types_id: Optional[int]
     
 
 class RegistrationUpdate(BaseModel):
@@ -249,6 +261,7 @@ class RegistrationUpdate(BaseModel):
     product: Optional[int]
     batches: Optional[List[BatchUpdate]]
     test_params: Optional[List[RegistrationTestParamsUpdate]]
+    test_types: Optional[List[RegistrationTestTypeUpdate]]
 
 # class RegistrationWithBatchesUpdate(BaseModel):
 #     registration: Optional[RegistrationUpdate]
@@ -274,7 +287,7 @@ class SampleCreate(BaseModel):
     sample_id: str
     name: str
     batch_id: int
-    department : str
+    test_type_id : int
     test_params : list[SampleTestParamsCreate]
 
 class PatchSampleTestParameterSchema(BaseModel):

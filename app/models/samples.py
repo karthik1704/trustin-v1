@@ -44,6 +44,7 @@ class TestType(Base):
 
     parameters = relationship('TestingParameter',back_populates="test_type" )
     trfs = relationship('TRF', secondary=testtype_association_table, back_populates='test_types')
+    registration_test_types = relationship('RegistrationTestType',  back_populates='test_type')
 
 class TestingParameter(Base):
     __tablename__ = "testingparameters"
