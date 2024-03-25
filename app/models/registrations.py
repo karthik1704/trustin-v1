@@ -157,7 +157,7 @@ class Registration(Base):
                         "updated_at" : time,
                         "updated_by" : current_user["id"],
                     }
-                test_type_data = {**test_type_data, **update_dict}
+                test_type_data = {**test_types_data, **update_dict}
                 test_type.update_registration_test_type(test_type_data)
             else:
                 print("create")
