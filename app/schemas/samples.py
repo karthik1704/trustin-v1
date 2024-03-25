@@ -1,6 +1,6 @@
 from decimal import Decimal
 from pydantic import BaseModel
-
+from typing import  Optional
 
 class ProductCreate(BaseModel):
     branch_id: int
@@ -15,7 +15,8 @@ class TestTypeCreate(BaseModel):
 class TestParameterCreate(BaseModel):
     branch_id : int
     test_type_id : int
-    product_id : int
+    product_id : Optional[int]
+    customer_id : Optional[int]
     
     # parameter_code:str
     testing_parameters:str

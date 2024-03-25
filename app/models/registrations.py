@@ -42,6 +42,7 @@ class Registration(Base):
     batches = relationship("Batch", back_populates="registration", lazy="selectin")
     test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
     test_types = relationship("RegistrationTestType", back_populates="registration", lazy="selectin")
+    sample = relationship("Sample", back_populates="registration", lazy="selectin")
     
     @classmethod
     async def generate_next_code(cls,database_session ):
@@ -335,12 +336,13 @@ class Sample(Base):
     status : Mapped[str] = mapped_column(String, default='Draft', nullable=True)
 
     sample_workflows = relationship("SampleWorkflow", back_populates="sample", lazy="selectin")
-    sample_test_parameters = relationship("SampleTestParameter", back_populates="sample", lazy="selectin")
+    sample_test_parameters = relationship("SampleTestParameter", back_populates="sample", lazy="selectin", order_by="SampleTestParameter.order")
     sample_history = relationship("SampleHistory", back_populates="sample", lazy="selectin")
     status_data = relationship("SampleStatus", back_populates="sample", lazy="selectin")
     assignee = relationship("User", back_populates="sample_assignee",  foreign_keys=[assigned_to], lazy="selectin")
     # created = relationship("User", back_populates="sample_created",  foreign_keys=[created_by], lazy="selectin")
     batch = relationship("Batch", back_populates="sample_batch", lazy="selectin")
+    registration = relationship("Registration", back_populates="sample", lazy="selectin")
 
     @classmethod
     async def generate_next_code(cls,database_session ):
