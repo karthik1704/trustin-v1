@@ -7,7 +7,7 @@ import datetime
 from sqlalchemy.orm import mapped_column, Mapped, relationship, joinedload,Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.models import Base, Branch, TRF, Customer, TestingParameter
+from app.models import Base, Branch, TRF, Customer, TestingParameter,TestType
 from pydantic import BaseModel, ConfigDict, ValidationError
 from enum import Enum as PyEnum
 from .users import User
@@ -35,12 +35,13 @@ class Registration(Base):
     updated_at  : Mapped[DateTime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    test_type  : Mapped[str] =  mapped_column(String)
+    # test_type  : Mapped[str] =  mapped_column(String)
     product : Mapped[int] = mapped_column(Integer, ForeignKey("products.id"))
 
     trf = relationship("TRF", back_populates="registrations", lazy="selectin")
     batches = relationship("Batch", back_populates="registration", lazy="selectin")
     test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
+    test_types = relationship("RegistrationTestType", back_populates="registration", lazy="selectin")
     
     @classmethod
     def generate_next_code(cls,database_session ):
@@ -135,6 +136,37 @@ class Registration(Base):
                 test_param = RegistrationTestParameter(**test_param_data, registration_id=self.id)
                 RegistrationTestParameter.create_registration_test_param(database_session,test_param)
 
+    async def update_test_types(self, database_session: AsyncSession, test_types_data, current_user):
+        print("update test params")
+        time = datetime.datetime.now()
+        for test_param_data in test_types_data:
+            test_type_id = test_param_data.pop('test_type_id', None)
+            test_type = None
+            if test_type_id:
+                test_type = await RegistrationTestType.get_one(database_session,[RegistrationTestType.test_type_id == test_type_id])
+                # print(test_param)
+            if test_type:
+                print("u[date]")
+                update_dict = {
+                        "updated_at" : time,
+                        "updated_by" : current_user["id"],
+                    }
+                test_type_data = {**test_type_data, **update_dict}
+                test_type.update_registration_test_type(test_type_data)
+            else:
+                print("create")
+                print(test_param_data)
+                
+                update_dict = {
+                        "created_at" :time ,
+                        "updated_at" : time,
+                        "created_by" : current_user["id"],
+                        "updated_by" : current_user["id"],
+                    }
+                test_param_data = {**test_param_data, **update_dict}
+                test_param = RegistrationTestParameter(**test_param_data, registration_id=self.id)
+                RegistrationTestParameter.create_registration_test_param(database_session,test_param)
+
 
 
     
@@ -192,6 +224,44 @@ class RegistrationTestParameter(Base):
 
     registration = relationship("Registration", back_populates="test_params", lazy="selectin")
     test_parameter = relationship("TestingParameter", back_populates="registration_test_parameters",  lazy="selectin")
+    
+    # model_config = ConfigDict(from_attributes=True)
+
+    @classmethod
+    async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().all()
+    
+    @classmethod
+    async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().first()
+    
+    @classmethod
+    def create_registration_test_param(cls,db: AsyncSession,batch):
+        db.add(batch)
+
+    def update_registration_test_param(self, updated_data):
+        for field, value in updated_data.items():
+            setattr(self, field, value)
+
+
+class RegistrationTestType(Base):
+    __tablename__ = "registration_test_types"
+    id : Mapped[int]= mapped_column(Integer, primary_key=True)
+    # name : Mapped[str]= mapped_column(String)
+    registration_id  : Mapped[int]  = mapped_column(Integer, ForeignKey(Registration.id))
+    test_type_id : Mapped[int]= mapped_column(Integer, ForeignKey(TestType.id))
+    created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at  : Mapped[DateTime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
+    created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+    updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+
+    registration = relationship("Registration", back_populates="test_types", lazy="selectin")
+    test_type = relationship("TestType", back_populates="registration_test_types",  lazy="selectin")
+    # test_type = relationship("TestType", back_populates="registration_test_types",  lazy="selectin")
     # model_config = ConfigDict(from_attributes=True)
 
     @classmethod

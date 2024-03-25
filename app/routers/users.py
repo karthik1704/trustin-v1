@@ -99,6 +99,7 @@ async def get_all_users_by_role(db: db_dep, user: user_dep, role_id: int):
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dep, user: user_dep, data: UserCreate):
+    print(data)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"

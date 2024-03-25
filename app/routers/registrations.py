@@ -9,7 +9,9 @@ from typing import List, Optional
 
 from app.dependencies.auth import get_current_user
 from app.models.samples import TestType, TestingParameter
-from app.models.registrations import Registration, Batch, RegistrationTestParameter, Sample, SampleTestParameter
+from app.models.registrations import Registration, Batch, \
+RegistrationTestParameter, Sample, SampleTestParameter,\
+RegistrationTestType
 from ..schemas.test_request_form import TRFCreate
 from app.database import get_db, get_async_db
 from ..models.test_request_forms import TRF, TestingDetail
@@ -78,6 +80,7 @@ async def create_registration_with_batches(registration_with_batches: Registrati
     registration_data = {**registration_data, **update_dict}
     batches_data = registration_data.pop('batches')
     test_params_data = registration_data.pop('test_params')
+    test_types_data = registration_data.pop('test_params')
     code  = Registration.generate_next_code(db_session)
     registration_data.update({
         "code" : code
@@ -97,6 +100,13 @@ async def create_registration_with_batches(registration_with_batches: Registrati
         print(params_data)
         test_param = RegistrationTestParameter(**params_data, registration_id=registration.id)
         db_session.add(test_param)
+    for types_data in test_types_data:
+        # batch_data = batch_data.model_dump()
+        types_data = {**types_data, **update_dict}
+        print(types_data)
+        test_type = RegistrationTestType(**types_data, registration_id=registration.id)
+        db_session.add(test_type)
+    
     
 
     await db_session.commit()
@@ -112,6 +122,7 @@ async def update_registration_with_batches(registration_id: int, registration: R
     registration_data = registration.model_dump()
     batches_data = registration_data.pop("batches",[])
     test_params_data = registration_data.pop("test_params",[])
+    test_types_data = registration_data.pop("test_types",[])
     print("reg with batches update")
     registration = await Registration.get_one(db_session,[Registration.id == registration_id])
     if registration is None:
@@ -127,6 +138,8 @@ async def update_registration_with_batches(registration_id: int, registration: R
         await registration.update_batches(db_session, batches_data, current_user)
     if test_params_data:
         await registration.update_test_prams(db_session, test_params_data, current_user)
+    if test_types_data:
+        await registration.update_test_types(db_session, test_types_data, current_user)
 
     await db_session.commit()
     await db_session.refresh(registration)
@@ -249,7 +262,7 @@ async def create_sample_with_testparams(registration_id : int, sample_with_testp
     for sample_with_testparams in sample_with_testparams_list:
         sample_data = sample_with_testparams.model_dump()
         sample_data = {**sample_data, **update_dict}
-        test_params_data = sample_data.pop('test_params')
+        test_params_data = sample_data.pop('test_params')        
         # test_params_data = sample_data.pop('test_params')
         print(sample_data)
         sample_id = Sample.generate_next_code(db_session)

@@ -127,10 +127,10 @@ async def create_trf(db: db_dep, data: TRFCreate, user: user_dep):
     data_dict = data.model_dump()
     data_dict.pop("test_details")
     data_dict.pop("test_types_ids")
-    trf_code  = TRF.generate_next_code(db)
-    data_dict.update({
-        "trf_code" : trf_code
-    })
+    # trf_code  = TRF.generate_next_code(db)
+    # data_dict.update({
+    #     "trf_code" : trf_code
+    # })
     trf = TRF(**data_dict)
     db.add(trf)
     db.commit()

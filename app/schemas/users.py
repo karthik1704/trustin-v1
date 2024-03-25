@@ -12,7 +12,7 @@ class UserCreate(BaseModel):
     phone: str
     role_id:int 
     department_id:int
-    qa_type_id : Optional[int]
+    qa_type_id : Optional[int] | None
 
 
 class UserUpdate(BaseModel):
