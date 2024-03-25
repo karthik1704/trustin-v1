@@ -30,13 +30,13 @@ VALUES
 
 INSERT INTO menus (id, name)
 VALUES 
-  (1, 'Home'),
-  (2, 'Customers'),
-  (3, 'Customer Followups'),
-  (4, 'TRF'),
-  (5, 'Registration'),
-  (6, 'Sampels'),
-  (7, 'Configurations');
+  (1, 'dashboard'),
+  (2, 'customers'),
+  (3, 'followup'),
+  (4, 'trf'),
+  (5, 'registrations'),
+  (6, 'samples'),
+  (7, 'configurations');
 
 INSERT INTO menu_control_lists (id, menu_id, department_id)
 VALUES 
