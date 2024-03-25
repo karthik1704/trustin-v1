@@ -139,7 +139,7 @@ class SampleSchema(BaseModel):
     name: str
     registration_id : int
     status_id : Optional[int]
-    department : Optional[str]
+    test_type_id : Optional[int]
     assigned_to : Optional[int]
     batch_id: int
     created_at: datetime
@@ -160,7 +160,7 @@ class SampleListSchema(BaseModel):
     name: str
     registration_id : int
     status_id : Optional[int]
-    department : Optional[str]
+    test_type_id : Optional[int]
     assigned_to : Optional[int]
     batch_id: int
     status: Optional[str]
@@ -170,17 +170,6 @@ class SampleListSchema(BaseModel):
     updated_by: int
     
 
-
-
-
-class SampleRequestSchema(BaseModel):
-    id: int
-    sample_id: int
-    sample_status_id: int
-    created_at: datetime
-    updated_at: datetime
-    created_by: int
-    updated_by: int
 
 
 
@@ -274,7 +263,7 @@ class SampleCreate(BaseModel):
     sample_id: str
     name: str
     batch_id: int
-    department : str
+    test_type_id : int
     test_params : list[SampleTestParamsCreate]
 
 class PatchSampleTestParameterSchema(BaseModel):

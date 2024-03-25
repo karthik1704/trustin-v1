@@ -1,3 +1,4 @@
+from pickle import TRUE
 import uuid
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime,Date, func,  UUID, Enum
 from typing import Any
@@ -9,7 +10,7 @@ from sqlalchemy import select
 from app.models import Base, Branch, TRF, Customer, TestingParameter
 from pydantic import BaseModel, ConfigDict, ValidationError
 from enum import Enum as PyEnum
-# from .users import Department
+from .users import User
 
 
 
@@ -17,6 +18,7 @@ from enum import Enum as PyEnum
 class Registration(Base):
     __tablename__ = "registrations"
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
+    code  : Mapped[str] =  mapped_column(String, nullable=True)
     branch_id : Mapped[int] = mapped_column(Integer, ForeignKey(Branch.id))
     trf_id  : Mapped[int]  = mapped_column(Integer, ForeignKey(TRF.id))
     company_id  : Mapped[int] =  mapped_column(Integer, ForeignKey(Customer.id))
@@ -39,6 +41,20 @@ class Registration(Base):
     trf = relationship("TRF", back_populates="registrations", lazy="selectin")
     batches = relationship("Batch", back_populates="registration", lazy="selectin")
     test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
+    
+    @classmethod
+    def generate_next_code(cls,database_session ):
+        # session = Session()
+        # Query the database for the highest existing code
+        highest_code = database_session.query(cls.code).order_by(cls.code.desc()).first()
+        if highest_code:
+            highest_code_int = int(highest_code[0].split("Registration")[-1]) + 1
+        else:
+            highest_code_int = 1
+        # Generate the new code by combining the prefix and the incremented integer
+        new_code = f"{'Registration'}{highest_code_int:04}"  # Adjust the format based on your requirements
+        # session.close()
+        return new_code
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
@@ -204,6 +220,9 @@ class SampleStatus(Base):
     __tablename__ = "sample_status"
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     name : Mapped[str]= mapped_column(String)
+    department_id : Mapped[int]  = mapped_column(Integer, ForeignKey('departments.id'), nullable=True)
+    role_id : Mapped[int]  = mapped_column(Integer, ForeignKey('roles.id'), nullable=True)
+    user_id : Mapped[int]  = mapped_column(Integer, ForeignKey('users.id'), nullable=True)
 
     sample = relationship("Sample", back_populates="status_data", lazy="selectin")
 
@@ -228,7 +247,8 @@ class Sample(Base):
     name : Mapped[str]= mapped_column(String)
     registration_id : Mapped[int]= mapped_column(Integer, ForeignKey(Registration.id), nullable=True)
     batch_id : Mapped[int]  = mapped_column(Integer, ForeignKey(Batch.id))
-    department_id = Column(Integer, ForeignKey("testtypes.id"))
+    # department_id = Column(Integer, ForeignKey("testtypes.id"))
+    test_type_id = Column(Integer, ForeignKey("testtypes.id"))
     assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
     status_id : Mapped[int] = mapped_column(Integer, ForeignKey("sample_status.id"),  nullable = True)
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -246,8 +266,55 @@ class Sample(Base):
     batch = relationship("Batch", back_populates="sample_batch", lazy="selectin")
 
     @classmethod
+    def generate_next_code(cls,database_session ):
+        
+        # Query the database for the highest existing code
+        highest_code = database_session.query(cls.sample_id).order_by(cls.sample_id.desc()).first()
+        if highest_code:
+            highest_code_int = int(highest_code[0].split("Sample")[-1]) + 1
+        else:
+            highest_code_int = 1
+        # Generate the new code by combining the prefix and the incremented integer
+        new_code = f"{'Sample'}{highest_code_int:04}"  # Adjust the format based on your requirements
+        # database_session.close()
+        return new_code
+
+    @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
         _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars()
+    
+    @classmethod
+    async def get_for_qa_hod(cls, database_session: AsyncSession, user, where_conditions: list[Any]):                
+        _stmt = (
+            select(cls)
+            .select_from(cls)
+            .join(User, cls.test_type_id == User.qa_type_id)
+            .where(
+                User.id == user.id,
+                cls.status == "Submitted"
+               
+            )
+        )        
+        # _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars()
+
+    @classmethod
+    async def get_for_qa_analyst(cls, database_session: AsyncSession, user, where_conditions: list[Any]):                
+        _stmt = (
+            select(cls)
+            .select_from(cls)
+            .join(SampleWorkflow, cls.id == SampleWorkflow.sample_id)
+            # .join(User, SampleWorkflow.assigned_to == User.sample_id)
+            .where(
+                SampleWorkflow.assigned_to == user.id,
+                cls.status == "Submitted"
+               
+            )
+        )        
+        # _stmt = select(cls).where(*where_conditions)
         _result = await database_session.execute(_stmt)
         return _result.scalars()
 
@@ -307,7 +374,9 @@ class Sample(Base):
             workflow_dict = {
                 'sample_id' : self.id,
                 'sample_status_id' : status.id,
-                'assigned_to' : current_user["id"],
+                'department_id' : status.department_id,
+                'role_id' : status.role_id,
+                'assigned_to' : current_user["id"] if status.name == 'Draft' else status.user_id,
                 'status' : 'Done' if status.name == 'Draft' else 'In Progress'\
                       if status.name == 'Review Pending' else 'Yet To Start'
             }
@@ -373,6 +442,8 @@ class SampleWorkflow(Base):
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     sample_id : Mapped[int]  =  mapped_column(Integer, ForeignKey(Sample.id))
     sample_status_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
+    department_id : Mapped[int]  = mapped_column(Integer, ForeignKey('departments.id'), nullable=True)
+    role_id : Mapped[int]  = mapped_column(Integer, ForeignKey('roles.id'), nullable=True)
     assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"),  nullable=True)
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at  : Mapped[DateTime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
