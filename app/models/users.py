@@ -21,17 +21,20 @@ class Role(Base):
     __tablename__ = "roles"
     id = Column(Integer, primary_key=True)
     name = Column(String)
+    sample_workflow_role = relationship("SampleWorkflow", back_populates="role",  lazy="selectin")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
         _stmt = select(cls).where(*where_conditions)
         _result = await database_session.execute(_stmt)
         return _result.scalars()
+    
 
 class Department(Base):
     __tablename__ = "departments"
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String)    
+    sample_workflow_department = relationship("SampleWorkflow", back_populates="department",  lazy="selectin")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
@@ -70,6 +73,8 @@ class User(Base):
     
     assingee = relationship("CustomerFollowUp", back_populates="marketing_user")
     sample_assignee = relationship("Sample", foreign_keys="[Sample.assigned_to]", back_populates="assignee")
+    sample_workflow_assignee = relationship("SampleWorkflow", foreign_keys="[SampleWorkflow.assigned_to]",   back_populates="assignee")
+    sample_history_assignee = relationship("SampleHistory", foreign_keys="[SampleHistory.assigned_to]",   back_populates="assignee")
     # sample_created = relationship("Sample", foreign_keys="[Sample.created_by]", back_populates="created")
 
 class MenuControlList(Base):

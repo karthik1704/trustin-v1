@@ -43,14 +43,17 @@ user_dep = Annotated[dict, Depends(get_current_user)]
 
 
 # GET method to retrieve all samples
-@router.get("/", response_model=list[SampleListSchema])
+@router.get("/", response_model=Optional[list[SampleListSchema]])
 async def get_all_samples(db_session: AsyncSession = Depends(get_async_db), current_user: dict = Depends(get_current_user)):
     print("coming inside")
     print(current_user)
+    samples = []
     if current_user.get("dept_id", "") in (1,2, 5, 6): 
         samples = await Sample.get_all(db_session,[])
     elif current_user.get("role_id", "")==3:
         samples = await Sample.get_for_qa_hod(db_session,current_user,[])
+    elif current_user.get("role_id", "")==4:
+        samples = await Sample.get_for_qa_analyst(db_session,current_user,[])
 
     return samples
 
