@@ -69,7 +69,7 @@ class RegistrationTestTypeSchema(BaseModel):
 class RegistrationListSchema(BaseModel):
     id: int
     branch_id: int
-    code : str
+    code : str|None # added none temp, because code null in already created registration
     trf_id: int
     company_id: int
     company_name: str
