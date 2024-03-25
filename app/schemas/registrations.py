@@ -254,7 +254,7 @@ class RegistrationTestParamsUpdate(BaseModel):
     test_params_id: Optional[int]
 
 class RegistrationTestTypeUpdate(BaseModel):
-    test_types_id: Optional[int]
+    test_type_id: Optional[int]
     
 
 class RegistrationUpdate(BaseModel):
@@ -271,7 +271,7 @@ class RegistrationUpdate(BaseModel):
     date_of_received: Optional[date]
     # created_by: Optional[int]
     # updated_by: Optional[int]
-    test_type: Optional[str]
+    # test_type: Optional[str]
     product: Optional[int]
     batches: Optional[List[BatchUpdate]]
     test_params: Optional[List[RegistrationTestParamsUpdate]]
