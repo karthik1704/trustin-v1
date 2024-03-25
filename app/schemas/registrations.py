@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 from ..models.registrations import Registration, Batch
-from ..schemas.users import UserSchema
+from ..schemas.users import DepartmentSchema, UserSchema, RoleSchema
 from ..schemas.test_request_form import TRFSchema
 # from .samples import TestParameterCreate
 
@@ -121,8 +121,9 @@ class RegistrationSchema(BaseModel):
 class SampleTestParameterSchema(BaseModel):
     id: int
     sample_id: int
+    order : int
     test_parameter_id: int
-    test_type: str
+    test_type: Optional[str]
     value : Optional[str]
     result : Optional[bool]
     created_at: datetime
@@ -134,22 +135,28 @@ class SampleTestParameterSchema(BaseModel):
 class SampleWorkflowSchema(BaseModel):
     id: int
     sample_status_id: int
-    assigned_to : int
+    assigned_to : Optional[int]
     status: str
+    assignee : Optional[UserSchema]
+    department : Optional[DepartmentSchema]
+    role : Optional[RoleSchema]
     
-class SampleHistorySchema(BaseModel):
-    id: int
-    from_status_id: int
-    to_status_id: int
-    comments: str
-    created_at: datetime
-    created_by: int
+
     
 class SampleStatusSchema(BaseModel):
     id: int
     name: str
 
-
+class SampleHistorySchema(BaseModel):
+    id: int
+    from_status_id: int
+    to_status_id: int
+    assigned_to : Optional[int]
+    comments: str
+    created_at: datetime
+    created_by: int
+    from_status : Optional[SampleStatusSchema]
+    to_status : Optional[SampleStatusSchema]
 
 class SampleSchema(BaseModel):
     id: int
@@ -282,11 +289,12 @@ class RegistrationsGet(BaseModel):
 
 class SampleTestParamsCreate(BaseModel):
     test_parameter_id : int
-    test_type  :  Optional[str]
+    order : int
+    # test_type  :  Optional[str]
 
 
 class SampleCreate(BaseModel):
-    sample_id: str
+    # sample_id: str
     name: str
     batch_id: int
     test_type_id : int
@@ -294,6 +302,7 @@ class SampleCreate(BaseModel):
 
 class PatchSampleTestParameterSchema(BaseModel):
     id: int
+    order : int
     value : str
     result : bool
 

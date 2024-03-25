@@ -300,6 +300,8 @@ class SampleStatus(Base):
     user_id : Mapped[int]  = mapped_column(Integer, ForeignKey('users.id'), nullable=True)
 
     sample = relationship("Sample", back_populates="status_data", lazy="selectin")
+    sample_history_from = relationship("SampleHistory", back_populates="from_status",  foreign_keys="[SampleHistory.from_status_id]")
+    sample_history_to = relationship("SampleHistory", back_populates="to_status",  foreign_keys="[SampleHistory.to_status_id]")
 
     # ["Draft", "Review Pending", "Requested","Received","Under Testing", "Verification Pending", "Done"]
     
@@ -484,9 +486,10 @@ class SampleTestParameter(Base):
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     sample_id : Mapped[int]  =  mapped_column(Integer, ForeignKey(Sample.id))
     test_parameter_id : Mapped[int] = mapped_column(Integer, ForeignKey(TestingParameter.id))
+    order : Mapped[int]= mapped_column(Integer, nullable=True)
     test_type :Mapped[str] =  mapped_column(String, nullable=True)
     value :Mapped[str] =  mapped_column(String, nullable=True)
-    result :Mapped[bool] =  mapped_column(Boolean, nullable=True)
+    result :Mapped[bool] =  mapped_column(Boolean, nullable=True) 
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at  : Mapped[DateTime] =  mapped_column(DateTime(timezone=True), onupdate=func.now())
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
@@ -532,6 +535,10 @@ class SampleWorkflow(Base):
     status :Mapped[str] = mapped_column(String,server_default='Yet to start')
 
     sample = relationship("Sample", back_populates="sample_workflows")
+    assignee = relationship("User", back_populates="sample_workflow_assignee",  foreign_keys=[assigned_to], lazy="selectin")
+    department = relationship("Department", back_populates="sample_workflow_department",  lazy="selectin")
+    role = relationship("Role", back_populates="sample_workflow_role",  lazy="selectin")
+
     # sample_workflow_history= relationship("SampleRequestHistory", back_populates="sample_request")
 
     @classmethod
@@ -562,3 +569,6 @@ class SampleHistory(Base):
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     
     sample = relationship("Sample", back_populates="sample_history")
+    assignee = relationship("User", back_populates="sample_history_assignee",  foreign_keys=[assigned_to], lazy="selectin")
+    from_status = relationship("SampleStatus", back_populates="sample_history_from",  foreign_keys=[from_status_id], lazy="selectin")
+    to_status = relationship("SampleStatus", back_populates="sample_history_to",  foreign_keys=[to_status_id], lazy="selectin")

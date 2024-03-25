@@ -41,7 +41,9 @@ class Token(BaseModel):
 class UserSchema(BaseModel):
     first_name: Optional[str]
     last_name: Optional[str]
-    department : Optional[str]
+    # department_id : Optional[int]
+    # role_id : Optional[int]
+    # qa_type_id : Optional[int]
 
 class RoleSchema(BaseModel):
     id: int
