@@ -336,7 +336,7 @@ class Sample(Base):
     status : Mapped[str] = mapped_column(String, default='Draft', nullable=True)
 
     sample_workflows = relationship("SampleWorkflow", back_populates="sample", lazy="selectin")
-    sample_test_parameters = relationship("SampleTestParameter", back_populates="sample", lazy="selectin")
+    sample_test_parameters = relationship("SampleTestParameter", back_populates="sample", lazy="selectin", order_by="SampleTestParameter.order")
     sample_history = relationship("SampleHistory", back_populates="sample", lazy="selectin")
     status_data = relationship("SampleStatus", back_populates="sample", lazy="selectin")
     assignee = relationship("User", back_populates="sample_assignee",  foreign_keys=[assigned_to], lazy="selectin")
