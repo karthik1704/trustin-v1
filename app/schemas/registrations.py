@@ -69,6 +69,7 @@ class RegistrationTestTypeSchema(BaseModel):
 class RegistrationListSchema(BaseModel):
     id: int
     branch_id: int
+    code : str
     trf_id: int
     company_id: int
     company_name: str
@@ -92,6 +93,7 @@ class RegistrationListSchema(BaseModel):
 
 class RegistrationSchema(BaseModel):
     id: int
+    code : str
     branch_id: int
     trf_id: int
     company_id: int
