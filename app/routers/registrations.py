@@ -80,8 +80,8 @@ async def create_registration_with_batches(registration_with_batches: Registrati
     registration_data = {**registration_data, **update_dict}
     batches_data = registration_data.pop('batches')
     test_params_data = registration_data.pop('test_params')
-    test_types_data = registration_data.pop('test_params')
-    code  = Registration.generate_next_code(db_session)
+    test_types_data = registration_data.pop('test_types')
+    code  = await Registration.generate_next_code(db_session)
     registration_data.update({
         "code" : code
     })
@@ -265,7 +265,7 @@ async def create_sample_with_testparams(registration_id : int, sample_with_testp
         test_params_data = sample_data.pop('test_params')        
         # test_params_data = sample_data.pop('test_params')
         print(sample_data)
-        sample_id = Sample.generate_next_code(db_session)
+        sample_id = await Sample.generate_next_code(db_session)
         sample_data.update({
             "sample_id" : sample_id
         })

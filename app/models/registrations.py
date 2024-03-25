@@ -6,7 +6,7 @@ import datetime
 # from sqlalchemy.orm import relationship
 from sqlalchemy.orm import mapped_column, Mapped, relationship, joinedload,Session
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, desc
 from app.models import Base, Branch, TRF, Customer, TestingParameter,TestType
 from pydantic import BaseModel, ConfigDict, ValidationError
 from enum import Enum as PyEnum
@@ -44,12 +44,17 @@ class Registration(Base):
     test_types = relationship("RegistrationTestType", back_populates="registration", lazy="selectin")
     
     @classmethod
-    def generate_next_code(cls,database_session ):
-        # session = Session()
-        # Query the database for the highest existing code
-        highest_code = database_session.query(cls.code).order_by(cls.code.desc()).first()
+    async def generate_next_code(cls,database_session ):
+        
+        _stmt = (
+            select(cls.code)
+            .where(*[])
+            .order_by(desc(cls.code))  # Assuming `code` is the column you want to order by
+        )
+        _result = await database_session.execute(_stmt)
+        highest_code = _result.scalars().first()
         if highest_code:
-            highest_code_int = int(highest_code[0].split("Registration")[-1]) + 1
+            highest_code_int = int(highest_code.split("Registration")[-1]) + 1
         else:
             highest_code_int = 1
         # Generate the new code by combining the prefix and the incremented integer
@@ -336,12 +341,17 @@ class Sample(Base):
     batch = relationship("Batch", back_populates="sample_batch", lazy="selectin")
 
     @classmethod
-    def generate_next_code(cls,database_session ):
+    async def generate_next_code(cls,database_session ):
         
-        # Query the database for the highest existing code
-        highest_code = database_session.query(cls.sample_id).order_by(cls.sample_id.desc()).first()
+        _stmt = (
+            select(cls.sample_id)
+            .where(*[])
+            .order_by(desc(cls.sample_id))  # Assuming `code` is the column you want to order by
+        )
+        _result = await database_session.execute(_stmt)
+        highest_code = _result.scalars().first()
         if highest_code:
-            highest_code_int = int(highest_code[0].split("Sample")[-1]) + 1
+            highest_code_int = int(highest_code.split("Sample")[-1]) + 1
         else:
             highest_code_int = 1
         # Generate the new code by combining the prefix and the incremented integer
