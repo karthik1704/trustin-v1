@@ -115,10 +115,10 @@ class Registration(Base):
         print("update test params")
         time = datetime.datetime.now()
         for test_param_data in test_params_data:
-            test_param_id = test_param_data.pop('test_params_id', None)
+            test_param_id = test_param_data.get('test_params_id', None)
             test_param = None
             if test_param_id:
-                test_param = await RegistrationTestParameter.get_one(database_session,[RegistrationTestParameter.test_params_id == test_param_id])
+                test_param = await RegistrationTestParameter.get_one(database_session,[RegistrationTestParameter.registration_id == self.id, RegistrationTestParameter.test_params_id == test_param_id])
                 print(test_param)
             if test_param:
                 print("u[date]")
@@ -133,7 +133,7 @@ class Registration(Base):
                 print(test_param_data)
                 
                 update_dict = {
-                        "created_at" :time ,
+                        "created_at" :time,
                         "updated_at" : time,
                         "created_by" : current_user["id"],
                         "updated_by" : current_user["id"],
@@ -141,15 +141,23 @@ class Registration(Base):
                 test_param_data = {**test_param_data, **update_dict}
                 test_param = RegistrationTestParameter(**test_param_data, registration_id=self.id)
                 RegistrationTestParameter.create_registration_test_param(database_session,test_param)
+        existing_params = await RegistrationTestParameter.get_all(database_session,[RegistrationTestParameter.registration_id == self.id])
+        for existing_param in existing_params:
+            for test_param_data in test_params_data:
+                if existing_param.test_params_id == test_param_data.get("test_params_id",""):
+                    break
+            else:
+                await database_session.delete(existing_param)
 
     async def update_test_types(self, database_session: AsyncSession, test_types_data, current_user):
-        print("update test params")
+        print("update test types")
         time = datetime.datetime.now()
+        print(test_types_data)
         for test_type_data in test_types_data:
-            test_type_id = test_type_data.pop('test_type_id', None)
+            test_type_id = test_type_data.get('test_type_id', None)
             test_type = None
             if test_type_id:
-                test_type = await RegistrationTestType.get_one(database_session,[RegistrationTestType.test_type_id == test_type_id])
+                test_type = await RegistrationTestType.get_one(database_session,[RegistrationTestType.registration_id == self.id, RegistrationTestType.test_type_id == test_type_id])
                 # print(test_param)
             if test_type:
                 print("u[date]")
@@ -172,6 +180,13 @@ class Registration(Base):
                 test_type_data = {**test_type_data, **update_dict}
                 test_type = RegistrationTestType(**test_type_data, registration_id=self.id)
                 RegistrationTestType.create_registration_test_type(database_session,test_type)
+        existing_types = await RegistrationTestType.get_all(database_session,[RegistrationTestType.registration_id == self.id])
+        for existing_type in existing_types:
+            for test_type_data in test_types_data:
+                if existing_type.test_type_id == test_type_data.get("test_type_id",""):
+                    break
+            else:
+                await database_session.delete(existing_type)
 
 
 
