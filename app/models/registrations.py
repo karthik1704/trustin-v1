@@ -145,8 +145,8 @@ class Registration(Base):
     async def update_test_types(self, database_session: AsyncSession, test_types_data, current_user):
         print("update test params")
         time = datetime.datetime.now()
-        for test_param_data in test_types_data:
-            test_type_id = test_param_data.pop('test_type_id', None)
+        for test_type_data in test_types_data:
+            test_type_id = test_type_data.pop('test_type_id', None)
             test_type = None
             if test_type_id:
                 test_type = await RegistrationTestType.get_one(database_session,[RegistrationTestType.test_type_id == test_type_id])
@@ -161,7 +161,7 @@ class Registration(Base):
                 test_type.update_registration_test_type(test_type_data)
             else:
                 print("create")
-                print(test_param_data)
+                print(test_type_data)
                 
                 update_dict = {
                         "created_at" :time ,
@@ -169,9 +169,9 @@ class Registration(Base):
                         "created_by" : current_user["id"],
                         "updated_by" : current_user["id"],
                     }
-                test_param_data = {**test_param_data, **update_dict}
-                test_param = RegistrationTestParameter(**test_param_data, registration_id=self.id)
-                RegistrationTestParameter.create_registration_test_param(database_session,test_param)
+                test_type_data = {**test_type_data, **update_dict}
+                test_type = RegistrationTestType(**test_type_data, registration_id=self.id)
+                RegistrationTestType.create_registration_test_type(database_session,test_type)
 
 
 
@@ -283,10 +283,10 @@ class RegistrationTestType(Base):
         return _result.scalars().first()
     
     @classmethod
-    def create_registration_test_param(cls,db: AsyncSession,batch):
+    def create_registration_test_type(cls,db: AsyncSession,batch):
         db.add(batch)
 
-    def update_registration_test_param(self, updated_data):
+    def update_registration_test_type(self, updated_data):
         for field, value in updated_data.items():
             setattr(self, field, value)
 
