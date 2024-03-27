@@ -7,7 +7,7 @@ from app.models.test_request_forms import TRF
 from app.utils import get_unique_code
 from ..schemas.customers import CustomerFollowupCreate
 from app.database import get_db
-from ..models.customers import CustomerFollowUp, MarketingStatus
+from ..models.customers import CustomerFollowUp, MarketingStatus, CustomerFollowUpHistory
 
 router = APIRouter(prefix="/followups", tags=["Customers Followup"])
 
@@ -49,6 +49,10 @@ async def get_Customer_followup(
         .options(joinedload(CustomerFollowUp.marketing_user))
         .options(joinedload(CustomerFollowUp.product))
         .options(joinedload(CustomerFollowUp.trf))
+         .options(joinedload(CustomerFollowUp.customer_followup_history))
+         .options(joinedload(CustomerFollowUp.customer_followup_history, CustomerFollowUpHistory.user))
+        #  .options(joinedload(CustomerFollowUp.customer_followup_history.user))
+        #  .options(joinedload(CustomerFollowUpHistory.user))
         .filter(CustomerFollowUp.id == followup_id)
         .first()
     )
@@ -69,6 +73,19 @@ async def create_followup(db: db_dep, data: CustomerFollowupCreate, user: user_d
     db.add(followup)
     db.commit()
     db.refresh(followup)
+    # followup = followup.dict()
+    history_dict = {
+        "customer_followup_id" : followup.id,
+        "marketing_status" : followup.marketing_status.name,
+        "user_id" : followup.marketing_user.id,
+        "date" : followup.date,
+        "remarks" : followup.remarks
+    }
+    print(history_dict)
+    history = CustomerFollowUpHistory(**history_dict)
+    db.add(history)
+    db.commit()
+    db.refresh(history)
 
 
 @router.put("/{followup_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -100,6 +117,17 @@ async def update_customer_followup(
 
     db.commit()
     db.refresh(followup)
+    history_dict = {
+        "followup_id" : followup.id,
+        "marketing_status" : followup.marketing_status,
+        "user_id" : followup.marketing_user,
+        "date" : followup.date,
+        "remarks" : followup.remarks
+    }
+    history = CustomerFollowUpHistory(**history_dict)
+    db.add(history)
+    db.commit()
+    db.refresh(history)
 
     if followup.marketing_status == MarketingStatus.WON: # type: ignore
 
