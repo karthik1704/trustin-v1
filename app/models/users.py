@@ -72,6 +72,7 @@ class User(Base):
     qa_type_id = Column(Integer, ForeignKey("testtypes.id"), nullable=True)
     
     assingee = relationship("CustomerFollowUp", back_populates="marketing_user")
+    followup_updated_user = relationship("CustomerFollowUpHistory", back_populates="user")
     sample_assignee = relationship("Sample", foreign_keys="[Sample.assigned_to]", back_populates="assignee")
     sample_workflow_assignee = relationship("SampleWorkflow", foreign_keys="[SampleWorkflow.assigned_to]",   back_populates="assignee")
     sample_history_assignee = relationship("SampleHistory", foreign_keys="[SampleHistory.assigned_to]",   back_populates="assignee")

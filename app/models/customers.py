@@ -96,9 +96,29 @@ class CustomerFollowUp(Base):
     trf_id = Column(Integer, ForeignKey('test_request_forms.id'), unique=True)
     trf = relationship("TRF", back_populates="followup")
     product = relationship("Product", back_populates="followups")
+    customer_followup_history = relationship("CustomerFollowUpHistory", back_populates="customer_followup")
 
     
     created_at =Column(DateTime(timezone=True), server_default=func.now())
     updated_at =  Column(DateTime(timezone=True), onupdate=func.now())
+    
+
+class CustomerFollowUpHistory(Base):
+    __tablename__ = "customerfollowups_history"
+    id = Column(Integer, primary_key=True)
+    customer_followup_id = Column(Integer, ForeignKey('customerfollowups.id'))
+    marketing_status = Column(String)
+    user_id = Column(Integer, ForeignKey('users.id'))
+    date = Column(DateTime(timezone=True), default=func.now())
+    remarks = Column(Text)
+
+
+    customer_followup = relationship("CustomerFollowUp", back_populates="customer_followup_history")
+    user = relationship("User", back_populates="followup_updated_user")
+    
+
+    
+    created_at =Column(DateTime(timezone=True), server_default=func.now())
+    
     
 
