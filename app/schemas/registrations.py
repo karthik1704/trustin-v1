@@ -155,7 +155,7 @@ class SampleHistorySchema(BaseModel):
     from_status_id: int
     to_status_id: int
     assigned_to : Optional[int]
-    comments: str
+    comments: Optional[str]
     created_at: datetime
     created_by: int
     from_status : Optional[SampleStatusSchema]
