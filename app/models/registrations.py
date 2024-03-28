@@ -333,6 +333,27 @@ class SampleStatus(Base):
         _result = await database_session.execute(_stmt)
         return _result.scalars().first()
 
+
+
+class SampleHistory(Base):
+    __tablename__ = "sample_history"
+    id : Mapped[int]= mapped_column(Integer, primary_key=True)
+    sample_id : Mapped[int] = mapped_column(Integer, ForeignKey("samples.id"))
+    from_status_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
+    to_status_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
+    assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
+    comments : Mapped[str] = mapped_column(String, nullable=True)
+    created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+    
+    sample = relationship("Sample", back_populates="sample_history")
+    assignee = relationship("User", back_populates="sample_history_assignee",  foreign_keys=[assigned_to], lazy="selectin")
+    created_by_user = relationship("User", back_populates="sample_history_created",  foreign_keys=[created_by], lazy="selectin")
+    from_status = relationship("SampleStatus", back_populates="sample_history_from",  foreign_keys=[from_status_id], lazy="selectin")
+    to_status = relationship("SampleStatus", back_populates="sample_history_to",  foreign_keys=[to_status_id], lazy="selectin")
+
+
+
 class Sample(Base):
     __tablename__ = "samples"
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
@@ -352,7 +373,7 @@ class Sample(Base):
 
     sample_workflows = relationship("SampleWorkflow", back_populates="sample", lazy="selectin")
     sample_test_parameters = relationship("SampleTestParameter", back_populates="sample", lazy="selectin", order_by="SampleTestParameter.order")
-    sample_history = relationship("SampleHistory", back_populates="sample", lazy="selectin")
+    sample_history = relationship("SampleHistory", back_populates="sample", lazy="selectin", order_by=desc(SampleHistory.id))
     status_data = relationship("SampleStatus", back_populates="sample", lazy="selectin")
     assignee = relationship("User", back_populates="sample_assignee",  foreign_keys=[assigned_to], lazy="selectin")
     # created = relationship("User", back_populates="sample_created",  foreign_keys=[created_by], lazy="selectin")
@@ -574,18 +595,3 @@ class SampleWorkflow(Base):
         for field, value in updated_data.items():
             setattr(self, field, value) if value else None
 
-class SampleHistory(Base):
-    __tablename__ = "sample_history"
-    id : Mapped[int]= mapped_column(Integer, primary_key=True)
-    sample_id : Mapped[int] = mapped_column(Integer, ForeignKey(Sample.id))
-    from_status_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
-    to_status_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
-    assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
-    comments : Mapped[str] = mapped_column(String, nullable=True)
-    created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
-    created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    
-    sample = relationship("Sample", back_populates="sample_history")
-    assignee = relationship("User", back_populates="sample_history_assignee",  foreign_keys=[assigned_to], lazy="selectin")
-    from_status = relationship("SampleStatus", back_populates="sample_history_from",  foreign_keys=[from_status_id], lazy="selectin")
-    to_status = relationship("SampleStatus", back_populates="sample_history_to",  foreign_keys=[to_status_id], lazy="selectin")
