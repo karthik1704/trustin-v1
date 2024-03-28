@@ -581,7 +581,7 @@ class SampleHistory(Base):
     from_status_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
     to_status_id : Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
     assigned_to : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
-    comments : Mapped[str] = mapped_column(String)
+    comments : Mapped[str] = mapped_column(String, nullable=True)
     created_at : Mapped[DateTime]  =mapped_column(DateTime(timezone=True), server_default=func.now())
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     
