@@ -160,6 +160,8 @@ class SampleHistorySchema(BaseModel):
     created_by: int
     from_status : Optional[SampleStatusSchema]
     to_status : Optional[SampleStatusSchema]
+    assignee : Optional[UserSchema]
+    created_by_user : Optional[UserSchema]
 
 class SampleSchema(BaseModel):
     id: int

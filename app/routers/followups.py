@@ -77,7 +77,7 @@ async def create_followup(db: db_dep, data: CustomerFollowupCreate, user: user_d
     history_dict = {
         "customer_followup_id" : followup.id,
         "marketing_status" : followup.marketing_status.name,
-        "user_id" : followup.marketing_user.id,
+        "user_id" : user["id"],
         "date" : followup.date,
         "remarks" : followup.remarks
     }
@@ -120,7 +120,7 @@ async def update_customer_followup(
     history_dict = {
         "customer_followup_id" : followup.id,
         "marketing_status" : followup.marketing_status,
-        "user_id" : followup.marketing_user,
+        "user_id" : user["id"],
         "date" : followup.date,
         "remarks" : followup.remarks
     }
