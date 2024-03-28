@@ -44,26 +44,15 @@ async def get_Customer_followup(
         )
 
     customer = (
-        # db.query(CustomerFollowUp)
-        # .options(joinedload(CustomerFollowUp.customer))
-        # .options(joinedload(CustomerFollowUp.marketing_user))
-        # .options(joinedload(CustomerFollowUp.product))
-        # .options(joinedload(CustomerFollowUp.trf))
-        #  .options(joinedload(CustomerFollowUp.customer_followup_history))
-        #  .options(joinedload(CustomerFollowUp.customer_followup_history, CustomerFollowUpHistory.user))
-        # #  .options(joinedload(CustomerFollowUp.customer_followup_history.user))
-        # #  .options(joinedload(CustomerFollowUpHistory.user))
-        # .filter(CustomerFollowUp.id == followup_id)
-        # .first()
         db.query(CustomerFollowUp)
-        .options(
-            joinedload(CustomerFollowUp.customer),
-            joinedload(CustomerFollowUp.marketing_user),
-            joinedload(CustomerFollowUp.product),
-            joinedload(CustomerFollowUp.trf),
-            joinedload(CustomerFollowUp.history).options(joinedload(CustomerFollowUp.history).order_by(desc(CustomerFollowUpHistory.id))),  # Order by id in descending order
-            joinedload(CustomerFollowUp.history, CustomerFollowUpHistory.user)
-        )
+        .options(joinedload(CustomerFollowUp.customer))
+        .options(joinedload(CustomerFollowUp.marketing_user))
+        .options(joinedload(CustomerFollowUp.product))
+        .options(joinedload(CustomerFollowUp.trf))
+         .options(joinedload(CustomerFollowUp.customer_followup_history))
+         .options(joinedload(CustomerFollowUp.customer_followup_history, CustomerFollowUpHistory.user))
+        #  .options(joinedload(CustomerFollowUp.customer_followup_history.user))
+        #  .options(joinedload(CustomerFollowUpHistory.user))
         .filter(CustomerFollowUp.id == followup_id)
         .first()
     )

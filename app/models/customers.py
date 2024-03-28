@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, func, Enum, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, func, Enum, Text, desc
 from sqlalchemy.orm import relationship
 from app.models import Base
 from enum import Enum as PyEnum
@@ -96,7 +96,7 @@ class CustomerFollowUp(Base):
     trf_id = Column(Integer, ForeignKey('test_request_forms.id'), unique=True)
     trf = relationship("TRF", back_populates="followup")
     product = relationship("Product", back_populates="followups")
-    customer_followup_history = relationship("CustomerFollowUpHistory", back_populates="customer_followup")
+    customer_followup_history = relationship("CustomerFollowUpHistory", back_populates="customer_followup",order_by=desc("CustomerFollowUpHistory.id"))
 
     
     created_at =Column(DateTime(timezone=True), server_default=func.now())
