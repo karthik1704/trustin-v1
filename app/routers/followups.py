@@ -118,7 +118,7 @@ async def update_customer_followup(
     db.commit()
     db.refresh(followup)
     history_dict = {
-        "followup_id" : followup.id,
+        "customer_followup_id" : followup.id,
         "marketing_status" : followup.marketing_status,
         "user_id" : followup.marketing_user,
         "date" : followup.date,
