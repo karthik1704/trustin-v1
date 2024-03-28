@@ -172,7 +172,8 @@ async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: A
                 "created_at" : time,
                 "created_by": current_user["id"],
                 "to_status_id" : sample_data.get("status_id",""),
-                "from_status_id" : progress.sample_status_id
+                "from_status_id" : progress.sample_status_id,
+                "comments" : sample_data.get("comments","")
                 }
                 if sample_data.get("assigned_to",""):
                     history.update({
