@@ -135,6 +135,11 @@ class SampleTestParameterSchema(BaseModel):
     updated_by: int
     test_parameter : Optional[TestParameterSchema]
 
+    
+class SampleStatusSchema(BaseModel):
+    id: int
+    name: str
+
 class SampleWorkflowSchema(BaseModel):
     id: int
     sample_status_id: int
@@ -143,12 +148,10 @@ class SampleWorkflowSchema(BaseModel):
     assignee : Optional[UserSchema]
     department : Optional[DepartmentSchema]
     role : Optional[RoleSchema]
+    sample_status : Optional[SampleStatusSchema]
     
 
-    
-class SampleStatusSchema(BaseModel):
-    id: int
-    name: str
+
 
 class SampleHistorySchema(BaseModel):
     id: int
@@ -314,9 +317,9 @@ class PatchSampleTestParameterSchema(BaseModel):
     result : bool
 
 class PatchSample(BaseModel):
-    status : Optional[str]
-    status_id: Optional[int]
-    assigned_to: Optional[int]
-    comments : Optional[str]
-    test_params : Optional[list[PatchSampleTestParameterSchema]]
+    status : Optional[str] | None
+    status_id: Optional[int] | None
+    assigned_to: Optional[int] | None
+    comments : Optional[str] | None
+    test_params : Optional[list[PatchSampleTestParameterSchema]] | None
     

@@ -90,7 +90,7 @@ async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: A
         test_param = await SampleTestParameter.get_one(db_session,[SampleTestParameter.id == test_param_id])
         if test_param:
             await test_param.update_sample_test_param(test_param_data)
-    print(sample_data)
+    
     prev_status = sample.status
     await sample.update_sample(sample_data)
     if sample_data.get("status","") == "Submitted" and prev_status != "Submitted":
@@ -114,9 +114,12 @@ async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: A
         await sample.create_history(db_session, current_user,history)
     else:
         if sample_data.get("status_id",""):
-            progress = await SampleWorkflow.get_one(db_session,[Sample.id == sample_id, status == 'In Progress'])
-            print("coming **********************")
-            if progress and sample_data.get("status_id","") == progress.sample_status_id + 1:
+            
+            progress = await SampleWorkflow.get_one(db_session,[SampleWorkflow.sample_id == sample_id, SampleWorkflow.status == 'In Progress'])
+            
+            progres_status_id = progress.sample_status_id if progress else 0
+            print("progres_status_id",progres_status_id)
+            if progress and sample_data.get("status_id","") == progres_status_id + 1:
                 #moving forward
                 update_dict = {
                    "status" : "Done",
@@ -127,9 +130,10 @@ async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: A
                     update_dict.update({
                         "assigned_to" : sample_data.get("assigned_to","")
                     })
-                await progress.update_workflow(**update_dict)
+                
+                await progress.update_workflow(update_dict)
             
-                new_status = await SampleWorkflow.get_one(db_session,[Sample.id == sample_id,  SampleStatus.id == progress.sample_status_id+1])
+                new_status = await SampleWorkflow.get_one(db_session,[SampleWorkflow.sample_id == sample_id,  SampleWorkflow.sample_status_id == progres_status_id+1])
                 if new_status:
                     update_dict = {
                     "status" : "In Progress",
@@ -140,13 +144,14 @@ async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: A
                         update_dict.update({
                             "assigned_to" : sample_data.get("assigned_to","")
                         })
-                    await new_status.update_workflow(**update_dict)
+                    
+                    await new_status.update_workflow(update_dict)
                 history = {
                 "sample_id" : sample_id,
                 "created_at" : time,
                 "created_by": current_user["id"],
                 "to_status_id" : sample_data.get("status_id",""),
-                "from_status_id" : progress.sample_status_id,
+                "from_status_id" : progres_status_id,
                 "comments" : sample_data.get("comments","")
                 }
                 if sample_data.get("assigned_to",""):
@@ -159,7 +164,7 @@ async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: A
                     })
 
                 await sample.create_history(db_session, current_user,history)
-            elif progress and sample_data.get("status_id","") == progress.sample_status_id - 1:
+            elif progress and sample_data.get("status_id","") == progres_status_id - 1:
                 #moving forward
                 update_dict = {
                    "status" : "Yet To Start",
@@ -170,9 +175,9 @@ async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: A
                     update_dict.update({
                         "assigned_to" : sample_data.get("assigned_to","")
                     })
-                await progress.update_workflow(**update_dict)
+                await progress.update_workflow(update_dict)
             
-                new_status = await SampleWorkflow.get_one(db_session,[Sample.id == sample_id,  SampleStatus.id == progress.sample_status_id-1])
+                new_status = await SampleWorkflow.get_one(db_session,[SampleWorkflow.sample_id == sample_id,  SampleWorkflow.sample_status_id == progres_status_id-1])
                 if new_status:
                     update_dict = {
                     "status" : "In Progress",
@@ -183,14 +188,14 @@ async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: A
                         update_dict.update({
                             "assigned_to" : sample_data.get("assigned_to","")
                         })
-                    await new_status.update_workflow(**update_dict)
+                    await new_status.update_workflow(update_dict)
             if progress:
                 history = {
                 "sample_id" : sample_id,
                 "created_at" : time,
                 "created_by": current_user["id"],
                 "to_status_id" : sample_data.get("status_id",""),
-                "from_status_id" : progress.sample_status_id,
+                "from_status_id" : progres_status_id,
                 "comments" : sample_data.get("comments","")
                 }
                 if sample_data.get("assigned_to",""):
