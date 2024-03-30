@@ -149,6 +149,7 @@ class SampleWorkflowSchema(BaseModel):
     department : Optional[DepartmentSchema]
     role : Optional[RoleSchema]
     sample_status : Optional[SampleStatusSchema]
+    updated_at: datetime
     
 
 
