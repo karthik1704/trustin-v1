@@ -318,12 +318,12 @@ class SampleStatus(Base):
     sample = relationship("Sample", back_populates="status_data", lazy="selectin")
     sample_history_from = relationship("SampleHistory", back_populates="from_status",  foreign_keys="[SampleHistory.from_status_id]")
     sample_history_to = relationship("SampleHistory", back_populates="to_status",  foreign_keys="[SampleHistory.to_status_id]")
-
+    sample_workflow_status = relationship("SampleWorkflow", back_populates="sample_status", lazy="selectin")
     # ["Draft", "Review Pending", "Requested","Received","Under Testing", "Verification Pending", "Done"]
     
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
-        _stmt = select(cls).where(*where_conditions)
+        _stmt = select(cls).where(*where_conditions).order_by(cls.id)
         _result = await database_session.execute(_stmt)
         return _result.scalars().all()
     
@@ -371,7 +371,7 @@ class Sample(Base):
     updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     status : Mapped[str] = mapped_column(String, default='Draft', nullable=True)
 
-    sample_workflows = relationship("SampleWorkflow", back_populates="sample", lazy="selectin")
+    sample_workflows = relationship("SampleWorkflow", back_populates="sample", lazy="selectin",order_by="SampleWorkflow.id")
     sample_test_parameters = relationship("SampleTestParameter", back_populates="sample", lazy="selectin", order_by="SampleTestParameter.order")
     sample_history = relationship("SampleHistory", back_populates="sample", lazy="selectin", order_by=desc(SampleHistory.id))
     status_data = relationship("SampleStatus", back_populates="sample", lazy="selectin")
@@ -576,6 +576,7 @@ class SampleWorkflow(Base):
     assignee = relationship("User", back_populates="sample_workflow_assignee",  foreign_keys=[assigned_to], lazy="selectin")
     department = relationship("Department", back_populates="sample_workflow_department",  lazy="selectin")
     role = relationship("Role", back_populates="sample_workflow_role",  lazy="selectin")
+    sample_status = relationship("SampleStatus", back_populates="sample_workflow_status", lazy="selectin")
 
     # sample_workflow_history= relationship("SampleRequestHistory", back_populates="sample_request")
 
@@ -587,11 +588,13 @@ class SampleWorkflow(Base):
 
     @classmethod
     async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        print("where_conditions",*where_conditions)
         _stmt = select(cls).where(*where_conditions)
         _result = await database_session.execute(_stmt)
         return _result.scalars().first()
     
     async def update_workflow(self, updated_data):
         for field, value in updated_data.items():
+            print(self.id, field, value)
             setattr(self, field, value) if value else None
 
