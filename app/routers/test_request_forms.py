@@ -29,6 +29,7 @@ async def get_all_trf(db: db_dep, user: user_dep):
         .options(joinedload(TRF.followup))
         .options(joinedload(TRF.test_types))
         .options(joinedload(TRF.test_details))
+        .order_by(TRF.id.desc())
         .all()
     )
 
