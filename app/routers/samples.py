@@ -146,24 +146,24 @@ async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: A
                         })
                     
                     await new_status.update_workflow(update_dict)
-                history = {
-                "sample_id" : sample_id,
-                "created_at" : time,
-                "created_by": current_user["id"],
-                "to_status_id" : sample_data.get("status_id",""),
-                "from_status_id" : progres_status_id,
-                "comments" : sample_data.get("comments","")
-                }
-                if sample_data.get("assigned_to",""):
-                    history.update({
-                        "assigned_to" : sample_data.get("assigned_to","")
-                    })
-                if comments:
-                    history.update({
-                        "comments" : comments
-                    })
+                # history = {
+                # "sample_id" : sample_id,
+                # "created_at" : time,
+                # "created_by": current_user["id"],
+                # "to_status_id" : sample_data.get("status_id",""),
+                # "from_status_id" : progres_status_id,
+                # "comments" : sample_data.get("comments","")
+                # }
+                # if sample_data.get("assigned_to",""):
+                #     history.update({
+                #         "assigned_to" : sample_data.get("assigned_to","")
+                #     })
+                # if comments:
+                #     history.update({
+                #         "comments" : comments
+                #     })
 
-                await sample.create_history(db_session, current_user,history)
+                # await sample.create_history(db_session, current_user,history)
             elif progress and sample_data.get("status_id","") == progres_status_id - 1:
                 #moving forward
                 update_dict = {
