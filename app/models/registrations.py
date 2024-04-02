@@ -65,7 +65,7 @@ class Registration(Base):
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
-        _stmt = select(cls).where(*where_conditions)
+        _stmt = select(cls).where(*where_conditions).order_by(desc(cls.code))
         _result = await database_session.execute(_stmt)
         return _result.scalars()
 
@@ -401,7 +401,7 @@ class Sample(Base):
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
-        _stmt = select(cls).where(*where_conditions)
+        _stmt = select(cls).where(*where_conditions).order_by(desc(cls.id))
         _result = await database_session.execute(_stmt)
         return _result.scalars()
     
