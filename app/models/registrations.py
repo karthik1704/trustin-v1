@@ -412,7 +412,7 @@ class Sample(Base):
             .select_from(cls)
             .join(User, cls.test_type_id == User.qa_type_id)
             .where(
-                User.id == user.id,
+                User.id == user.get('id'),
                 cls.status == "Submitted"
                
             )
@@ -425,11 +425,12 @@ class Sample(Base):
     async def get_for_qa_analyst(cls, database_session: AsyncSession, user, where_conditions: list[Any]):                
         _stmt = (
             select(cls)
+            .distinct()
             .select_from(cls)
             .join(SampleWorkflow, cls.id == SampleWorkflow.sample_id)
             # .join(User, SampleWorkflow.assigned_to == User.sample_id)
             .where(
-                SampleWorkflow.assigned_to == user.id,
+                SampleWorkflow.assigned_to == user.get('id'),
                 cls.status == "Submitted"
                
             )

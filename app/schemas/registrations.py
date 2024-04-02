@@ -39,7 +39,7 @@ class TestParameterSchema(BaseModel):
     testing_parameters : Optional[str]
     amount : Optional[float]
     method_or_spec : Optional[str]
-    group_of_test_parameters : str
+    group_of_test_parameters : str | None
 
 class TestTypeSchema(BaseModel):
     id: int

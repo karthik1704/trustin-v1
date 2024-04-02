@@ -23,4 +23,4 @@ class TestParameterCreate(BaseModel):
     amount : Decimal
     method_or_spec:str
 
-    group_of_test_parameters : str
+    group_of_test_parameters : str | None
