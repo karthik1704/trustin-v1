@@ -57,9 +57,10 @@ def decode_access_token(token: str) -> dict[str, Any]:
 
 def get_unique_code(prefix: str, unique_number: int) -> str:
     # Get current year
-    current_year = datetime.now().year
+    # current_year = datetime.now().year
 
-    # Get previous year
-    previous_year = current_year - 1
+    # # Get previous year
+    # previous_year = current_year - 1
+    new_code = f"{prefix}{unique_number:04}" 
 
-    return f"{prefix}-{previous_year}-{current_year}-{unique_number}"
+    return new_code
