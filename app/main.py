@@ -1,14 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import departments
+from app.routers import dashboard, departments
 from app.schemas.users import DepartmentSchema
 
 
 
 from .routers import users, auth , customers, branches, products, \
         test_request_forms, followups, testtype, testparameters, \
-        registrations, samples, roles, departments
+        registrations, samples, roles, departments, dashboard
 from dotenv import load_dotenv
 
 
@@ -45,3 +45,4 @@ app.include_router(testparameters.router)
 app.include_router(test_request_forms.router)
 app.include_router(registrations.router)
 app.include_router(samples.router)
+app.include_router(dashboard.router)
