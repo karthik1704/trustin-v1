@@ -74,7 +74,7 @@ async def get_dashboard_data(db_session: AsyncSession = Depends(get_async_db), c
             sample_count = await db_session.scalar(
                 select(func.count())
                 .select_from(Sample)
-                .where(Sample.qa_type_id == user.test_type_id)
+                .where(Sample.test_type_id == user.qa_type_id)
             )
         else:
             # Handle the case where the user is not found
