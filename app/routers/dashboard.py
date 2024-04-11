@@ -103,7 +103,7 @@ async def get_dashboard_data(db_session: AsyncSession = Depends(get_async_db), c
                     func.DATE_TRUNC('week', Registration.created_at).label('week_start'),
                     func.count().label('registration_count')
                 )
-                .filter(Registration.created_at >= start_date, Registration.created_at < end_date)
+                # .filter(Registration.created_at >= start_date, Registration.created_at < end_date)
                 .group_by(func.DATE_TRUNC('week', Registration.created_at), Registration.created_at)  # Include Registration.created_at in GROUP BY
                 .order_by(func.DATE_TRUNC('week', Registration.created_at))
             )
