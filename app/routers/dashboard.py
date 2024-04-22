@@ -3,7 +3,7 @@ from typing import Annotated, Dict, Any
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, Path, status, HTTPException,Request
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import select, func,join
+from sqlalchemy import select, func,join, cast, Date
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
@@ -99,14 +99,14 @@ async def get_dashboard_data(db_session: AsyncSession = Depends(get_async_db), c
         # Query to get the count of registrations grouped by week
         weekly_registration_counts = (
             await db_session.execute(
-                select(
-                    func.DATE_TRUNC('week', Registration.created_at).label('week_start'),
+                 select(
+                   cast(func.DATE_TRUNC('week', Registration.created_at), Date).label('week_start'),
                     func.count().label('registration_count')
                 )
-                # .filter(Registration.created_at >= start_date, Registration.created_at < end_date)
-                .group_by(func.DATE_TRUNC('week', Registration.created_at), Registration.created_at)  # Include Registration.created_at in GROUP BY
-                .order_by(func.DATE_TRUNC('week', Registration.created_at))
+                .group_by('week_start')
+                .order_by('week_start')
             )
+            
         )
         results = []
         for row in weekly_registration_counts.all():

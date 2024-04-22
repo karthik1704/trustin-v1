@@ -7,6 +7,11 @@ class ProductCreate(BaseModel):
     product_name : str
     description : str
 
+class ProductSchema(BaseModel):
+    id: int
+    product_code : str
+    product_name : str
+
 
 class TestTypeCreate(BaseModel):
     name: str
