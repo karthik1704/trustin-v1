@@ -31,6 +31,7 @@ class Product(Base):
     parameters = relationship('TestingParameter',back_populates="product")
     trfs = relationship('TRF', back_populates='product')
     followups = relationship("CustomerFollowUp", back_populates="product")
+    registrations = relationship('Registration', back_populates='product_data')
 
 class TestType(Base):
     __tablename__ = "testtypes"

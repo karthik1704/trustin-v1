@@ -43,6 +43,7 @@ class Registration(Base):
     test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
     test_types = relationship("RegistrationTestType", back_populates="registration", lazy="selectin")
     sample = relationship("Sample", back_populates="registration", lazy="selectin")
+    product_data = relationship("Product", back_populates="registrations", lazy="selectin")
     
     @classmethod
     async def generate_next_code(cls,database_session ):

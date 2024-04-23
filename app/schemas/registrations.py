@@ -12,6 +12,7 @@ from datetime import datetime
 from ..models.registrations import Registration, Batch
 from ..schemas.users import DepartmentSchema, UserSchema, RoleSchema
 from ..schemas.test_request_form import TRFSchema
+from ..schemas.samples import ProductSchema
 # from .samples import TestParameterCreate
 
 class BatchSchema(BaseModel):
@@ -87,6 +88,28 @@ class RegistrationListSchema(BaseModel):
     updated_by: int
     # test_type: str
     product: int
+
+class RegistrationSampleSchema(BaseModel):
+    id: int
+    branch_id: int
+    code : str|None # added none temp, because code null in already created registration
+    trf_id: int
+    company_id: int
+    company_name: str
+    customer_address_line1: str
+    customer_address_line2: str
+    city: str
+    state: str
+    pincode_no: str
+    gst: str
+    date_of_registration: datetime
+    date_of_received: datetime
+    created_at: datetime
+    updated_at: datetime
+    created_by: int
+    updated_by: int
+    # test_type: str
+    product_data: ProductSchema
 
 
 class RegistrationCodeSchema(BaseModel):    
@@ -187,7 +210,7 @@ class SampleSchema(BaseModel):
     status_data : Optional[SampleStatusSchema]
     assignee : Optional[UserSchema]
     batch : Optional[BatchSchema]
-    registration : Optional[RegistrationListSchema]
+    registration : Optional[RegistrationSampleSchema]
 
 class SampleListSchema(BaseModel):
     id: int
