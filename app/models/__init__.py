@@ -9,3 +9,4 @@ from .customers import Customer, CustomerFollowUp, ContactPerson
 from .samples import Product, TestType, TestingParameter
 from .test_request_forms import TRF , TestingDetail
 from .registrations import Registration
+from .front_desks import FrontDesk

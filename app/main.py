@@ -5,10 +5,23 @@ from app.routers import dashboard, departments
 from app.schemas.users import DepartmentSchema
 
 
-
-from .routers import users, auth , customers, branches, products, \
-        test_request_forms, followups, testtype, testparameters, \
-        registrations, samples, roles, departments, dashboard
+from .routers import (
+    users,
+    auth,
+    customers,
+    branches,
+    products,
+    test_request_forms,
+    followups,
+    testtype,
+    testparameters,
+    registrations,
+    samples,
+    roles,
+    departments,
+    dashboard,
+    front_desks,
+)
 from dotenv import load_dotenv
 
 
@@ -22,7 +35,6 @@ origins = [
     "http://localhost:3000",
     "http://3.109.2.198",
     "http://13.201.194.87",
-
 ]
 
 app.add_middleware(
@@ -47,3 +59,4 @@ app.include_router(test_request_forms.router)
 app.include_router(registrations.router)
 app.include_router(samples.router)
 app.include_router(dashboard.router)
+app.include_router(front_desks.router)
