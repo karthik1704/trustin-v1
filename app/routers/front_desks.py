@@ -75,7 +75,7 @@ async def update_front_desk(
     return front_desk
 
 @router.delete("/{id}")
-async def update_front_desk(
+async def delete_front_desk(
     id: int, db_session: db_dep, current_user: user_dep
 ):
     
