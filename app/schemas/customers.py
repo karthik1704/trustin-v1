@@ -38,3 +38,20 @@ class CustomerFollowupCreate(BaseModel):
     assign_to : int
     date: date
     remarks: str
+
+class CustomerSchema(BaseModel):
+    id:int    
+    company_name :str
+    customer_address_line1 :str
+    customer_address_line2 :str
+    city :str
+    state :str
+    pincode_no :str
+    website :str
+    email : EmailStr
+    nature_of_business :str
+    product_details :str
+    market :str
+    regulatory :str
+    pan :str
+    gst :str

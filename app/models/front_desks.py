@@ -41,7 +41,7 @@ class FrontDesk(Base):
     created_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
-    customer: Mapped["Customer"] = relationship(back_populates="front_desks", uselist=False)
+    customer: Mapped["Customer"] = relationship(back_populates="front_desks", uselist=False,  lazy="selectin")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
