@@ -272,7 +272,7 @@ class RegistrationCreate(BaseModel):
 #     batches: List[BatchCreate]
 
 class BatchUpdate(BaseModel):
-    id: Optional[int]
+    # id: Optional[int]
     batch_no: Optional[str]
     manufactured_date: Optional[date]
     expiry_date: Optional[date]
