@@ -16,6 +16,7 @@ from .routers import (
     testtype,
     testparameters,
     registrations,
+    batches,
     samples,
     roles,
     departments,
@@ -57,6 +58,7 @@ app.include_router(testtype.router)
 app.include_router(testparameters.router)
 app.include_router(test_request_forms.router)
 app.include_router(registrations.router)
+app.include_router(batches.router)
 app.include_router(samples.router)
 app.include_router(dashboard.router)
 app.include_router(front_desks.router)

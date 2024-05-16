@@ -65,6 +65,65 @@ async def get_sample(sample_id:int, db_session: AsyncSession = Depends(get_async
         raise HTTPException(status_code=404, detail="Sample not found")
     return sample
 
+
+@router.post("/", response_model=list[SampleListSchema])
+async def create_sample_with_testparams(sample_with_testparams_list: list[SampleCreate], 
+                                           db_session: AsyncSession = Depends(get_async_db), 
+                                           current_user: dict = Depends(get_current_user)) -> list[SampleListSchema]:
+    time = datetime.datetime.now()
+    update_dict = {
+        "status_id" : 1,
+        "assigned_to" : current_user["id"],
+        "created_at" :time ,
+        "updated_at" : time,
+        "created_by" : current_user["id"],
+        "updated_by" : current_user["id"], 
+    }
+    print("samplae creattion")
+    result = []
+    for sample_with_testparams in sample_with_testparams_list:
+        sample_data = sample_with_testparams.model_dump()
+        sample_data = {**sample_data, **update_dict}
+        test_params_data = sample_data.pop('test_params')        
+        # test_params_data = sample_data.pop('test_params')
+        print(sample_data)
+        sample_id = await Sample.generate_next_code(db_session)
+        sample_data.update({
+            "sample_id" : sample_id
+        })
+        sample = Sample(**sample_data)
+        db_session.add(sample)
+        await db_session.commit()
+        # Create batches associated with the registration
+        # for batch_data in batches_data:
+        #     # batch_data = batch_data.model_dump()
+        #     batch_data = {**batch_data, **update_dict}
+        #     batch = Batch(**batch_data, registration_id=registration.id)
+        #     db_session.add(batch)
+        test_update_dict = {
+            "created_at" :time ,
+            "updated_at" : time,
+            "created_by" : current_user["id"],
+            "updated_by" : current_user["id"], 
+            }
+        for params_data in test_params_data:
+            # batch_data = batch_data.model_dump()
+            # params_data["test_parameter_id"] = 2
+            params_data = {**params_data, **test_update_dict}
+            print(params_data)
+            test_param = SampleTestParameter(**params_data, sample_id=sample.id)
+            db_session.add(test_param)
+        
+
+        await db_session.commit()
+        await db_session.refresh(sample)
+        result.append(sample)
+    
+    print(result)
+    return result
+
+
+
 # PUT method to update an existing registration
 @router.patch("/{sample_id}", response_model=SampleSchema)
 async def patch_sample(sample_id:int, updated_sample: PatchSample, db_session: AsyncSession = Depends(get_async_db), current_user: dict = Depends(get_current_user)):

@@ -10,6 +10,8 @@ from sqlalchemy import select, desc
 from app.models import Base, Branch, TRF, Customer, TestingParameter,TestType
 from pydantic import BaseModel, ConfigDict, ValidationError
 from enum import Enum as PyEnum
+
+from app.utils import get_unique_code
 from .users import User
 
 
@@ -20,7 +22,7 @@ class Registration(Base):
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     code  : Mapped[str] =  mapped_column(String, nullable=True)
     branch_id : Mapped[int] = mapped_column(Integer, ForeignKey(Branch.id))
-    trf_id  : Mapped[int]  = mapped_column(Integer, ForeignKey(TRF.id))
+    trf_id  : Mapped[int]  = mapped_column(Integer, ForeignKey(TRF.id), nullable=True)
     company_id  : Mapped[int] =  mapped_column(Integer, ForeignKey(Customer.id))
     company_name  : Mapped[str] =  mapped_column(String)
     customer_address_line1  : Mapped[str] =  mapped_column(String)
@@ -39,10 +41,10 @@ class Registration(Base):
     product : Mapped[int] = mapped_column(Integer, ForeignKey("products.id"))
 
     trf = relationship("TRF", back_populates="registrations", lazy="selectin")
-    batches = relationship("Batch", back_populates="registration", lazy="selectin")
+    # batches = relationship("Batch", back_populates="registration", lazy="selectin")
     test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
     test_types = relationship("RegistrationTestType", back_populates="registration", lazy="selectin")
-    sample = relationship("Sample", back_populates="registration", lazy="selectin")
+    # sample = relationship("Sample", back_populates="registration", lazy="selectin")
     product_data = relationship("Product", back_populates="registrations", lazy="selectin")
     
     @classmethod
@@ -60,7 +62,7 @@ class Registration(Base):
         else:
             highest_code_int = 1
         # Generate the new code by combining the prefix and the incremented integer
-        new_code = f"{'Registration'}{highest_code_int:04}"  # Adjust the format based on your requirements
+        new_code =get_unique_code("REG", highest_code_int)  # Adjust the format based on your requirements
         # session.close()
         return new_code
 
@@ -197,7 +199,7 @@ class Batch(Base):
     __tablename__ = "batches"
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     # name : Mapped[str]= mapped_column(String)
-    registration_id  : Mapped[int]  = mapped_column(Integer, ForeignKey(Registration.id))
+    # registration_id  : Mapped[int]  = mapped_column(Integer, ForeignKey(Registration.id))
     batch_no : Mapped[str]= mapped_column(String)
     manufactured_date  : Mapped[Date] =mapped_column(Date)
     expiry_date  : Mapped[Date] =mapped_column(Date)
@@ -208,7 +210,7 @@ class Batch(Base):
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
-    registration = relationship("Registration", back_populates="batches")
+    # registration = relationship("Registration", back_populates="batches")
     sample_batch = relationship("Sample", back_populates="batch", lazy="selectin")
 
     @classmethod
@@ -360,7 +362,7 @@ class Sample(Base):
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     sample_id : Mapped[str]= mapped_column(String)
     name : Mapped[str]= mapped_column(String)
-    registration_id : Mapped[int]= mapped_column(Integer, ForeignKey(Registration.id), nullable=True)
+    # registration_id : Mapped[int]= mapped_column(Integer, ForeignKey(Registration.id), nullable=True)
     batch_id : Mapped[int]  = mapped_column(Integer, ForeignKey(Batch.id))
     # department_id = Column(Integer, ForeignKey("testtypes.id"))
     test_type_id = Column(Integer, ForeignKey("testtypes.id"))
@@ -379,7 +381,7 @@ class Sample(Base):
     assignee = relationship("User", back_populates="sample_assignee",  foreign_keys=[assigned_to], lazy="selectin")
     # created = relationship("User", back_populates="sample_created",  foreign_keys=[created_by], lazy="selectin")
     batch = relationship("Batch", back_populates="sample_batch", lazy="selectin")
-    registration = relationship("Registration", back_populates="sample", lazy="selectin")
+    # registration = relationship("Registration", back_populates="sample", lazy="selectin")
 
     @classmethod
     async def generate_next_code(cls,database_session ):

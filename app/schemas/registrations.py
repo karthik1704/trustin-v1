@@ -17,7 +17,7 @@ from ..schemas.samples import ProductSchema
 
 class BatchSchema(BaseModel):
     id: int
-    registration_id: int
+    # registration_id: int
     batch_no: str
     manufactured_date: datetime
     expiry_date: datetime
@@ -71,7 +71,7 @@ class RegistrationListSchema(BaseModel):
     id: int
     branch_id: int
     code : str|None # added none temp, because code null in already created registration
-    trf_id: int
+    # trf_id: int
     company_id: int
     company_name: str
     customer_address_line1: str
@@ -93,7 +93,7 @@ class RegistrationSampleSchema(BaseModel):
     id: int
     branch_id: int
     code : str|None # added none temp, because code null in already created registration
-    trf_id: int
+    # trf_id: int
     company_id: int
     company_name: str
     customer_address_line1: str
@@ -121,7 +121,7 @@ class RegistrationSchema(BaseModel):
     id: int
     code : str
     branch_id: int
-    trf_id: int
+    # trf_id: int
     company_id: int
     company_name: str
     customer_address_line1: str
@@ -194,7 +194,7 @@ class SampleSchema(BaseModel):
     id: int
     sample_id: str
     name: str
-    registration_id : int
+    # registration_id : int
     status_id : Optional[int]
     test_type_id : Optional[int]
     assigned_to : Optional[int]
@@ -216,7 +216,7 @@ class SampleListSchema(BaseModel):
     id: int
     sample_id: str
     name: str
-    registration_id : int
+    # registration_id : int
     status_id : Optional[int]
     test_type_id : Optional[int]
     assigned_to : Optional[int]
@@ -226,7 +226,7 @@ class SampleListSchema(BaseModel):
     updated_at: datetime
     created_by: int
     updated_by: int
-    registration : Optional[RegistrationCodeSchema]
+    # registration : Optional[RegistrationCodeSchema]
     
 
 
