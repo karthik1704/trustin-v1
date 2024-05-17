@@ -123,6 +123,33 @@ async def create_sample_with_testparams(sample_with_testparams_list: list[Sample
     return result
 
 
+@router.put("/{sample_id}", response_model=SampleSchema)
+async def update_registration_with_batches(sample_id: int, sample_update: SampleCreate, 
+                                           db_session: AsyncSession = Depends(get_async_db), 
+                                           current_user: dict = Depends(get_current_user)):
+    sample_data = sample_update.model_dump()
+    test_params_data = sample_data.pop("test_params",[])
+    
+    sample = await Sample.get_one(db_session,[Sample.id == sample_id])
+    if sample is None:
+        raise HTTPException(status_code=404, detail="Registration not found")
+    time = datetime.datetime.now()
+    update_dict = {
+                        "updated_at" : time,
+                        "updated_by" : current_user["id"],
+                    }
+    sample_data = {**sample_data, **update_dict}
+    await sample.update_sample(sample_data)
+   
+    if test_params_data:
+        await sample.update_test_params(db_session, test_params_data, current_user)
+   
+
+    await db_session.commit()
+    await db_session.refresh(sample)
+
+    return sample
+
 
 # PUT method to update an existing registration
 @router.patch("/{sample_id}", response_model=SampleSchema)

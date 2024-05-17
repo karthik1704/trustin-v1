@@ -11,6 +11,7 @@ from app.models import Base, Branch, TRF, Customer, TestingParameter,TestType
 from pydantic import BaseModel, ConfigDict, ValidationError
 from enum import Enum as PyEnum
 
+from app.models.samples import Product
 from app.utils import get_unique_code
 from .users import User
 
@@ -42,7 +43,7 @@ class Registration(Base):
 
     trf = relationship("TRF", back_populates="registrations", lazy="selectin")
     # batches = relationship("Batch", back_populates="registration", lazy="selectin")
-    test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
+    # test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
     test_types = relationship("RegistrationTestType", back_populates="registration", lazy="selectin")
     # sample = relationship("Sample", back_populates="registration", lazy="selectin")
     product_data = relationship("Product", back_populates="registrations", lazy="selectin")
@@ -200,6 +201,7 @@ class Batch(Base):
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     # name : Mapped[str]= mapped_column(String)
     # registration_id  : Mapped[int]  = mapped_column(Integer, ForeignKey(Registration.id))
+    product_id:Mapped[int] = mapped_column(ForeignKey(Product.id), nullable=True)
     batch_no : Mapped[str]= mapped_column(String)
     manufactured_date  : Mapped[Date] =mapped_column(Date)
     expiry_date  : Mapped[Date] =mapped_column(Date)
@@ -212,6 +214,7 @@ class Batch(Base):
 
     # registration = relationship("Registration", back_populates="batches")
     sample_batch = relationship("Sample", back_populates="batch", lazy="selectin")
+    product:Mapped['Product'] = relationship( back_populates="batch", lazy="selectin")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
@@ -246,7 +249,7 @@ class RegistrationTestParameter(Base):
     created_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by : Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
-    registration = relationship("Registration", back_populates="test_params", lazy="selectin")
+    # registration = relationship("Registration", back_populates="test_params", lazy="selectin")
     test_parameter = relationship("TestingParameter", back_populates="registration_test_parameters",  lazy="selectin")
     
     # model_config = ConfigDict(from_attributes=True)
@@ -362,7 +365,7 @@ class Sample(Base):
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     sample_id : Mapped[str]= mapped_column(String)
     name : Mapped[str]= mapped_column(String)
-    # registration_id : Mapped[int]= mapped_column(Integer, ForeignKey(Registration.id), nullable=True)
+    registration_id : Mapped[int]= mapped_column(Integer, ForeignKey(Registration.id), nullable=True)
     batch_id : Mapped[int]  = mapped_column(Integer, ForeignKey(Batch.id))
     # department_id = Column(Integer, ForeignKey("testtypes.id"))
     test_type_id = Column(Integer, ForeignKey("testtypes.id"))
@@ -398,7 +401,7 @@ class Sample(Base):
         else:
             highest_code_int = 1
         # Generate the new code by combining the prefix and the incremented integer
-        new_code = f"{'Sample'}{highest_code_int:04}"  # Adjust the format based on your requirements
+        new_code = get_unique_code("SAM", highest_code_int) # Adjust the format based on your requirements
         # database_session.close()
         return new_code
 
@@ -453,36 +456,43 @@ class Sample(Base):
         for field, value in updated_data.items():
             setattr(self, field, value) if value else None
 
-    async def update_test_params(self, database_session: AsyncSession, batches_data, current_user):
-        print("update batches")
+    async def update_test_params(self, database_session: AsyncSession, test_params_data, current_user):
+        print("update test params")
         time = datetime.datetime.now()
-        for batch_data in batches_data:
-            batch_id = batch_data.pop('id', None)
-            batch = None
-            if batch_id:
-                batch = await Batch.get_one(database_session,[Batch.id == batch_id])
-                print(batch)
-            if batch:
+        for test_param_data in test_params_data:
+            test_param_id = test_param_data.get('test_parameter_id', None)
+            test_param = None
+            if test_param_id:
+                test_param = await SampleTestParameter.get_one(database_session,[SampleTestParameter.sample_id == self.id, SampleTestParameter.test_parameter_id == test_param_id])
+                print(test_param)
+            if test_param:
                 print("u[date]")
                 update_dict = {
                         "updated_at" : time,
                         "updated_by" : current_user["id"],
                     }
-                batch_data = {**batch_data, **update_dict}
-                batch.update_batch(batch_data)
+                test_param_data = {**test_param_data, **update_dict}
+                await test_param.update_sample_test_param(test_param_data)
             else:
                 print("create")
-                print(batch_data)
+                print(test_param_data)
                 
                 update_dict = {
-                        "created_at" :time ,
+                        "created_at" :time,
                         "updated_at" : time,
                         "created_by" : current_user["id"],
                         "updated_by" : current_user["id"],
                     }
-                batch_data = {**batch_data, **update_dict}
-                batch = Batch(**batch_data, registration_id=self.id)
-                Batch.create_batch(database_session,batch)
+                test_param_data = {**test_param_data, **update_dict}
+                test_param = SampleTestParameter(**test_param_data, sample_id=self.id)
+                SampleTestParameter.create_sample_test_param(database_session,test_param)
+        existing_params = await SampleTestParameter.get_all(database_session,[SampleTestParameter.sample_id == self.id])
+        for existing_param in existing_params:
+            for test_param_data in test_params_data:
+                if existing_param.test_parameter_id == test_param_data.get("test_parameter_id",""):
+                    break
+            else:
+                await database_session.delete(existing_param)
 
 
     async def create_workflow(self,db_session, current_user):

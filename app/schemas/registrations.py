@@ -210,7 +210,7 @@ class SampleSchema(BaseModel):
     status_data : Optional[SampleStatusSchema]
     assignee : Optional[UserSchema]
     batch : Optional[BatchSchema]
-    registration : Optional[RegistrationSampleSchema]
+    # registration : Optional[RegistrationSampleSchema]
 
 class SampleListSchema(BaseModel):
     id: int
