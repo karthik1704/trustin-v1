@@ -45,7 +45,7 @@ class Registration(Base):
     # batches = relationship("Batch", back_populates="registration", lazy="selectin")
     # test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
     test_types = relationship("RegistrationTestType", back_populates="registration", lazy="selectin")
-    # sample = relationship("Sample", back_populates="registration", lazy="selectin")
+    samples = relationship("Sample", back_populates="registration", lazy="selectin")
     product_data = relationship("Product", back_populates="registrations", lazy="selectin")
     
     @classmethod
@@ -201,6 +201,7 @@ class Batch(Base):
     id : Mapped[int]= mapped_column(Integer, primary_key=True)
     # name : Mapped[str]= mapped_column(String)
     # registration_id  : Mapped[int]  = mapped_column(Integer, ForeignKey(Registration.id))
+    customer_id:Mapped[int] = mapped_column(ForeignKey(Customer.id), nullable=True)
     product_id:Mapped[int] = mapped_column(ForeignKey(Product.id), nullable=True)
     batch_no : Mapped[str]= mapped_column(String)
     manufactured_date  : Mapped[Date] =mapped_column(Date)
@@ -215,6 +216,7 @@ class Batch(Base):
     # registration = relationship("Registration", back_populates="batches")
     sample_batch = relationship("Sample", back_populates="batch", lazy="selectin")
     product:Mapped['Product'] = relationship( back_populates="batch", lazy="selectin")
+    customer:Mapped['Customer'] = relationship( back_populates="batches", lazy="selectin")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
@@ -384,7 +386,7 @@ class Sample(Base):
     assignee = relationship("User", back_populates="sample_assignee",  foreign_keys=[assigned_to], lazy="selectin")
     # created = relationship("User", back_populates="sample_created",  foreign_keys=[created_by], lazy="selectin")
     batch = relationship("Batch", back_populates="sample_batch", lazy="selectin")
-    # registration = relationship("Registration", back_populates="sample", lazy="selectin")
+    registration = relationship("Registration", back_populates="samples", lazy="selectin")
 
     @classmethod
     async def generate_next_code(cls,database_session ):

@@ -27,6 +27,9 @@ class BatchSchema(BaseModel):
     updated_at: datetime
     created_by: int
     updated_by: int
+    product_id: Optional[int]
+    product: Optional[ProductSchema]
+
 
 class TestParameterSchema(BaseModel):
     id: int
@@ -138,10 +141,10 @@ class RegistrationSchema(BaseModel):
     updated_by: int
     # test_type: str
     product: int
-    batches : Optional[list[BatchSchema]]
-    test_params : Optional[list[RegistrationTestParamsSchema]]
-    test_types : Optional[list[RegistrationTestTypeSchema]]
-    trf : TRFSchema
+    # batches : Optional[list[BatchSchema]]
+    # test_params : Optional[list[RegistrationTestParamsSchema]]
+    # test_types : Optional[list[RegistrationTestTypeSchema]]
+    # trf : TRFSchema
 
 
 class SampleTestParameterSchema(BaseModel):
@@ -194,7 +197,7 @@ class SampleSchema(BaseModel):
     id: int
     sample_id: str
     name: str
-    # registration_id : int
+    registration_id : int | None
     status_id : Optional[int]
     test_type_id : Optional[int]
     assigned_to : Optional[int]
@@ -216,7 +219,7 @@ class SampleListSchema(BaseModel):
     id: int
     sample_id: str
     name: str
-    # registration_id : int
+    registration_id : int|None
     status_id : Optional[int]
     test_type_id : Optional[int]
     assigned_to : Optional[int]
@@ -226,7 +229,7 @@ class SampleListSchema(BaseModel):
     updated_at: datetime
     created_by: int
     updated_by: int
-    # registration : Optional[RegistrationCodeSchema]
+    registration : Optional[RegistrationCodeSchema|None]
     
 
 
@@ -237,6 +240,7 @@ class BatchCreate(BaseModel):
     manufactured_date: date
     expiry_date: date
     batch_size: int
+    product_id: Optional[int]
     received_quantity: int
 
 class RegistrationTestParamsCreate(BaseModel):
@@ -263,9 +267,9 @@ class RegistrationCreate(BaseModel):
     # updated_at: datetime
     # test_type: str
     product: int
-    batches: List[BatchCreate]
-    test_params : List[RegistrationTestParamsCreate]
-    test_types : List[RegistrationTestTypeCreate]
+    # batches: List[BatchCreate]
+    # test_params : List[RegistrationTestParamsCreate]
+    # test_types : List[RegistrationTestTypeCreate]
 
 # class RegistrationWithBatchesCreate(BaseModel):
 #     registration: RegistrationCreate
@@ -277,6 +281,7 @@ class BatchUpdate(BaseModel):
     manufactured_date: Optional[date]
     expiry_date: Optional[date]
     batch_size: Optional[int]
+    product_id: Optional[int]
     received_quantity: Optional[int]
 
 class RegistrationTestParamsUpdate(BaseModel):
@@ -302,9 +307,9 @@ class RegistrationUpdate(BaseModel):
     # updated_by: Optional[int]
     # test_type: Optional[str]
     product: Optional[int]
-    batches: Optional[List[BatchUpdate]]
-    test_params: Optional[List[RegistrationTestParamsUpdate]]
-    test_types: Optional[List[RegistrationTestTypeUpdate]]
+    # batches: Optional[List[BatchUpdate]]
+    # test_params: Optional[List[RegistrationTestParamsUpdate]]
+    # test_types: Optional[List[RegistrationTestTypeUpdate]]
 
 # class RegistrationWithBatchesUpdate(BaseModel):
 #     registration: Optional[RegistrationUpdate]

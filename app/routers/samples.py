@@ -57,6 +57,14 @@ async def get_all_samples(db_session: AsyncSession = Depends(get_async_db), curr
 
     return samples
 
+@router.get("/without-reg", response_model=Optional[list[SampleListSchema]])
+async def get_all_sample_without_reg(db_session: AsyncSession = Depends(get_async_db), current_user: str = Depends(get_current_user)):
+    sample = await Sample.get_all(db_session,[Sample.registration_id == None ])
+    if sample is None:
+        raise HTTPException(status_code=404, detail="Sample not found")
+    return sample
+
+
 # GET method to retrieve a specific sample by ID
 @router.get("/{sample_id}", response_model=SampleSchema)
 async def get_sample(sample_id:int, db_session: AsyncSession = Depends(get_async_db), current_user: str = Depends(get_current_user)):
