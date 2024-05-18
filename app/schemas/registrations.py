@@ -9,6 +9,8 @@ from typing import List
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
+
+from app.schemas.customers import CustomerSchema
 from ..models.registrations import Registration, Batch
 from ..schemas.users import DepartmentSchema, UserSchema, RoleSchema
 from ..schemas.test_request_form import TRFSchema
@@ -28,8 +30,9 @@ class BatchSchema(BaseModel):
     created_by: int
     updated_by: int
     product_id: Optional[int]
+    customer_id: Optional[int]
     product: Optional[ProductSchema]
-
+    customer: Optional[CustomerSchema]
 
 class TestParameterSchema(BaseModel):
     id: int
@@ -241,6 +244,7 @@ class BatchCreate(BaseModel):
     expiry_date: date
     batch_size: int
     product_id: Optional[int]
+    customer_id: Optional[int]
     received_quantity: int
 
 class RegistrationTestParamsCreate(BaseModel):
@@ -282,6 +286,7 @@ class BatchUpdate(BaseModel):
     expiry_date: Optional[date]
     batch_size: Optional[int]
     product_id: Optional[int]
+    customer_id: Optional[int]
     received_quantity: Optional[int]
 
 class RegistrationTestParamsUpdate(BaseModel):
