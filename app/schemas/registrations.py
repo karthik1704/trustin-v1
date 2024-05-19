@@ -183,7 +183,9 @@ class SampleListSchema(BaseModel):
     updated_at: datetime
     created_by: int
     updated_by: int
-    registration : Optional[RegistrationCodeSchema|None]   
+    registration : Optional[RegistrationCodeSchema|None]  
+    batch : Optional[BatchSchema]
+ 
 
 class SampleSchema(BaseModel):
     id: int
