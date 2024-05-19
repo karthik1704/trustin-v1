@@ -120,35 +120,6 @@ class RegistrationSampleSchema(BaseModel):
 
 class RegistrationCodeSchema(BaseModel):    
     code : str | None
-    
-
-
-class RegistrationSchema(BaseModel):
-    id: int
-    code : str
-    branch_id: int
-    # trf_id: int
-    company_id: int
-    company_name: str
-    customer_address_line1: str
-    customer_address_line2: str
-    city: str
-    state: str
-    pincode_no: str
-    gst: str
-    date_of_registration: datetime
-    date_of_received: datetime
-    created_at: datetime
-    updated_at: datetime
-    created_by: int
-    updated_by: int
-    # test_type: str
-    product: int
-    # batches : Optional[list[BatchSchema]]
-    # test_params : Optional[list[RegistrationTestParamsSchema]]
-    # test_types : Optional[list[RegistrationTestTypeSchema]]
-    # trf : TRFSchema
-
 
 class SampleTestParameterSchema(BaseModel):
     id: int
@@ -196,6 +167,24 @@ class SampleHistorySchema(BaseModel):
     assignee : Optional[UserSchema]
     created_by_user : Optional[UserSchema]
 
+
+
+class SampleListSchema(BaseModel):
+    id: int
+    sample_id: str
+    name: str
+    registration_id : int|None
+    status_id : Optional[int]
+    test_type_id : Optional[int]
+    assigned_to : Optional[int]
+    batch_id: int
+    status: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    created_by: int
+    updated_by: int
+    registration : Optional[RegistrationCodeSchema|None]   
+
 class SampleSchema(BaseModel):
     id: int
     sample_id: str
@@ -218,21 +207,42 @@ class SampleSchema(BaseModel):
     batch : Optional[BatchSchema]
     # registration : Optional[RegistrationSampleSchema]
 
-class SampleListSchema(BaseModel):
+class RegistrationSamplesSchema(BaseModel):
     id: int
-    sample_id: str
-    name: str
-    registration_id : int|None
-    status_id : Optional[int]
-    test_type_id : Optional[int]
-    assigned_to : Optional[int]
-    batch_id: int
-    status: Optional[str]
+    registration_id: int
+    sample_id: int
+
+    sample: Optional[SampleSchema]
+
+class RegistrationSchema(BaseModel):
+    id: int
+    code : str
+    branch_id: int
+    # trf_id: int
+    company_id: int
+    company_name: str
+    customer_address_line1: str
+    customer_address_line2: str
+    city: str
+    state: str
+    pincode_no: str
+    gst: str
+    date_of_registration: datetime
+    date_of_received: datetime
     created_at: datetime
     updated_at: datetime
     created_by: int
     updated_by: int
-    registration : Optional[RegistrationCodeSchema|None]
+    # test_type: str
+    product: int
+    # batches : Optional[list[BatchSchema]]
+    # test_params : Optional[list[RegistrationTestParamsSchema]]
+    # test_types : Optional[list[RegistrationTestTypeSchema]]
+    # trf : TRFSchema
+    reg_samples:Optional[List[RegistrationSamplesSchema]]
+
+
+
     
 
 
@@ -253,9 +263,11 @@ class RegistrationTestParamsCreate(BaseModel):
 class RegistrationTestTypeCreate(BaseModel):
    test_type_id : int
 
+class RegistrationSampleCreate(BaseModel):
+   sample_id : int
+
 class RegistrationCreate(BaseModel):
     branch_id: int
-    trf_id: int
     company_id: int
     company_name: str
     customer_address_line1: str
@@ -274,6 +286,7 @@ class RegistrationCreate(BaseModel):
     # batches: List[BatchCreate]
     # test_params : List[RegistrationTestParamsCreate]
     # test_types : List[RegistrationTestTypeCreate]
+    registration_samples : List[RegistrationSampleCreate]
 
 # class RegistrationWithBatchesCreate(BaseModel):
 #     registration: RegistrationCreate
@@ -294,7 +307,10 @@ class RegistrationTestParamsUpdate(BaseModel):
 
 class RegistrationTestTypeUpdate(BaseModel):
     test_type_id: Optional[int]
-    
+
+class RegistrationSampleUpdate(BaseModel):
+    sample_id : Optional[int]
+
 
 class RegistrationUpdate(BaseModel):
     branch_id: Optional[int]
@@ -315,6 +331,7 @@ class RegistrationUpdate(BaseModel):
     # batches: Optional[List[BatchUpdate]]
     # test_params: Optional[List[RegistrationTestParamsUpdate]]
     # test_types: Optional[List[RegistrationTestTypeUpdate]]
+    registration_samples: Optional[List[RegistrationSampleUpdate]]
 
 # class RegistrationWithBatchesUpdate(BaseModel):
 #     registration: Optional[RegistrationUpdate]
@@ -356,4 +373,4 @@ class PatchSample(BaseModel):
     assigned_to: Optional[int] | None
     comments : Optional[str] | None
     test_params : Optional[list[PatchSampleTestParameterSchema]] | None
-    
+

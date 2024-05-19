@@ -61,7 +61,7 @@ def get_unique_code(prefix: str, unique_number: int) -> str:
     start_year = FiscalYear.current().start.strftime("%Y")[-2:]
     end_year = FiscalYear.current().end.strftime("%Y")[-2:]
 
-    new_code = f"TAS/{prefix}-{start_year}-{end_year}-{unique_number:04}" 
+    new_code = f"TAS/{prefix}/{start_year}-{end_year}/{unique_number:04}" 
 
     return new_code
 
