@@ -594,7 +594,7 @@ class Sample(Base):
         "Registration", back_populates="samples", lazy="selectin"
     )
     registration_sample: Mapped["RegistrationSample"] = relationship(
-        back_populates="sample", lazy="selectin"
+        back_populates="sample", lazy="selectin", uselist=True
     )
 
     @classmethod

@@ -108,15 +108,15 @@ async def create_registration_with_batches(registration_with_batches: Registrati
     #     test_type = RegistrationTestType(**types_data, registration_id=registration.id)
     #     db_session.add(test_type)
     
-    for sample_data in registration_samples_data:
+    for reg_sample_data in registration_samples_data:
         # batch_data = batch_data.model_dump()
-        sample_data = {**sample_data, **update_dict}
-        print(sample_data)
-        sample = RegistrationSample(**sample_data, registration_id=registration.id)
-        sample_data = await Sample.get_one(db_session, [Sample.id == sample_data.get("sample_id")])
-        if sample_data:
-            await sample_data.update_sample({'registration_id':registration.id})
-        db_session.add(sample)
+        reg_sam_data = {**reg_sample_data, **update_dict}
+        print(reg_sam_data)
+        reg_sample = RegistrationSample(**reg_sam_data, registration_id=registration.id)
+        sample = await Sample.get_one(db_session, [Sample.id == reg_sam_data.get("sample_id")])
+        if sample:
+            await sample.update_sample({'registration_id':registration.id})
+        db_session.add(reg_sample)
     
     
 

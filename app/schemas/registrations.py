@@ -314,7 +314,7 @@ class RegistrationSampleUpdate(BaseModel):
 
 class RegistrationUpdate(BaseModel):
     branch_id: Optional[int]
-    trf_id: Optional[int]
+    # trf_id: Optional[int]
     company_id: Optional[int]
     company_name: Optional[str]
     customer_address_line1: Optional[str]
