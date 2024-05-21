@@ -37,6 +37,8 @@ VALUES
   (5, 'registrations'),
   (6, 'samples'),
   (7, 'configurations');
+  (8, 'front-desk');
+  (9, 'batches');
 
 INSERT INTO menu_control_lists (id, menu_id, department_id)
 VALUES 
@@ -62,4 +64,8 @@ VALUES
   (20, 6,5),
   (21, 6,6),
   (22, 7,1);
+  (23, 8,1);
+  (24, 8,6);
+  (25, 9,1);
+  (26, 9,6);
   
