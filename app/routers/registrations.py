@@ -65,7 +65,7 @@ async def get_registration(registration_id: int, db_session: AsyncSession = Depe
 
 
 # POST method to create a new registration
-@router.post("/")
+@router.post("/",   status_code=status.HTTP_201_CREATED)
 async def create_registration_with_batches(registration_with_batches: RegistrationCreate, 
                                            db_session: AsyncSession = Depends(get_async_db), 
                                            current_user: dict = Depends(get_current_user)):
@@ -121,9 +121,9 @@ async def create_registration_with_batches(registration_with_batches: Registrati
     
 
     await db_session.commit()
-    await db_session.refresh(registration)
-    print(registration)
-    return registration
+    # await db_session.refresh(registration)
+    # print(registration)
+    # return registration
 
 # PUT method to update an existing registration
 @router.put("/{registration_id}", response_model=RegistrationSchema)
