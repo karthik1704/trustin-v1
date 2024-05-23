@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Path, status, HTTPException, Request
 from sqlalchemy.orm import Session, joinedload
 
 from app.dependencies.auth import get_current_user
-from app.utils import get_hashed_password
+from app.utils import get_hashed_password, verify_password
 from ..schemas.users import (
     UserCreate,
     ChangePassword,
@@ -135,6 +135,48 @@ async def create_user(db: db_dep, user: user_dep, data: UserCreate):
     db.commit()
     db.refresh(user)
     return user
+
+
+@router.post("/change-password", status_code=status.HTTP_200_OK)
+async def change_user_password(db: db_dep, user: user_dep, data:ChangePassword):
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+        )
+    user_db = (
+        db.query(User)
+        .filter(User.id == user["id"])
+        .first()
+    )
+
+    if user_db is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="User Does not match"
+        )
+    
+    current_plain_password = data.current_password
+    plain_password = data.password
+    plain_password2 = data.password2
+    user_dict = data.model_dump()
+    user_dict.pop("password")
+    user_dict.pop("password2")
+
+    if not verify_password(current_plain_password, user_db.password): # type: ignore
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Password Does not match"
+        )
+
+    if plain_password != plain_password2:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Password Does not match"
+        )
+
+    user_db.password= get_hashed_password(plain_password) # type: ignore
+    db.add(user_db)
+    db.commit()
+
+
+
 
 
 @router.put("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
