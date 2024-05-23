@@ -92,7 +92,7 @@ async def get_all_users_by_role(db: db_dep, user: user_dep, role_id: int):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
 
-    users = db.query(User).filter(User.role == role_id).all()
+    users = db.query(User).filter(User.role_id == role_id).all()
 
     return users
 
