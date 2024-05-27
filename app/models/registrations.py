@@ -6,14 +6,14 @@ from sqlalchemy import (
     String,
     ForeignKey,
     Boolean,
-    DateTime,
-    Date,
     func,
     UUID,
     Enum,
+    Date,
+    DateTime
 )
-from typing import Any, List
-import datetime
+from typing import Any, List, Optional
+from datetime import date, datetime
 
 # from sqlalchemy.orm import relationship
 from sqlalchemy.orm import mapped_column, Mapped, relationship, joinedload, Session
@@ -30,10 +30,12 @@ from .users import User
 
 class Registration(Base):
     __tablename__ = "registrations"
+    
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     code: Mapped[str] = mapped_column(String, nullable=True)
     branch_id: Mapped[int] = mapped_column(Integer, ForeignKey(Branch.id))
     trf_id: Mapped[int] = mapped_column(Integer, ForeignKey(TRF.id), nullable=True)
+    trf_code: Mapped[Optional[str]]
     company_id: Mapped[int] = mapped_column(Integer, ForeignKey(Customer.id))
     company_name: Mapped[str] = mapped_column(String)
     customer_address_line1: Mapped[str] = mapped_column(String)
@@ -42,26 +44,38 @@ class Registration(Base):
     state: Mapped[str] = mapped_column(String)
     pincode_no: Mapped[str] = mapped_column(String)
     gst: Mapped[str] = mapped_column(String)
-    date_of_registration: Mapped[DateTime] = mapped_column(
+    date_of_registration: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    date_of_received: Mapped[DateTime] = mapped_column(
+    date_of_received: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    created_at: Mapped[DateTime] = mapped_column(
+
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    updated_at: Mapped[DateTime] = mapped_column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), onupdate=func.now()
     )
     created_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+
     # test_type  : Mapped[str] =  mapped_column(String)
     product: Mapped[int] = mapped_column(Integer, ForeignKey("products.id"))
+    nabl_logo: Mapped[bool]
+
+    sample_name: Mapped[Optional[str]]
+    batch_or_lot_no: Mapped[Optional[str]]
+    manufactured_date:Mapped[Optional[date]]
+    expiry_date:Mapped[Optional[date]]
+    batch_size: Mapped[Optional[int]]
+
+    no_of_samples: Mapped[Optional[int]]
+
 
     trf = relationship("TRF", back_populates="registrations", lazy="selectin")
     # batches = relationship("Batch", back_populates="registration", lazy="selectin")
-    # test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
+    test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
     test_types = relationship(
         "RegistrationTestType", back_populates="registration", lazy="selectin"
     )
@@ -69,9 +83,7 @@ class Registration(Base):
     product_data = relationship(
         "Product", back_populates="registrations", lazy="selectin"
     )
-    reg_samples: Mapped[List["RegistrationSample"]] = relationship(
-        back_populates="registration", lazy="selectin"
-    )
+
 
     @classmethod
     async def generate_next_code(cls, database_session):
@@ -117,7 +129,7 @@ class Registration(Base):
         self, database_session: AsyncSession, batches_data, current_user
     ):
         print("update batches")
-        time = datetime.datetime.now()
+        time = datetime.now()
         for batch_data in batches_data:
             batch_id = batch_data.pop("id", None)
             batch = None
@@ -150,7 +162,7 @@ class Registration(Base):
         self, database_session: AsyncSession, test_params_data, current_user
     ):
         print("update test params")
-        time = datetime.datetime.now()
+        time = datetime.now()
         for test_param_data in test_params_data:
             test_param_id = test_param_data.get("test_params_id", None)
             test_param = None
@@ -204,7 +216,7 @@ class Registration(Base):
         self, database_session: AsyncSession, samples_data, current_user
     ):
         print("update test params")
-        time = datetime.datetime.now()
+        time = datetime.now()
         for sample_data in samples_data:
             sample_id = sample_data.get("sample_id", None)
             reg_sample = None
@@ -258,13 +270,21 @@ class Registration(Base):
                 if existing_param.sample_id == sample_data.get("sample_id", ""):
                     break
             else:
+                sample = await Sample.get_one(
+                    database_session,
+                    [Sample.id == existing_param.sample_id],
+                )
+
+                if sample:
+                    sample_up_data = {"registration_id": None}
+                    await sample.update_sample(sample_up_data)
                 await database_session.delete(existing_param)
 
     async def update_test_types(
         self, database_session: AsyncSession, test_types_data, current_user
     ):
         print("update test types")
-        time = datetime.datetime.now()
+        time = datetime.now()
         print(test_types_data)
         for test_type_data in test_types_data:
             test_type_id = test_type_data.get("test_type_id", None)
@@ -380,7 +400,7 @@ class RegistrationTestParameter(Base):
     created_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
-    # registration = relationship("Registration", back_populates="test_params", lazy="selectin")
+    registration = relationship("Registration", back_populates="test_params", lazy="selectin")
     test_parameter = relationship(
         "TestingParameter",
         back_populates="registration_test_parameters",
@@ -673,7 +693,7 @@ class Sample(Base):
         self, database_session: AsyncSession, test_params_data, current_user
     ):
         print("update test params")
-        time = datetime.datetime.now()
+        time = datetime.now()
         for test_param_data in test_params_data:
             test_param_id = test_param_data.get("test_parameter_id", None)
             test_param = None
@@ -723,7 +743,7 @@ class Sample(Base):
 
     async def create_workflow(self, db_session, current_user):
         status_list = await SampleStatus.get_all(db_session, [])
-        time = datetime.datetime.now()
+        time = datetime.now()
         update_dict = {
             "created_at": time,
             "updated_at": time,
@@ -756,7 +776,7 @@ class Sample(Base):
         await db_session.commit()
 
     async def create_history(self, db_session, current_user, history):
-        time = datetime.datetime.now()
+        time = datetime.now()
         update_dict = {
             "created_at": time,
             "created_by": current_user["id"],
@@ -891,9 +911,7 @@ class RegistrationSample(Base):
     sample: Mapped["Sample"] = relationship(
         back_populates="registration_sample", lazy="selectin"
     )
-    registration: Mapped["Registration"] = relationship(
-        back_populates="reg_samples"
-    )
+    # registration: Mapped["Registration"] = relationship(back_populates="reg_samples")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):

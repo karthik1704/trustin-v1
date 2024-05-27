@@ -16,3 +16,6 @@ class Branch(BaseModel):
 
 class BranchCreate(BaseModel):
     pass
+
+class BranchSchema(Branch):
+    id: int

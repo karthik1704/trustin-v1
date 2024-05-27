@@ -79,9 +79,9 @@ async def create_registration_with_batches(registration_with_batches: Registrati
     registration_data = registration_with_batches.model_dump()
     registration_data = {**registration_data, **update_dict}
     # batches_data = registration_data.pop('batches')
-    # test_params_data = registration_data.pop('test_params')
-    # test_types_data = registration_data.pop('test_types')
-    registration_samples_data = registration_data.pop('registration_samples')
+    test_params_data = registration_data.pop('test_params')
+    test_types_data = registration_data.pop('test_types')
+    # registration_samples_data = registration_data.pop('registration_samples')
     code  = await Registration.generate_next_code(db_session)
     registration_data.update({
         "code" : code
@@ -108,15 +108,15 @@ async def create_registration_with_batches(registration_with_batches: Registrati
     #     test_type = RegistrationTestType(**types_data, registration_id=registration.id)
     #     db_session.add(test_type)
     
-    for reg_sample_data in registration_samples_data:
-        # batch_data = batch_data.model_dump()
-        reg_sam_data = {**reg_sample_data, **update_dict}
-        print(reg_sam_data)
-        reg_sample = RegistrationSample(**reg_sam_data, registration_id=registration.id)
-        sample = await Sample.get_one(db_session, [Sample.id == reg_sam_data.get("sample_id")])
-        if sample:
-            await sample.update_sample({'registration_id':registration.id})
-        db_session.add(reg_sample)
+    # for reg_sample_data in registration_samples_data:
+    #     # batch_data = batch_data.model_dump()
+    #     reg_sam_data = {**reg_sample_data, **update_dict}
+    #     print(reg_sam_data)
+    #     reg_sample = RegistrationSample(**reg_sam_data, registration_id=registration.id)
+    #     sample = await Sample.get_one(db_session, [Sample.id == reg_sam_data.get("sample_id")])
+    #     if sample:
+    #         await sample.update_sample({'registration_id':registration.id})
+    #     db_session.add(reg_sample)
     
     
 
@@ -134,7 +134,7 @@ async def update_registration_with_batches(registration_id: int, registration: R
     # batches_data = registration_data.pop("batches",[])
     # test_params_data = registration_data.pop("test_params",[])
     # test_types_data = registration_data.pop("test_types",[])
-    reg_sample_data = registration_data.pop("registration_samples",[])
+    # reg_sample_data = registration_data.pop("registration_samples",[])
     print("reg with batches update")
     registration = await Registration.get_one(db_session,[Registration.id == registration_id])
     if registration is None:
@@ -152,8 +152,8 @@ async def update_registration_with_batches(registration_id: int, registration: R
     #     await registration.update_test_prams(db_session, test_params_data, current_user)
     # if test_types_data:
     #     await registration.update_test_types(db_session, test_types_data, current_user)
-    if reg_sample_data:
-        await registration.update_samples(db_session, reg_sample_data, current_user)
+    # if reg_sample_data:
+    #     await registration.update_samples(db_session, reg_sample_data, current_user)
 
     await db_session.commit()
     await db_session.refresh(registration)

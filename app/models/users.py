@@ -35,6 +35,7 @@ class Department(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)    
     sample_workflow_department = relationship("SampleWorkflow", back_populates="department",  lazy="selectin")
+    front_desks = relationship("FrontDesk",back_populates="department", uselist=True,   lazy="selectin")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):

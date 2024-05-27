@@ -96,7 +96,7 @@ class TRF(Base):
     product_id = Column(Integer, ForeignKey("products.id"))
     customer_id = Column(Integer, ForeignKey("customers.id"))
 
-    branch = relationship("Branch", back_populates="trfs")
+    # branch = relationship("Branch", back_populates="trfs")
     product = relationship("Product", back_populates="trfs")
     customer = relationship("Customer", back_populates="trfs")
     followup = relationship(

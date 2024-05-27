@@ -78,6 +78,7 @@ class RegistrationListSchema(BaseModel):
     branch_id: int
     code : str|None # added none temp, because code null in already created registration
     # trf_id: int
+    trf_code: str
     company_id: int
     company_name: str
     customer_address_line1: str
@@ -220,7 +221,7 @@ class RegistrationSchema(BaseModel):
     id: int
     code : str
     branch_id: int
-    # trf_id: int
+    trf_code: str
     company_id: int
     company_name: str
     customer_address_line1: str
@@ -238,10 +239,10 @@ class RegistrationSchema(BaseModel):
     # test_type: str
     product: int
     # batches : Optional[list[BatchSchema]]
-    # test_params : Optional[list[RegistrationTestParamsSchema]]
-    # test_types : Optional[list[RegistrationTestTypeSchema]]
+    test_params : Optional[list[RegistrationTestParamsSchema]]
+    test_types : Optional[list[RegistrationTestTypeSchema]]
     # trf : TRFSchema
-    reg_samples:Optional[List[RegistrationSamplesSchema]]
+    # reg_samples:Optional[List[RegistrationSamplesSchema]]
 
 
 

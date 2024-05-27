@@ -10,7 +10,7 @@ from sqlalchemy import (
     UUID,
     Enum,
 )
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 import datetime
 
 # from sqlalchemy.orm import relationship
@@ -20,17 +20,40 @@ from sqlalchemy import select, desc
 from app.models import Base, Branch, TRF, Customer, TestingParameter, TestType
 from pydantic import BaseModel, ConfigDict, ValidationError
 from enum import Enum as PyEnum
-from .users import User
+from .users import Department, User
+
+class SampleCondition(PyEnum):
+    DAMAGED = 'DAMAGED'
+    GOOD = 'GOOD'
+class FrontDeskStatus(PyEnum):
+    NOT_REGISTRATION = 'NOT_REGISTRATION'
+    REGISTRATION = 'REGISTRATION'
+
+class ParcelType(PyEnum):
+    SAMPLE = 'SAMPLE'
+    Material = 'Material'
+
+
 
 
 class FrontDesk(Base):
     __tablename__ = "frontdesks"
+    
+    type_annotation_map = {
+        PyEnum: Enum(PyEnum, native_enum=False),
+    }
+
     id: Mapped[int] = mapped_column(primary_key=True)
     customer_id: Mapped[int] = mapped_column(ForeignKey(Customer.id), nullable=False)
     courier_name: Mapped[str]
     date_of_received: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+    product_received: Mapped[ParcelType] = mapped_column(Enum(ParcelType))
+    sample_condition: Mapped[SampleCondition] = mapped_column(Enum(SampleCondition))
+    temperature: Mapped[str]
+    deparment_id: Mapped[int] = mapped_column(ForeignKey(Department.id))
+    status: Mapped[FrontDeskStatus] = mapped_column(Enum(FrontDeskStatus))
 
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -42,6 +65,7 @@ class FrontDesk(Base):
     updated_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
     customer: Mapped["Customer"] = relationship(back_populates="front_desks", uselist=False,  lazy="selectin")
+    department: Mapped["Department"] = relationship(back_populates="front_desks",   lazy="selectin")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
