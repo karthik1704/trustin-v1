@@ -1,20 +1,21 @@
+from typing import Optional
 from pydantic import BaseModel, EmailStr
 
 
 class Branch(BaseModel):
-    branch_name: str
-    address_line1: str
-    address_line2: str
-    mobile_number: str
-    landline_number: str
-    email: EmailStr
-    pan_no: str
-    cin: str
-    gstin: str
-    bank_details: str
-    ifsc_code: str
+    branch_name: Optional[str]
+    address_line1: Optional[str]
+    address_line2: Optional[str]
+    mobile_number: Optional[str]
+    landline_number: Optional[str]
+    email: Optional[EmailStr]
+    pan_no: Optional[str]
+    cin: Optional[str]
+    gstin: Optional[str]
+    bank_details: Optional[str]
+    ifsc_code: Optional[str]
 
-class BranchCreate(BaseModel):
+class BranchCreate(Branch):
     pass
 
 class BranchSchema(Branch):

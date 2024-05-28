@@ -69,6 +69,7 @@ class Registration(Base):
     manufactured_date:Mapped[Optional[date]]
     expiry_date:Mapped[Optional[date]]
     batch_size: Mapped[Optional[int]]
+    received_quantity:Mapped[Optional[int]]
 
     no_of_samples: Mapped[Optional[int]]
 
@@ -567,6 +568,15 @@ class Sample(Base):
     batch_id: Mapped[int] = mapped_column(Integer, ForeignKey(Batch.id))
     # department_id = Column(Integer, ForeignKey("testtypes.id"))
     test_type_id = Column(Integer, ForeignKey("testtypes.id"))
+
+    
+    sample_name: Mapped[Optional[str]]
+    batch_or_lot_no: Mapped[Optional[str]]
+    manufactured_date:Mapped[Optional[date]]
+    expiry_date:Mapped[Optional[date]]
+    batch_size: Mapped[Optional[int]]
+    received_quantity:Mapped[Optional[int]]
+
     assigned_to: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True
     )
@@ -644,7 +654,7 @@ class Sample(Base):
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
         _stmt = select(cls).where(*where_conditions).order_by(desc(cls.id))
         _result = await database_session.execute(_stmt)
-        return _result.scalars()
+        return _result.scalars().all()
 
     @classmethod
     async def get_for_qa_hod(

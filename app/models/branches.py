@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 class Branch(Base):
     __tablename__ = "branches"
+
     id: Mapped[int] = mapped_column( primary_key=True)
     branch_name: Mapped[str]  = mapped_column(unique=True, index=True)
     address_line1: Mapped[Optional[str]]  
@@ -33,7 +34,7 @@ class Branch(Base):
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
         _stmt = select(cls).where(*where_conditions).order_by(desc(cls.id))
         _result = await database_session.execute(_stmt)
-        return _result.scalars()
+        return _result.scalars().all()
 
     @classmethod
     async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):
