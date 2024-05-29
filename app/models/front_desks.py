@@ -22,7 +22,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 from enum import Enum as PyEnum
 from .users import Department, User
 
-class SampleCondition(PyEnum):
+class ReceivedCondition(PyEnum):
     DAMAGED = 'DAMAGED'
     GOOD = 'GOOD'
 class FrontDeskStatus(PyEnum):
@@ -49,8 +49,8 @@ class FrontDesk(Base):
     date_of_received: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    product_received: Mapped[ParcelType] = mapped_column(Enum(ParcelType))
-    sample_condition: Mapped[SampleCondition] = mapped_column(Enum(SampleCondition))
+    parcel_received: Mapped[ParcelType] = mapped_column(Enum(ParcelType))
+    received_condition: Mapped[ReceivedCondition] = mapped_column(Enum(ReceivedCondition))
     temperature: Mapped[str]
     deparment_id: Mapped[int] = mapped_column(ForeignKey(Department.id))
     status: Mapped[FrontDeskStatus] = mapped_column(Enum(FrontDeskStatus))
@@ -80,7 +80,7 @@ class FrontDesk(Base):
         return _result.scalars().first()
 
     @classmethod
-    def create_front_desk(cls, db: AsyncSession, desk):
+    async def create_front_desk(cls, db: AsyncSession, desk):
         db.add(desk)
 
     def update_front_desk(self, updated_data):

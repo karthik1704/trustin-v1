@@ -62,7 +62,7 @@ class Registration(Base):
 
     # test_type  : Mapped[str] =  mapped_column(String)
     product: Mapped[int] = mapped_column(Integer, ForeignKey("products.id"))
-    nabl_logo: Mapped[bool]
+    nabl_logo: Mapped[bool] = mapped_column(default=False)
 
     sample_name: Mapped[Optional[str]]
     batch_or_lot_no: Mapped[Optional[str]]
