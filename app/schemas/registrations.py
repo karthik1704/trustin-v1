@@ -67,6 +67,7 @@ class RegistrationTestParamsSchema(BaseModel):
     id: int
     registration_id: int
     test_params_id: int
+    order:int
     created_at: datetime
     updated_at: datetime
     created_by: int
