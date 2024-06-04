@@ -1,5 +1,3 @@
-from pickle import TRUE
-import uuid
 from sqlalchemy import (
     Column,
     Integer,
@@ -10,7 +8,7 @@ from sqlalchemy import (
     UUID,
     Enum,
     Date,
-    DateTime
+    DateTime,
 )
 from typing import Any, List, Optional
 from datetime import date, datetime
@@ -28,15 +26,44 @@ from app.utils import get_unique_code
 from .users import User
 
 
+class TestingProcessEnum(PyEnum):
+    BATCH_ANALYSIS = "BATCH_ANALYSIS"
+    METHOD_DEVELOPMENT = "METHOD_DEVELOPMENT"
+    METHOD_VALIDATION = "METHOD_VALIDATION"
+    RD_RESEARCH = "RD_RESEARCH"
+    REGULATORY = "REGULATORY"
+
+
+class DisposalProcessEnum(PyEnum):
+    DISCARD = "DISCARD"
+    RETURN = "RETURN"
+
+
+class ReportSentByEnum(PyEnum):
+    COURIER = "COURIER"
+    EMAIL = "EMAIL"
+
+
+class SamplingByEnum(PyEnum):
+    CUSTOMER = "CUSTOMER"
+    LABORATORY = "LABORATORY"
+
+
+class YesOrNoEnum(PyEnum):
+    YES = "YES"
+    NO = "NO"
+
+
 class Registration(Base):
     __tablename__ = "registrations"
-    
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     code: Mapped[str] = mapped_column(String, nullable=True)
     branch_id: Mapped[int] = mapped_column(Integer, ForeignKey(Branch.id))
     trf_id: Mapped[int] = mapped_column(Integer, ForeignKey(TRF.id), nullable=True)
     trf_code: Mapped[Optional[str]]
     company_id: Mapped[int] = mapped_column(Integer, ForeignKey(Customer.id))
+    test_type_id: Mapped[int] = mapped_column(ForeignKey(TestType.id))
     company_name: Mapped[str] = mapped_column(String)
     customer_address_line1: Mapped[str] = mapped_column(String)
     customer_address_line2: Mapped[str] = mapped_column(String)
@@ -61,22 +88,30 @@ class Registration(Base):
     updated_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
     # test_type  : Mapped[str] =  mapped_column(String)
-    product: Mapped[int] = mapped_column(Integer, ForeignKey("products.id"))
-    nabl_logo: Mapped[bool] = mapped_column(default=False)
+    product_id: Mapped[int] = mapped_column(Integer, ForeignKey("products.id"))
 
+    testing_process: Mapped[TestingProcessEnum]
+
+    nabl_logo: Mapped[Optional[bool]]
+    license_no: Mapped[Optional[str]]
+    sampled_by: Mapped[Optional[SamplingByEnum]]
+
+    sample_disposal_process: Mapped[Optional[DisposalProcessEnum]]
     sample_name: Mapped[Optional[str]]
     batch_or_lot_no: Mapped[Optional[str]]
-    manufactured_date:Mapped[Optional[date]]
-    expiry_date:Mapped[Optional[date]]
+    manufactured_date: Mapped[Optional[date]]
+    expiry_date: Mapped[Optional[date]]
     batch_size: Mapped[Optional[int]]
-    received_quantity:Mapped[Optional[int]]
+    received_quantity: Mapped[Optional[int]]
 
-    no_of_samples: Mapped[Optional[int]]
-
+    no_of_samples: Mapped[int] = mapped_column(default=0)
+    reports_send_by: Mapped[Optional[ReportSentByEnum]]
 
     trf = relationship("TRF", back_populates="registrations", lazy="selectin")
     # batches = relationship("Batch", back_populates="registration", lazy="selectin")
-    test_params = relationship("RegistrationTestParameter", back_populates="registration", lazy="selectin")
+    test_params = relationship(
+        "RegistrationTestParameter", back_populates="registration", lazy="selectin"
+    )
     test_types = relationship(
         "RegistrationTestType", back_populates="registration", lazy="selectin"
     )
@@ -84,7 +119,6 @@ class Registration(Base):
     product_data = relationship(
         "Product", back_populates="registrations", lazy="selectin"
     )
-
 
     @classmethod
     async def generate_next_code(cls, database_session):
@@ -99,7 +133,7 @@ class Registration(Base):
         _result = await database_session.execute(_stmt)
         highest_code = _result.scalars().first()
         if highest_code:
-            highest_code_int = int(highest_code.split("TAS/REG/24-25/")[-1]) + 1
+            highest_code_int = int(highest_code.split("/")[-1]) + 1
         else:
             highest_code_int = 1
         # Generate the new code by combining the prefix and the incremented integer
@@ -168,7 +202,7 @@ class Registration(Base):
             test_param_id = test_param_data.get("test_params_id", None)
             test_param = None
             if test_param_id:
-                test_param = await RegistrationTestParameter.get_one(
+                test_param = await  RegistrationTestParameter.get_one(
                     database_session,
                     [
                         RegistrationTestParameter.registration_id == self.id,
@@ -214,20 +248,20 @@ class Registration(Base):
                 await database_session.delete(existing_param)
 
     async def update_samples(
-        self, database_session: AsyncSession, samples_data, current_user
+        self, database_session: AsyncSession, samples_data, current_user, reg_params
     ):
         print("update test params")
         time = datetime.now()
         for sample_data in samples_data:
-            sample_id = sample_data.get("sample_id", None)
+            sample_id = sample_data.get("id", None)
             reg_sample = None
             if sample_id:
 
-                reg_sample = await RegistrationSample.get_one(
+                reg_sample = await Sample.get_one(
                     database_session,
                     [
-                        RegistrationSample.registration_id == self.id,
-                        RegistrationSample.sample_id == sample_id,
+                        Sample.registration_id == self.id,
+                        Sample.id == sample_id,
                     ],
                 )
                 print(reg_sample)
@@ -238,7 +272,25 @@ class Registration(Base):
                     "updated_by": current_user["id"],
                 }
                 sample_data = {**sample_data, **update_dict}
-                await reg_sample.update_reg_sample(sample_data)
+                await reg_sample.update_sample(sample_data)
+
+                await reg_sample.update_test_params(database_session, reg_params, current_user)
+                # for params_data in reg_params:
+                #     param_id = params_data["test_params_id"]
+                #     params_data = {
+                #         "order": params_data.get("order"),
+                #         **update_dict,
+                #     }
+                #     print(params_data)
+                #     test_param = await SampleTestParameter.get_one(
+                #         database_session,
+                #         [
+                #             SampleTestParameter.test_parameter_id == param_id,
+                #             SampleTestParameter.sample_id == reg_sample.id,
+                #         ],
+                #     )
+                #     await test_param.update_sample_test_param(params_data)
+
             else:
                 print("create")
                 print(sample_data)
@@ -250,35 +302,30 @@ class Registration(Base):
                     "updated_by": current_user["id"],
                 }
                 sample_data = {**sample_data, **update_dict}
-                reg_sample = RegistrationSample(**sample_data, registration_id=self.id)
-                RegistrationSample.create_registration_sample(
-                    database_session, reg_sample
-                )
-            sample = await Sample.get_one(
-                database_session,
-                [Sample.id == sample_id, Sample.registration_id == None],
-            )
+                reg_sample = Sample(**sample_data, registration_id=self.id)
+                database_session.add(reg_sample)
+                await database_session.commit()
+                for params_data in reg_params:
+                    params_data = {
+                        "test_parameter_id": params_data["test_params_id"],
+                        **update_dict,
+                    }
+                    print(params_data)
+                    test_param = SampleTestParameter(
+                        **params_data,
+                        order=params_data.get("order"),
+                        sample_id=reg_sample.id,
+                    )
+                    database_session.add(test_param)
 
-            if sample:
-                sample_up_data = {"registration_id": self.id}
-                await sample.update_sample(sample_up_data)
-
-        existing_samples = await RegistrationSample.get_all(
-            database_session, [RegistrationSample.registration_id == self.id]
+        existing_samples = await Sample.get_all(
+            database_session, [Sample.registration_id == self.id]
         )
         for existing_param in existing_samples:
             for sample_data in samples_data:
-                if existing_param.sample_id == sample_data.get("sample_id", ""):
+                if existing_param.id == sample_data.get("id", ""):
                     break
             else:
-                sample = await Sample.get_one(
-                    database_session,
-                    [Sample.id == existing_param.sample_id],
-                )
-
-                if sample:
-                    sample_up_data = {"registration_id": None}
-                    await sample.update_sample(sample_up_data)
                 await database_session.delete(existing_param)
 
     async def update_test_types(
@@ -357,7 +404,7 @@ class Batch(Base):
     updated_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
     # registration = relationship("Registration", back_populates="batches")
-    sample_batch = relationship("Sample", back_populates="batch", lazy="selectin")
+    # sample_batch = relationship("Sample", back_populates="batch", lazy="selectin")
     product: Mapped["Product"] = relationship(back_populates="batch", lazy="selectin")
     customer: Mapped["Customer"] = relationship(
         back_populates="batches", lazy="selectin"
@@ -392,6 +439,7 @@ class RegistrationTestParameter(Base):
     test_params_id: Mapped[int] = mapped_column(
         Integer, ForeignKey(TestingParameter.id)
     )
+    order: Mapped[Optional[int]]
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -401,7 +449,9 @@ class RegistrationTestParameter(Base):
     created_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
-    registration = relationship("Registration", back_populates="test_params", lazy="selectin")
+    registration = relationship(
+        "Registration", back_populates="test_params", lazy="selectin"
+    )
     test_parameter = relationship(
         "TestingParameter",
         back_populates="registration_test_parameters",
@@ -561,21 +611,20 @@ class Sample(Base):
     __tablename__ = "samples"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sample_id: Mapped[str] = mapped_column(String)
-    name: Mapped[str] = mapped_column(String)
+    # name: Mapped[str] = mapped_column(String)
     registration_id: Mapped[int] = mapped_column(
         Integer, ForeignKey(Registration.id), nullable=True
     )
-    batch_id: Mapped[int] = mapped_column(Integer, ForeignKey(Batch.id))
+    # batch_id: Mapped[int] = mapped_column(Integer, ForeignKey(Batch.id))
     # department_id = Column(Integer, ForeignKey("testtypes.id"))
     test_type_id = Column(Integer, ForeignKey("testtypes.id"))
 
-    
     sample_name: Mapped[Optional[str]]
     batch_or_lot_no: Mapped[Optional[str]]
-    manufactured_date:Mapped[Optional[date]]
-    expiry_date:Mapped[Optional[date]]
+    manufactured_date: Mapped[Optional[date]]
+    expiry_date: Mapped[Optional[date]]
     batch_size: Mapped[Optional[int]]
-    received_quantity:Mapped[Optional[int]]
+    received_quantity: Mapped[Optional[int]]
 
     assigned_to: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True
@@ -618,14 +667,14 @@ class Sample(Base):
         foreign_keys=[assigned_to],
         lazy="selectin",
     )
-    # created = relationship("User", back_populates="sample_created",  foreign_keys=[created_by], lazy="selectin")
-    batch = relationship("Batch", back_populates="sample_batch", lazy="selectin")
     registration = relationship(
         "Registration", back_populates="samples", lazy="selectin"
     )
-    registration_sample: Mapped["RegistrationSample"] = relationship(
-        back_populates="sample", lazy="selectin", uselist=True
-    )
+    # created = relationship("User", back_populates="sample_created",  foreign_keys=[created_by], lazy="selectin")
+    # batch = relationship("Batch", back_populates="sample_batch", lazy="selectin")
+    # registration_sample: Mapped["RegistrationSample"] = relationship(
+    #     back_populates="sample", lazy="selectin", uselist=True
+    # )
 
     @classmethod
     async def generate_next_code(cls, database_session):
@@ -640,7 +689,7 @@ class Sample(Base):
         _result = await database_session.execute(_stmt)
         highest_code = _result.scalars().first()
         if highest_code:
-            highest_code_int = int(highest_code.split("TAS/SAM/24-25/")[-1]) + 1
+            highest_code_int = int(highest_code.split(f"/")[-1]) + 1
         else:
             highest_code_int = 1
         # Generate the new code by combining the prefix and the incremented integer
@@ -705,7 +754,7 @@ class Sample(Base):
         print("update test params")
         time = datetime.now()
         for test_param_data in test_params_data:
-            test_param_id = test_param_data.get("test_parameter_id", None)
+            test_param_id = test_param_data.get("test_params_id", None)
             test_param = None
             if test_param_id:
                 test_param = await SampleTestParameter.get_one(
@@ -745,7 +794,7 @@ class Sample(Base):
         for existing_param in existing_params:
             for test_param_data in test_params_data:
                 if existing_param.test_parameter_id == test_param_data.get(
-                    "test_parameter_id", ""
+                    "test_params_id", ""
                 ):
                     break
             else:
@@ -918,9 +967,9 @@ class RegistrationSample(Base):
     created_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
-    sample: Mapped["Sample"] = relationship(
-        back_populates="registration_sample", lazy="selectin"
-    )
+    # sample: Mapped["Sample"] = relationship(
+    #     back_populates="registration_sample", lazy="selectin"
+    # )
     # registration: Mapped["Registration"] = relationship(back_populates="reg_samples")
 
     @classmethod
