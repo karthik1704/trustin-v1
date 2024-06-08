@@ -278,6 +278,20 @@ class RegistrationSchema(BaseModel):
     updated_by: int
     # test_type: str
     product_id: int
+    test_type_id: int
+    license_no: str
+    nabl_logo: bool
+    testing_process: TestingProcessEnum
+    sampled_by: SamplingByEnum
+    sample_disposal_process: DisposalProcessEnum
+
+    sample_name: str
+    batch_or_lot_no: str
+    manufactured_date: date
+    expiry_date: date
+    batch_size: int
+    received_quantity: int
+    no_of_samples: int
     # batches : Optional[list[BatchSchema]]
     test_params: Optional[list[RegistrationTestParamsSchema]]
     samples: Optional[list[RegSamples]]
@@ -333,6 +347,7 @@ class RegistrationCreate(BaseModel):
     gst: str
     date_of_received: date
     product_id: int
+    reports_send_by: ReportSentByEnum
     license_no: str
     nabl_logo: bool
     testing_process: TestingProcessEnum
@@ -347,7 +362,6 @@ class RegistrationCreate(BaseModel):
     received_quantity: int
 
     no_of_samples: int
-    reports_send_by: ReportSentByEnum
     test_params: List[RegistrationTestParamsCreate]
     samples: List[SampleCreateSchema]
     # batches: List[BatchCreate]
@@ -384,7 +398,7 @@ class RegistrationSampleUpdate(BaseModel):
 
 
 class SampleUpdateSchema(BaseModel):
-    id: int
+    id: int | None
     sample_name: str
     batch_or_lot_no: str
     manufactured_date: date
@@ -398,7 +412,6 @@ class RegistrationUpdate(BaseModel):
     # trf_id: Optional[int]
     trf_code: str
     test_type_id: int
-
     company_id: Optional[int]
     company_name: Optional[str]
     customer_address_line1: Optional[str]
@@ -408,7 +421,22 @@ class RegistrationUpdate(BaseModel):
     pincode_no: Optional[str]
     gst: Optional[str]
     date_of_received: Optional[date]
-    product: Optional[int]
+    product_id: Optional[int]
+    reports_send_by: ReportSentByEnum
+    license_no: str
+    nabl_logo: bool
+    testing_process: TestingProcessEnum
+    sampled_by: SamplingByEnum
+    sample_disposal_process: DisposalProcessEnum
+
+    sample_name: str
+    batch_or_lot_no: str
+    manufactured_date: date
+    expiry_date: date
+    batch_size: int
+    received_quantity: int
+
+    no_of_samples: int
     test_params: List[RegistrationTestParamsCreate]
     samples: List[SampleUpdateSchema]
     # created_by: Optional[int]

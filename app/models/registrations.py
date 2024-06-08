@@ -202,7 +202,7 @@ class Registration(Base):
             test_param_id = test_param_data.get("test_params_id", None)
             test_param = None
             if test_param_id:
-                test_param = await  RegistrationTestParameter.get_one(
+                test_param = await RegistrationTestParameter.get_one(
                     database_session,
                     [
                         RegistrationTestParameter.registration_id == self.id,
@@ -274,7 +274,9 @@ class Registration(Base):
                 sample_data = {**sample_data, **update_dict}
                 await reg_sample.update_sample(sample_data)
 
-                await reg_sample.update_test_params(database_session, reg_params, current_user)
+                await reg_sample.update_test_params(
+                    database_session, reg_params, current_user
+                )
                 # for params_data in reg_params:
                 #     param_id = params_data["test_params_id"]
                 #     params_data = {
@@ -302,6 +304,10 @@ class Registration(Base):
                     "updated_by": current_user["id"],
                 }
                 sample_data = {**sample_data, **update_dict}
+                sample_id = await Sample.generate_next_code(database_session)
+                sample_data.update({
+                    "sample_id" : sample_id
+                })
                 reg_sample = Sample(**sample_data, registration_id=self.id)
                 database_session.add(reg_sample)
                 await database_session.commit()
@@ -653,6 +659,7 @@ class Sample(Base):
         back_populates="sample",
         lazy="selectin",
         order_by="SampleTestParameter.order",
+        cascade="all, delete"
     )
     sample_history = relationship(
         "SampleHistory",
@@ -783,7 +790,11 @@ class Sample(Base):
                     "created_by": current_user["id"],
                     "updated_by": current_user["id"],
                 }
-                test_param_data = {**test_param_data, **update_dict}
+                test_param_data = {
+                    "test_parameter_id": test_param_data.get("test_params_id"),
+                    "order": test_param_data.get("order"),
+                    **update_dict,
+                }
                 test_param = SampleTestParameter(**test_param_data, sample_id=self.id)
                 SampleTestParameter.create_sample_test_param(
                     database_session, test_param
