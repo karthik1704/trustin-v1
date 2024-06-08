@@ -118,7 +118,7 @@ class RegistrationSampleSchema(BaseModel):
     code: (
         str | None
     )  # added none temp, because code null in already created registration
-    # trf_id: int
+    trf_code: str
     company_id: int
     company_name: str
     customer_address_line1: str
@@ -144,7 +144,7 @@ class RegistrationCodeSchema(BaseModel):
 class SampleTestParameterSchema(BaseModel):
     id: int
     sample_id: int
-    order: int
+    order: int | None
     test_parameter_id: int
     test_type: Optional[str]
     value: Optional[str]
@@ -190,19 +190,24 @@ class SampleHistorySchema(BaseModel):
 class SampleListSchema(BaseModel):
     id: int
     sample_id: str
-    name: str
+    sample_name: str
+    batch_or_lot_no: str
+    manufactured_date: date
+    expiry_date: date
+    batch_size: int
+    received_quantity: int
     registration_id: int | None
     status_id: Optional[int]
     test_type_id: Optional[int]
     assigned_to: Optional[int]
-    batch_id: int
+    # batch_id: int
     status: Optional[str]
     created_at: datetime
     updated_at: datetime
     created_by: int
     updated_by: int
     registration: Optional[RegistrationCodeSchema | None]
-    batch: Optional[BatchSchema]
+    # batch: Optional[BatchSchema]
 
 
 class SampleSchema(BaseModel):
@@ -218,7 +223,7 @@ class SampleSchema(BaseModel):
     status_id: Optional[int]
     test_type_id: Optional[int]
     assigned_to: Optional[int]
-    batch_id: int
+    # batch_id: int
     created_at: datetime
     updated_at: datetime
     created_by: int
@@ -230,7 +235,7 @@ class SampleSchema(BaseModel):
     status_data: Optional[SampleStatusSchema]
     assignee: Optional[UserSchema]
     # batch: Optional[BatchSchema]
-    # registration: Optional[RegistrationSampleSchema]
+    registration: Optional[RegistrationSampleSchema]
 
 
 class RegistrationSamplesSchema(BaseModel):
@@ -441,9 +446,12 @@ class SampleTestParamsCreate(BaseModel):
 
 class SampleCreate(BaseModel):
     # sample_id: str
-    name: str
-    batch_id: int
-    test_type_id: int
+    sample_name: str
+    batch_or_lot_no: str
+    manufactured_date: date
+    expiry_date: date
+    batch_size: int
+    received_quantity: int
     test_params: list[SampleTestParamsCreate]
 
 
