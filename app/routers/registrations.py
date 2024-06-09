@@ -107,6 +107,14 @@ async def create_registration_with_batches(registration_with_batches: Registrati
 
     for sample in samples:
         # batch_data = batch_data.model_dump()
+        update_dict = {
+        "status_id" : 1,
+        "assigned_to" : current_user["id"],
+        "created_at" :time ,
+        "updated_at" : time,
+        "created_by" : current_user["id"],
+        "updated_by" : current_user["id"],
+        }
         sample_data = {**sample, **update_dict}
         print(sample_data)
         sample_id = await Sample.generate_next_code(db_session)

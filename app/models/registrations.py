@@ -298,6 +298,8 @@ class Registration(Base):
                 print(sample_data)
 
                 update_dict = {
+                    "status_id": 1,
+                    "assigned_to": current_user["id"],
                     "created_at": time,
                     "updated_at": time,
                     "created_by": current_user["id"],
@@ -305,34 +307,42 @@ class Registration(Base):
                 }
                 sample_data = {**sample_data, **update_dict}
                 sample_id = await Sample.generate_next_code(database_session)
-                sample_data.update({
-                    "sample_id" : sample_id
-                })
+                sample_data.update({"sample_id": sample_id})
                 reg_sample = Sample(**sample_data, registration_id=self.id)
                 database_session.add(reg_sample)
                 await database_session.commit()
+                await database_session.refresh(reg_sample)
                 for params_data in reg_params:
-                    params_data = {
+                    update_dict = {
+                        "created_at": time,
+                        "updated_at": time,
+                        "created_by": current_user["id"],
+                        "updated_by": current_user["id"],
+                    }
+                    test_data = {
                         "test_parameter_id": params_data["test_params_id"],
                         **update_dict,
                     }
                     print(params_data)
                     test_param = SampleTestParameter(
-                        **params_data,
+                        **test_data,
                         order=params_data.get("order"),
                         sample_id=reg_sample.id,
                     )
                     database_session.add(test_param)
+                    await database_session.commit()
 
         existing_samples = await Sample.get_all(
             database_session, [Sample.registration_id == self.id]
         )
-        for existing_param in existing_samples:
+        for sample in existing_samples:
             for sample_data in samples_data:
-                if existing_param.id == sample_data.get("id", ""):
+                if sample_data.get(id) is None:
+                    break
+                if sample.id == sample_data.get("id", ""):
                     break
             else:
-                await database_session.delete(existing_param)
+                await database_session.delete(sample)
 
     async def update_test_types(
         self, database_session: AsyncSession, test_types_data, current_user
@@ -659,7 +669,7 @@ class Sample(Base):
         back_populates="sample",
         lazy="selectin",
         order_by="SampleTestParameter.order",
-        cascade="all, delete"
+        cascade="all, delete",
     )
     sample_history = relationship(
         "SampleHistory",
