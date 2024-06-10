@@ -49,7 +49,7 @@ class FrontDesk(Base):
     date_of_received: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    parcel_received: Mapped[ParcelType] = mapped_column(Enum(ParcelType))
+    # parcel_received: Mapped[ParcelType] = mapped_column(Enum(ParcelType))
     received_condition: Mapped[ReceivedCondition] = mapped_column(Enum(ReceivedCondition))
     temperature: Mapped[str]
     deparment_id: Mapped[int] = mapped_column(ForeignKey(Department.id))
