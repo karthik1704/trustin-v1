@@ -2,9 +2,11 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, f
 from sqlalchemy.orm import relationship
 from app.models import Base
 from enum import Enum as PyEnum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+
+
 
 class RoleType(str, PyEnum):
     QAHOD = 'QAHOD'
@@ -74,6 +76,7 @@ class User(Base):
     
     assingee = relationship("CustomerFollowUp", back_populates="marketing_user")
     followup_updated_user = relationship("CustomerFollowUpHistory", back_populates="user")
+    # front_desks = relationship("FrontDesk", back_populates="user", foreign_keys=[FrontDesk.received_by])
     sample_assignee = relationship("Sample", foreign_keys="[Sample.assigned_to]", back_populates="assignee")
     sample_workflow_assignee = relationship("SampleWorkflow", foreign_keys="[SampleWorkflow.assigned_to]",   back_populates="assignee")
     sample_history_assignee = relationship("SampleHistory", foreign_keys="[SampleHistory.assigned_to]",   back_populates="assignee")

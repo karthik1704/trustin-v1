@@ -4,6 +4,7 @@ from typing import  Optional
 
 from app.models.front_desks import FrontDeskStatus, ParcelType, ReceivedCondition
 from app.schemas.customers import CustomerSchema
+from app.schemas.users import UserSchema
 
 class FrontDeskCreate(BaseModel):
     customer_id: int
@@ -18,4 +19,5 @@ class FrontDeskCreate(BaseModel):
 class FrontDeskSchema(FrontDeskCreate):
     id: int
     customer: Optional[CustomerSchema]
+    user_received_by: Optional[UserSchema]
     

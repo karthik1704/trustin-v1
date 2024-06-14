@@ -42,6 +42,7 @@ async def create_front_desk(
     update_dict = {
         "created_by": current_user["id"],
         "updated_by": current_user["id"],
+        "received_by": current_user["id"],
     }
     _data = data.model_dump()
     front_desk_data = {**_data, **update_dict}

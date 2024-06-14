@@ -54,19 +54,23 @@ class FrontDesk(Base):
     temperature: Mapped[str]
     deparment_id: Mapped[int] = mapped_column(ForeignKey(Department.id))
     status: Mapped[FrontDeskStatus] = mapped_column(Enum(FrontDeskStatus))
-
+    received_by: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(User.id))
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
     updated_at: Mapped[Optional[DateTime]] = mapped_column(
         DateTime(timezone=True), onupdate=func.now()
     )
-    created_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    updated_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+    created_by: Mapped[int] = mapped_column(Integer, ForeignKey(User.id))
+    updated_by: Mapped[int] = mapped_column(Integer, ForeignKey(User.id))
 
     customer: Mapped["Customer"] = relationship(back_populates="front_desks", uselist=False,  lazy="selectin")
+    # user: Mapped["User"] = relationship(back_populates="front_desks", uselist=False,  lazy="selectin")
+    user_received_by = relationship("User", foreign_keys=[received_by], lazy="selectin")
+    user_created_by = relationship("User", foreign_keys=[created_by], lazy="selectin")
+    user_updated_by = relationship("User", foreign_keys=[updated_by], lazy="selectin")
     department: Mapped["Department"] = relationship(back_populates="front_desks",   lazy="selectin")
-
+    
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
         _stmt = select(cls).where(*where_conditions).order_by(desc(cls.created_at))
