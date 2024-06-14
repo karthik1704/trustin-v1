@@ -63,7 +63,7 @@ class Registration(Base):
     trf_id: Mapped[int] = mapped_column(Integer, ForeignKey(TRF.id), nullable=True)
     trf_code: Mapped[Optional[str]]
     company_id: Mapped[int] = mapped_column(Integer, ForeignKey(Customer.id))
-    test_type_id: Mapped[int] = mapped_column(ForeignKey(TestType.id))
+    test_type_id: Mapped[Optional[int]] = mapped_column(ForeignKey(TestType.id))
     company_name: Mapped[str] = mapped_column(String)
     customer_address_line1: Mapped[str] = mapped_column(String)
     customer_address_line2: Mapped[str] = mapped_column(String)
@@ -105,6 +105,7 @@ class Registration(Base):
     received_quantity: Mapped[Optional[int]]
 
     no_of_samples: Mapped[int] = mapped_column(default=0)
+    controlled_quantity: Mapped[Optional[int]] = mapped_column(default=0)
     reports_send_by: Mapped[Optional[ReportSentByEnum]]
 
     trf = relationship("TRF", back_populates="registrations", lazy="selectin")
@@ -456,6 +457,7 @@ class RegistrationTestParameter(Base):
         Integer, ForeignKey(TestingParameter.id)
     )
     order: Mapped[Optional[int]]
+    quantity: Mapped[Optional[int]]
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -633,7 +635,7 @@ class Sample(Base):
     )
     # batch_id: Mapped[int] = mapped_column(Integer, ForeignKey(Batch.id))
     # department_id = Column(Integer, ForeignKey("testtypes.id"))
-    test_type_id = Column(Integer, ForeignKey("testtypes.id"))
+    test_type_id:Mapped[int] = mapped_column(Integer, ForeignKey(TestType.id))
 
     sample_name: Mapped[Optional[str]]
     batch_or_lot_no: Mapped[Optional[str]]
@@ -875,6 +877,8 @@ class SampleTestParameter(Base):
         Integer, ForeignKey(TestingParameter.id)
     )
     order: Mapped[int] = mapped_column(Integer, nullable=True)
+    quantity: Mapped[Optional[int]]
+
     test_type: Mapped[str] = mapped_column(String, nullable=True)
     value: Mapped[str] = mapped_column(String, nullable=True)
     result: Mapped[bool] = mapped_column(Boolean, nullable=True)

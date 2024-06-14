@@ -314,6 +314,7 @@ class BatchCreate(BaseModel):
 class RegistrationTestParamsCreate(BaseModel):
     test_params_id: int
     order: int
+    quantity: int
 
 
 class RegistrationTestTypeCreate(BaseModel):
@@ -331,6 +332,7 @@ class SampleCreateSchema(BaseModel):
     expiry_date: date
     batch_size: int
     received_quantity: int
+    test_type_id: int
 
 
 class RegistrationCreate(BaseModel):
@@ -360,9 +362,11 @@ class RegistrationCreate(BaseModel):
     expiry_date: date
     batch_size: int
     received_quantity: int
+    controlled_quantity: int
 
     no_of_samples: int
-    test_params: List[RegistrationTestParamsCreate]
+    micro_test_params: List[RegistrationTestParamsCreate]
+    mech_test_params: List[RegistrationTestParamsCreate]
     samples: List[SampleCreateSchema]
     # batches: List[BatchCreate]
     # test_types : List[RegistrationTestTypeCreate]

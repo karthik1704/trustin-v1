@@ -1,4 +1,5 @@
 from random import sample
+from re import M
 from typing import Annotated
 import datetime
 from fastapi import APIRouter, Depends, Path, status, HTTPException, Request
@@ -96,7 +97,9 @@ async def create_registration_with_batches(
     }
     registration_data = registration_with_batches.model_dump()
     registration_data = {**registration_data, **update_dict}
-    test_params_data = registration_data.pop("test_params")
+    mech_params_data = registration_data.pop("mech_test_params")
+    micro_params_data = registration_data.pop("micro_test_params")
+    test_params_data = {**mech_params_data, **micro_params_data}
     samples = registration_data.pop("samples")
 
     # batches_data = registration_data.pop('batches')
@@ -139,28 +142,48 @@ async def create_registration_with_batches(
             **sample_data,
             sample_id=sample_id,
             registration_id=registration.id,
-            test_type_id=registration.test_type_id
         )
         db_session.add(new_sample)
         await db_session.commit()
+        if new_sample.test_type_id == 1:
+            for params_data in micro_params_data:
+                update_dict = {
+                    "created_at": time,
+                    "updated_at": time,
+                    "created_by": current_user["id"],
+                    "updated_by": current_user["id"],
+                }
+                params_data = {
+                    "test_parameter_id": params_data["test_params_id"],
+                    **update_dict,
+                }
+                print(params_data)
+                test_param = SampleTestParameter(
+                    **params_data,
+                    order=params_data.get("order"),
+                    sample_id=new_sample.id,
+                )
+                db_session.add(test_param)
 
-        for params_data in test_params_data:
-            update_dict = {
-                "created_at": time,
-                "updated_at": time,
-                "created_by": current_user["id"],
-                "updated_by": current_user["id"],
-            }
-            params_data = {
-                "test_parameter_id": params_data["test_params_id"],
-                **update_dict,
-            }
-            print(params_data)
-            test_param = SampleTestParameter(
-                **params_data, order=params_data.get("order"), sample_id=new_sample.id
-            )
-            db_session.add(test_param)
-
+        if new_sample.test_type_id == 2:
+            for params_data in mech_params_data:
+                update_dict = {
+                    "created_at": time,
+                    "updated_at": time,
+                    "created_by": current_user["id"],
+                    "updated_by": current_user["id"],
+                }
+                params_data = {
+                    "test_parameter_id": params_data["test_params_id"],
+                    **update_dict,
+                }
+                print(params_data)
+                test_param = SampleTestParameter(
+                    **params_data,
+                    order=params_data.get("order"),
+                    sample_id=new_sample.id,
+                )
+                db_session.add(test_param)
     # for types_data in test_types_data:
     #     # batch_data = batch_data.model_dump()
     #     types_data = {**types_data, **update_dict}
