@@ -339,7 +339,7 @@ class RegistrationCreate(BaseModel):
     branch_id: int
     trf_code: str
     company_id: int
-    test_type_id: int
+    # test_type_id: int
     company_name: str
     customer_address_line1: str
     customer_address_line2: str
