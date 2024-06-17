@@ -97,9 +97,9 @@ async def create_registration_with_batches(
     }
     registration_data = registration_with_batches.model_dump()
     registration_data = {**registration_data, **update_dict}
-    mech_params_data = registration_data.pop("mech_test_params")
-    micro_params_data = registration_data.pop("micro_test_params")
-    test_params_data = {**mech_params_data, **micro_params_data}
+    mech_params_data = registration_data.pop("mech_params")
+    micro_params_data = registration_data.pop("micro_params")
+    test_params_data = mech_params_data + micro_params_data
     samples = registration_data.pop("samples")
 
     # batches_data = registration_data.pop('batches')

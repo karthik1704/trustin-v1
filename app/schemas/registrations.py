@@ -365,8 +365,8 @@ class RegistrationCreate(BaseModel):
     controlled_quantity: int
 
     no_of_samples: int
-    micro_test_params: List[RegistrationTestParamsCreate]
-    mech_test_params: List[RegistrationTestParamsCreate]
+    micro_params: List[RegistrationTestParamsCreate]
+    mech_params: List[RegistrationTestParamsCreate]
     samples: List[SampleCreateSchema]
     # batches: List[BatchCreate]
     # test_types : List[RegistrationTestTypeCreate]
