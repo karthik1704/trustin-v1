@@ -249,7 +249,7 @@ class Registration(Base):
                 await database_session.delete(existing_param)
 
     async def update_samples(
-        self, database_session: AsyncSession, samples_data, current_user, reg_params
+        self, database_session: AsyncSession, samples_data, current_user, mech_params, micro_params
     ):
         print("update test params")
         time = datetime.now()
@@ -274,11 +274,17 @@ class Registration(Base):
                 }
                 sample_data = {**sample_data, **update_dict}
                 await reg_sample.update_sample(sample_data)
-
-                await reg_sample.update_test_params(
-                    database_session, reg_params, current_user
-                )
                 # for params_data in reg_params:
+
+                if reg_sample.test_type_id == 1:
+                    await reg_sample.update_test_params(
+                        database_session, micro_params, current_user
+                    )
+
+                if reg_sample.test_type_id == 2:
+                    await reg_sample.update_test_params(
+                        database_session, mech_params, current_user
+                    )
                 #     param_id = params_data["test_params_id"]
                 #     params_data = {
                 #         "order": params_data.get("order"),
@@ -313,35 +319,50 @@ class Registration(Base):
                 database_session.add(reg_sample)
                 await database_session.commit()
                 await database_session.refresh(reg_sample)
-                for params_data in reg_params:
-                    update_dict = {
+                update_dict = {
                         "created_at": time,
                         "updated_at": time,
                         "created_by": current_user["id"],
                         "updated_by": current_user["id"],
                     }
-                    test_data = {
-                        "test_parameter_id": params_data["test_params_id"],
-                        **update_dict,
-                    }
-                    print(params_data)
-                    test_param = SampleTestParameter(
-                        **test_data,
-                        order=params_data.get("order"),
-                        sample_id=reg_sample.id,
-                    )
-                    database_session.add(test_param)
-                    await database_session.commit()
+                if reg_sample.test_type_id ==1:
+                    for params_data in micro_params:
+                        test_data = {
+                            "test_parameter_id": params_data["test_params_id"],
+                            **update_dict,
+                        }
+                        print(params_data)
+                        test_param = SampleTestParameter(
+                            **test_data,
+                            order=params_data.get("order"),
+                            sample_id=reg_sample.id,
+                        )
+                        database_session.add(test_param)
+                        await database_session.commit()
+                if reg_sample.test_type_id ==2:
+                    for params_data in mech_params:
+                        test_data = {
+                            "test_parameter_id": params_data["test_params_id"],
+                            **update_dict,
+                        }
+                        print(params_data)
+                        test_param = SampleTestParameter(
+                            **test_data,
+                            order=params_data.get("order"),
+                            sample_id=reg_sample.id,
+                        )
+                        database_session.add(test_param)
+                        await database_session.commit()
 
         existing_samples = await Sample.get_all(
-            database_session, [Sample.registration_id == self.id]
+            database_session, [Sample.registration_id == self.id, Sample.status_id==1]
         )
         for sample in existing_samples:
             for sample_data in samples_data:
                 if sample_data.get(id) is None:
-                    break
+                    continue
                 if sample.id == sample_data.get("id", ""):
-                    break
+                    break 
             else:
                 await database_session.delete(sample)
 

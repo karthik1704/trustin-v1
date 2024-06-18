@@ -68,6 +68,7 @@ class RegistrationTestParamsSchema(BaseModel):
     registration_id: int
     test_params_id: int
     order:int
+    quantity: int
     created_at: datetime
     updated_at: datetime
     created_by: int
@@ -250,6 +251,7 @@ class RegSamples(BaseModel):
     id: int
     sample_id: str
     sample_name: str
+    test_type_id: int
     batch_or_lot_no: str
     manufactured_date: date
     expiry_date: date
@@ -278,7 +280,7 @@ class RegistrationSchema(BaseModel):
     updated_by: int
     # test_type: str
     product_id: int
-    test_type_id: int
+    # test_type_id: int
     license_no: str
     nabl_logo: bool
     testing_process: TestingProcessEnum
@@ -292,6 +294,7 @@ class RegistrationSchema(BaseModel):
     batch_size: int
     received_quantity: int
     no_of_samples: int
+    controlled_quantity: int
     # batches : Optional[list[BatchSchema]]
     test_params: Optional[list[RegistrationTestParamsSchema]]
     samples: Optional[list[RegSamples]]
@@ -415,7 +418,7 @@ class RegistrationUpdate(BaseModel):
     branch_id: Optional[int]
     # trf_id: Optional[int]
     trf_code: str
-    test_type_id: int
+    # test_type_id: int
     company_id: Optional[int]
     company_name: Optional[str]
     customer_address_line1: Optional[str]
@@ -439,9 +442,11 @@ class RegistrationUpdate(BaseModel):
     expiry_date: date
     batch_size: int
     received_quantity: int
+    controlled_quantity: int
 
     no_of_samples: int
-    test_params: List[RegistrationTestParamsCreate]
+    micro_params: List[RegistrationTestParamsCreate]
+    mech_params: List[RegistrationTestParamsCreate]
     samples: List[SampleUpdateSchema]
     # created_by: Optional[int]
     # updated_by: Optional[int]

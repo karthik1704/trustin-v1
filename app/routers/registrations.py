@@ -216,7 +216,9 @@ async def update_registration_with_batches(
     current_user: dict = Depends(get_current_user),
 ):
     registration_data = registration.model_dump()
-    test_params_data = registration_data.pop("test_params", [])
+    micro_params_data = registration_data.pop("micro_params", [])
+    mech_params_data = registration_data.pop("mech_params", [])
+    test_params_data = micro_params_data + mech_params_data
     samples = registration_data.pop("samples", [])
     # batches_data = registration_data.pop("batches",[])
     # test_types_data = registration_data.pop("test_types",[])
@@ -242,7 +244,7 @@ async def update_registration_with_batches(
     #     await registration.update_test_types(db_session, test_types_data, current_user)
     if samples:
         await registration.update_samples(
-            db_session, samples, current_user, test_params_data
+            db_session, samples, current_user, micro_params_data, mech_params_data
         )
 
     await db_session.commit()
