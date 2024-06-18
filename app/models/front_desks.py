@@ -1,3 +1,4 @@
+from token import OP
 from sqlalchemy import (
     Column,
     Integer,
@@ -26,8 +27,8 @@ class ReceivedCondition(PyEnum):
     DAMAGED = 'DAMAGED'
     GOOD = 'GOOD'
 class FrontDeskStatus(PyEnum):
-    NOT_REGISTRATION = 'NOT_REGISTRATION'
-    REGISTRATION = 'REGISTRATION'
+    UNDER_REGISTRATION = 'UNDER_REGISTRATION'
+    REGISTERED = 'REGISTERED'
 
 class ParcelType(PyEnum):
     SAMPLE = 'SAMPLE'
@@ -52,7 +53,7 @@ class FrontDesk(Base):
     # parcel_received: Mapped[ParcelType] = mapped_column(Enum(ParcelType))
     received_condition: Mapped[ReceivedCondition] = mapped_column(Enum(ReceivedCondition))
     temperature: Mapped[str]
-    deparment_id: Mapped[int] = mapped_column(ForeignKey(Department.id))
+    deparment_id: Mapped[Optional[int]] = mapped_column(ForeignKey(Department.id))
     status: Mapped[FrontDeskStatus] = mapped_column(Enum(FrontDeskStatus))
     received_by: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(User.id))
     created_at: Mapped[DateTime] = mapped_column(

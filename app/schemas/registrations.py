@@ -412,6 +412,7 @@ class SampleUpdateSchema(BaseModel):
     expiry_date: date
     batch_size: int
     received_quantity: int
+    test_type_id: int
 
 
 class RegistrationUpdate(BaseModel):
