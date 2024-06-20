@@ -244,7 +244,7 @@ async def update_registration_with_batches(
     #     await registration.update_test_types(db_session, test_types_data, current_user)
     if samples:
         await registration.update_samples(
-            db_session, samples, current_user, micro_params_data, mech_params_data
+            db_session, samples, current_user,  mech_params_data, micro_params_data
         )
 
     await db_session.commit()

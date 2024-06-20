@@ -360,7 +360,7 @@ class Registration(Base):
         for sample in existing_samples:
             for sample_data in samples_data:
                 if sample_data.get(id) is None:
-                    continue
+                    break
                 if sample.id == sample_data.get("id", ""):
                     break 
             else:
