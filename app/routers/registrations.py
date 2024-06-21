@@ -137,7 +137,7 @@ async def create_registration_with_batches(
         }
         sample_data = {**sample, **update_dict}
         print(sample_data)
-        sample_id = await Sample.generate_next_code(db_session)
+        sample_id = await Sample.generate_next_code(db_session, registration.id)
         new_sample = Sample(
             **sample_data,
             sample_id=sample_id,
@@ -409,7 +409,7 @@ async def create_sample_with_testparams(
         test_params_data = sample_data.pop("test_params")
         # test_params_data = sample_data.pop('test_params')
         print(sample_data)
-        sample_id = await Sample.generate_next_code(db_session)
+        sample_id = await Sample.generate_next_code(db_session, registration_id)
         sample_data.update({"sample_id": sample_id})
         sample = Sample(**sample_data, registration_id=registration_id)
         db_session.add(sample)

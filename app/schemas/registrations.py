@@ -257,6 +257,8 @@ class RegSamples(BaseModel):
     expiry_date: date
     batch_size: int
     received_quantity: int
+    status_id: int
+    
 
 
 class RegistrationSchema(BaseModel):

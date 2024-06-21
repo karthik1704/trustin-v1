@@ -263,6 +263,7 @@ class Registration(Base):
                     [
                         Sample.registration_id == self.id,
                         Sample.id == sample_id,
+                        Sample.status_id ==1
                     ],
                 )
                 print(reg_sample)
@@ -313,7 +314,7 @@ class Registration(Base):
                     "updated_by": current_user["id"],
                 }
                 sample_data = {**sample_data, **update_dict}
-                sample_id = await Sample.generate_next_code(database_session)
+                sample_id = await Sample.generate_next_code(database_session, self.id)
                 sample_data.update({"sample_id": sample_id})
                 reg_sample = Sample(**sample_data, registration_id=self.id)
                 database_session.add(reg_sample)
@@ -717,11 +718,11 @@ class Sample(Base):
     # )
 
     @classmethod
-    async def generate_next_code(cls, database_session):
+    async def generate_next_code(cls, database_session, registration_id):
 
         _stmt = (
             select(cls.sample_id)
-            .where(*[])
+            .where(*[cls.registration_id==registration_id])
             .order_by(
                 desc(cls.sample_id)
             )  # Assuming `code` is the column you want to order by
@@ -734,7 +735,7 @@ class Sample(Base):
             highest_code_int = 1
         # Generate the new code by combining the prefix and the incremented integer
         new_code = get_unique_code(
-            "SAM", highest_code_int
+            f"SAM-REG{registration_id}", highest_code_int
         )  # Adjust the format based on your requirements
         # database_session.close()
         return new_code
