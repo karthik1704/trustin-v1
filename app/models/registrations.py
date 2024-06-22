@@ -1,3 +1,4 @@
+from token import OP
 from sqlalchemy import (
     Column,
     Integer,
@@ -21,6 +22,7 @@ from app.models import Base, Branch, TRF, Customer, TestingParameter, TestType
 from pydantic import BaseModel, ConfigDict, ValidationError
 from enum import Enum as PyEnum
 
+from app.models.front_desks import FrontDesk
 from app.models.samples import Product
 from app.utils import get_unique_code
 from .users import User
@@ -63,6 +65,9 @@ class Registration(Base):
     trf_id: Mapped[int] = mapped_column(Integer, ForeignKey(TRF.id), nullable=True)
     trf_code: Mapped[Optional[str]]
     company_id: Mapped[int] = mapped_column(Integer, ForeignKey(Customer.id))
+    front_desk_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey(FrontDesk.id), nullable=True
+    )
     test_type_id: Mapped[Optional[int]] = mapped_column(ForeignKey(TestType.id))
     company_name: Mapped[str] = mapped_column(String)
     customer_address_line1: Mapped[str] = mapped_column(String)
@@ -119,6 +124,9 @@ class Registration(Base):
     samples = relationship("Sample", back_populates="registration", lazy="selectin")
     product_data = relationship(
         "Product", back_populates="registrations", lazy="selectin"
+    )
+    front_desk: Mapped["FrontDesk"] = relationship(
+        back_populates="registration", lazy="selectin"
     )
 
     @classmethod
@@ -249,7 +257,12 @@ class Registration(Base):
                 await database_session.delete(existing_param)
 
     async def update_samples(
-        self, database_session: AsyncSession, samples_data, current_user, mech_params, micro_params
+        self,
+        database_session: AsyncSession,
+        samples_data,
+        current_user,
+        mech_params,
+        micro_params,
     ):
         print("update test params")
         time = datetime.now()
@@ -263,7 +276,7 @@ class Registration(Base):
                     [
                         Sample.registration_id == self.id,
                         Sample.id == sample_id,
-                        Sample.status_id ==1
+                        Sample.status_id == 1,
                     ],
                 )
                 print(reg_sample)
@@ -321,12 +334,12 @@ class Registration(Base):
                 await database_session.commit()
                 await database_session.refresh(reg_sample)
                 update_dict = {
-                        "created_at": time,
-                        "updated_at": time,
-                        "created_by": current_user["id"],
-                        "updated_by": current_user["id"],
-                    }
-                if reg_sample.test_type_id ==1:
+                    "created_at": time,
+                    "updated_at": time,
+                    "created_by": current_user["id"],
+                    "updated_by": current_user["id"],
+                }
+                if reg_sample.test_type_id == 1:
                     for params_data in micro_params:
                         test_data = {
                             "test_parameter_id": params_data["test_params_id"],
@@ -340,7 +353,7 @@ class Registration(Base):
                         )
                         database_session.add(test_param)
                         await database_session.commit()
-                if reg_sample.test_type_id ==2:
+                if reg_sample.test_type_id == 2:
                     for params_data in mech_params:
                         test_data = {
                             "test_parameter_id": params_data["test_params_id"],
@@ -356,14 +369,14 @@ class Registration(Base):
                         await database_session.commit()
 
         existing_samples = await Sample.get_all(
-            database_session, [Sample.registration_id == self.id, Sample.status_id==1]
+            database_session, [Sample.registration_id == self.id, Sample.status_id == 1]
         )
         for sample in existing_samples:
             for sample_data in samples_data:
                 if sample_data.get(id) is None:
                     break
                 if sample.id == sample_data.get("id", ""):
-                    break 
+                    break
             else:
                 await database_session.delete(sample)
 
@@ -657,7 +670,7 @@ class Sample(Base):
     )
     # batch_id: Mapped[int] = mapped_column(Integer, ForeignKey(Batch.id))
     # department_id = Column(Integer, ForeignKey("testtypes.id"))
-    test_type_id:Mapped[int] = mapped_column(Integer, ForeignKey(TestType.id))
+    test_type_id: Mapped[int] = mapped_column(Integer, ForeignKey(TestType.id))
 
     sample_name: Mapped[Optional[str]]
     batch_or_lot_no: Mapped[Optional[str]]
@@ -722,7 +735,7 @@ class Sample(Base):
 
         _stmt = (
             select(cls.sample_id)
-            .where(*[cls.registration_id==registration_id])
+            .where(*[cls.registration_id == registration_id])
             .order_by(
                 desc(cls.sample_id)
             )  # Assuming `code` is the column you want to order by

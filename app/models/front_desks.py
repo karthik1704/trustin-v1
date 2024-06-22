@@ -11,7 +11,7 @@ from sqlalchemy import (
     UUID,
     Enum,
 )
-from typing import Any, Literal, Optional
+from typing import TYPE_CHECKING, Any, Literal, Optional
 import datetime
 
 # from sqlalchemy.orm import relationship
@@ -21,7 +21,10 @@ from sqlalchemy import select, desc
 from app.models import Base, Branch, TRF, Customer, TestingParameter, TestType
 from pydantic import BaseModel, ConfigDict, ValidationError
 from enum import Enum as PyEnum
+
 from .users import Department, User
+if TYPE_CHECKING:
+    from app.models.registrations import Registration
 
 class ReceivedCondition(PyEnum):
     DAMAGED = 'DAMAGED'
@@ -71,6 +74,7 @@ class FrontDesk(Base):
     user_created_by = relationship("User", foreign_keys=[created_by], lazy="selectin")
     user_updated_by = relationship("User", foreign_keys=[updated_by], lazy="selectin")
     department: Mapped["Department"] = relationship(back_populates="front_desks",   lazy="selectin")
+    registration: Mapped["Registration"] = relationship(back_populates="front_desk")
     
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):

@@ -265,6 +265,7 @@ class RegistrationSchema(BaseModel):
     id: int
     code: str
     branch_id: int
+    front_desk_id:int
     trf_code: str
     company_id: int
     company_name: str
@@ -344,6 +345,7 @@ class RegistrationCreate(BaseModel):
     branch_id: int
     trf_code: str
     company_id: int
+    front_desk_id: int
     # test_type_id: int
     company_name: str
     customer_address_line1: str
@@ -422,6 +424,7 @@ class RegistrationUpdate(BaseModel):
     # trf_id: Optional[int]
     trf_code: str
     # test_type_id: int
+    front_desk_id:int
     company_id: Optional[int]
     company_name: Optional[str]
     customer_address_line1: Optional[str]
