@@ -280,39 +280,39 @@ class Registration(Base):
                     ],
                 )
                 print(reg_sample)
-            if reg_sample:
-                print("u[date]")
-                update_dict = {
-                    "updated_at": time,
-                    "updated_by": current_user["id"],
-                }
-                sample_data = {**sample_data, **update_dict}
-                await reg_sample.update_sample(sample_data)
-                # for params_data in reg_params:
+                if reg_sample:
+                    print("u[date]")
+                    update_dict = {
+                        "updated_at": time,
+                        "updated_by": current_user["id"],
+                    }
+                    sample_data = {**sample_data, **update_dict}
+                    await reg_sample.update_sample(sample_data)
+                    # for params_data in reg_params:
 
-                if reg_sample.test_type_id == 1:
-                    await reg_sample.update_test_params(
-                        database_session, micro_params, current_user
-                    )
+                    if reg_sample.test_type_id == 1:
+                        await reg_sample.update_test_params(
+                            database_session, micro_params, current_user
+                        )
 
-                if reg_sample.test_type_id == 2:
-                    await reg_sample.update_test_params(
-                        database_session, mech_params, current_user
-                    )
-                #     param_id = params_data["test_params_id"]
-                #     params_data = {
-                #         "order": params_data.get("order"),
-                #         **update_dict,
-                #     }
-                #     print(params_data)
-                #     test_param = await SampleTestParameter.get_one(
-                #         database_session,
-                #         [
-                #             SampleTestParameter.test_parameter_id == param_id,
-                #             SampleTestParameter.sample_id == reg_sample.id,
-                #         ],
-                #     )
-                #     await test_param.update_sample_test_param(params_data)
+                    if reg_sample.test_type_id == 2:
+                        await reg_sample.update_test_params(
+                            database_session, mech_params, current_user
+                        )
+                    #     param_id = params_data["test_params_id"]
+                    #     params_data = {
+                    #         "order": params_data.get("order"),
+                    #         **update_dict,
+                    #     }
+                    #     print(params_data)
+                    #     test_param = await SampleTestParameter.get_one(
+                    #         database_session,
+                    #         [
+                    #             SampleTestParameter.test_parameter_id == param_id,
+                    #             SampleTestParameter.sample_id == reg_sample.id,
+                    #         ],
+                    #     )
+                    #     await test_param.update_sample_test_param(params_data)
 
             else:
                 print("create")
