@@ -26,6 +26,14 @@ async def get_all_front_desks(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/under-registrations", response_model=list[FrontDeskSchema])
+async def get_all_front_desk_by_under_registration(db_session: db_dep, current_user: user_dep):
+    try:
+        _data = await FrontDesk.get_all(db_session, [FrontDesk.status == "UNDER_REGISTRATION"])
+        return _data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 @router.get("/{id}", response_model=Optional[FrontDeskSchema])
 async def get_front_desk(id: int, db_session: db_dep, current_user: user_dep):
     try:

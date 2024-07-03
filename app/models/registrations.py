@@ -10,6 +10,7 @@ from sqlalchemy import (
     Enum,
     Date,
     DateTime,
+    Text,
 )
 from typing import Any, List, Optional
 from datetime import date, datetime
@@ -44,6 +45,7 @@ class DisposalProcessEnum(PyEnum):
 class ReportSentByEnum(PyEnum):
     COURIER = "COURIER"
     EMAIL = "EMAIL"
+    EMAIL_COURIER = "EMAIL_COURIER"
 
 
 class SamplingByEnum(PyEnum):
@@ -55,13 +57,16 @@ class YesOrNoEnum(PyEnum):
     YES = "YES"
     NO = "NO"
 
+class RegistrationStatus(PyEnum):
+    UNDER_REGISTRATION = 'UNDER_REGISTRATION'
+    REGISTERED = 'REGISTERED'
 
 class Registration(Base):
     __tablename__ = "registrations"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     code: Mapped[str] = mapped_column(String, nullable=True)
-    branch_id: Mapped[int] = mapped_column(Integer, ForeignKey(Branch.id))
+    branch_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(Branch.id), nullable=True)
     trf_id: Mapped[int] = mapped_column(Integer, ForeignKey(TRF.id), nullable=True)
     trf_code: Mapped[Optional[str]]
     company_id: Mapped[int] = mapped_column(Integer, ForeignKey(Customer.id))
@@ -70,11 +75,12 @@ class Registration(Base):
     )
     test_type_id: Mapped[Optional[int]] = mapped_column(ForeignKey(TestType.id))
     company_name: Mapped[str] = mapped_column(String)
-    customer_address_line1: Mapped[str] = mapped_column(String)
-    customer_address_line2: Mapped[str] = mapped_column(String)
-    city: Mapped[str] = mapped_column(String)
-    state: Mapped[str] = mapped_column(String)
-    pincode_no: Mapped[str] = mapped_column(String)
+    full_address: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # customer_address_line1: Mapped[Optional[str]] = mapped_column(String)
+    # customer_address_line2: Mapped[] = mapped_column(String)
+    # city: Mapped[str] = mapped_column(String)
+    # state: Mapped[str] = mapped_column(String)
+    # pincode_no: Mapped[str] = mapped_column(String)
     gst: Mapped[str] = mapped_column(String)
     date_of_registration: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -95,23 +101,26 @@ class Registration(Base):
     # test_type  : Mapped[str] =  mapped_column(String)
     product_id: Mapped[int] = mapped_column(Integer, ForeignKey("products.id"))
 
-    testing_process: Mapped[TestingProcessEnum]
+    testing_process: Mapped[TestingProcessEnum] = mapped_column(Enum(TestingProcessEnum))
 
-    nabl_logo: Mapped[Optional[bool]]
+    # nabl_logo: Mapped[Optional[bool]]
     license_no: Mapped[Optional[str]]
-    sampled_by: Mapped[Optional[SamplingByEnum]]
+    sampled_by: Mapped[Optional[SamplingByEnum]] = mapped_column(Enum(SamplingByEnum))
 
-    sample_disposal_process: Mapped[Optional[DisposalProcessEnum]]
+    sample_disposal_process: Mapped[Optional[DisposalProcessEnum]] = mapped_column(Enum(DisposalProcessEnum))
+
     sample_name: Mapped[Optional[str]]
     batch_or_lot_no: Mapped[Optional[str]]
     manufactured_date: Mapped[Optional[date]]
     expiry_date: Mapped[Optional[date]]
     batch_size: Mapped[Optional[int]]
     received_quantity: Mapped[Optional[int]]
+    status: Mapped[RegistrationStatus] = mapped_column(Enum(RegistrationStatus))
 
     no_of_samples: Mapped[int] = mapped_column(default=0)
+    no_of_batches: Mapped[int] = mapped_column(default=0)
     controlled_quantity: Mapped[Optional[int]] = mapped_column(default=0)
-    reports_send_by: Mapped[Optional[ReportSentByEnum]]
+    reports_send_by: Mapped[Optional[ReportSentByEnum]] = mapped_column(Enum(ReportSentByEnum))
 
     trf = relationship("TRF", back_populates="registrations", lazy="selectin")
     # batches = relationship("Batch", back_populates="registration", lazy="selectin")
@@ -276,43 +285,43 @@ class Registration(Base):
                     [
                         Sample.registration_id == self.id,
                         Sample.id == sample_id,
-                        Sample.status_id == 1,
                     ],
                 )
                 print(reg_sample)
-                if reg_sample:
-                    print("u[date]")
-                    update_dict = {
-                        "updated_at": time,
-                        "updated_by": current_user["id"],
-                    }
-                    sample_data = {**sample_data, **update_dict}
-                    await reg_sample.update_sample(sample_data)
-                    # for params_data in reg_params:
+            if reg_sample:
+                
+                print("u[date]")
+                update_dict = {
+                    "updated_at": time,
+                    "updated_by": current_user["id"],
+                }
+                sample_data = {**sample_data, **update_dict}
+                await reg_sample.update_sample(sample_data)
+                # for params_data in reg_params:
 
-                    if reg_sample.test_type_id == 1:
-                        await reg_sample.update_test_params(
-                            database_session, micro_params, current_user
-                        )
+                # if reg_sample.test_type_id == 1:
+                #     await reg_sample.update_test_params(
+                #         database_session, micro_params, current_user
+                #     )
 
-                    if reg_sample.test_type_id == 2:
-                        await reg_sample.update_test_params(
-                            database_session, mech_params, current_user
-                        )
-                    #     param_id = params_data["test_params_id"]
-                    #     params_data = {
-                    #         "order": params_data.get("order"),
-                    #         **update_dict,
-                    #     }
-                    #     print(params_data)
-                    #     test_param = await SampleTestParameter.get_one(
-                    #         database_session,
-                    #         [
-                    #             SampleTestParameter.test_parameter_id == param_id,
-                    #             SampleTestParameter.sample_id == reg_sample.id,
-                    #         ],
-                    #     )
-                    #     await test_param.update_sample_test_param(params_data)
+                # if reg_sample.test_type_id == 2:
+                #     await reg_sample.update_test_params(
+                #         database_session, mech_params, current_user
+                #     )
+                #     param_id = params_data["test_params_id"]
+                #     params_data = {
+                #         "order": params_data.get("order"),
+                #         **update_dict,
+                #     }
+                #     print(params_data)
+                #     test_param = await SampleTestParameter.get_one(
+                #         database_session,
+                #         [
+                #             SampleTestParameter.test_parameter_id == param_id,
+                #             SampleTestParameter.sample_id == reg_sample.id,
+                #         ],
+                #     )
+                #     await test_param.update_sample_test_param(params_data)
 
             else:
                 print("create")
@@ -326,59 +335,61 @@ class Registration(Base):
                     "created_by": current_user["id"],
                     "updated_by": current_user["id"],
                 }
+                sample_data.pop("id")
                 sample_data = {**sample_data, **update_dict}
                 sample_id = await Sample.generate_next_code(database_session, self.id)
                 sample_data.update({"sample_id": sample_id})
                 reg_sample = Sample(**sample_data, registration_id=self.id)
                 database_session.add(reg_sample)
-                await database_session.commit()
-                await database_session.refresh(reg_sample)
-                update_dict = {
-                    "created_at": time,
-                    "updated_at": time,
-                    "created_by": current_user["id"],
-                    "updated_by": current_user["id"],
-                }
-                if reg_sample.test_type_id == 1:
-                    for params_data in micro_params:
-                        test_data = {
-                            "test_parameter_id": params_data["test_params_id"],
-                            **update_dict,
-                        }
-                        print(params_data)
-                        test_param = SampleTestParameter(
-                            **test_data,
-                            order=params_data.get("order"),
-                            sample_id=reg_sample.id,
-                        )
-                        database_session.add(test_param)
-                        await database_session.commit()
-                if reg_sample.test_type_id == 2:
-                    for params_data in mech_params:
-                        test_data = {
-                            "test_parameter_id": params_data["test_params_id"],
-                            **update_dict,
-                        }
-                        print(params_data)
-                        test_param = SampleTestParameter(
-                            **test_data,
-                            order=params_data.get("order"),
-                            sample_id=reg_sample.id,
-                        )
-                        database_session.add(test_param)
-                        await database_session.commit()
+                # await database_session.commit()
+                # await database_session.refresh(reg_sample)
+                # update_dict = {
+                #     "created_at": time,
+                #     "updated_at": time,
+                #     "created_by": current_user["id"],
+                #     "updated_by": current_user["id"],
+                # }
+                # if reg_sample.test_type_id == 1:
+                #     for params_data in micro_params:
+                #         test_data = {
+                #             "test_parameter_id": params_data["test_params_id"],
+                #             **update_dict,
+                #         }
+                #         print(params_data)
+                #         test_param = SampleTestParameter(
+                #             **test_data,
+                #             order=params_data.get("order"),
+                #             sample_id=reg_sample.id,
+                #         )
+                #         database_session.add(test_param)
+                #         await database_session.commit()
+                # if reg_sample.test_type_id == 2:
+                #     for params_data in mech_params:
+                #         test_data = {
+                #             "test_parameter_id": params_data["test_params_id"],
+                #             **update_dict,
+                #         }
+                #         print(params_data)
+                #         test_param = SampleTestParameter(
+                #             **test_data,
+                #             order=params_data.get("order"),
+                #             sample_id=reg_sample.id,
+                #         )
+                #         database_session.add(test_param)
+                        # await database_session.commit()
 
         existing_samples = await Sample.get_all(
-            database_session, [Sample.registration_id == self.id, Sample.status_id == 1]
+            database_session, [Sample.registration_id == self.id]
         )
         for sample in existing_samples:
             for sample_data in samples_data:
-                if sample_data.get(id) is None:
-                    break
+                print(sample_data)
                 if sample.id == sample_data.get("id", ""):
                     break
             else:
+                print("Hi 2")
                 await database_session.delete(sample)
+
 
     async def update_test_types(
         self, database_session: AsyncSession, test_types_data, current_user

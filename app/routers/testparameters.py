@@ -35,6 +35,7 @@ async def get_all_testing_parameters(db: db_dep, user: user_dep):
 @router.get("/product/{product_id}", status_code=status.HTTP_200_OK)
 async def get_all_testing_parameters_by_product_id(
     db: db_dep,
+    user: user_dep,
     test_type: List[int] = Query(..., description="List of test_type IDs"),
     product_id:int=Path(gt=0),
 ):

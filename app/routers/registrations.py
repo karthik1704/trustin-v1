@@ -9,11 +9,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
 from app.dependencies.auth import get_current_user
+from app.models.front_desks import FrontDesk, FrontDeskStatus
 from app.models.samples import TestType, TestingParameter
 from app.models.registrations import (
     Registration,
     Batch,
     RegistrationSample,
+    RegistrationStatus,
     RegistrationTestParameter,
     Sample,
     SampleTestParameter,
@@ -97,9 +99,9 @@ async def create_registration_with_batches(
     }
     registration_data = registration_with_batches.model_dump()
     registration_data = {**registration_data, **update_dict}
-    mech_params_data = registration_data.pop("mech_params")
-    micro_params_data = registration_data.pop("micro_params")
-    test_params_data = mech_params_data + micro_params_data
+    # mech_params_data = registration_data.pop("mech_params")
+    # micro_params_data = registration_data.pop("micro_params")
+    # test_params_data = mech_params_data + micro_params_data
     samples = registration_data.pop("samples")
 
     # batches_data = registration_data.pop('batches')
@@ -109,6 +111,17 @@ async def create_registration_with_batches(
     registration_data.update({"code": code})
     registration = Registration(**registration_data)
     db_session.add(registration)
+    print(registration_data.get('status'))
+    if registration_data.get('status')==RegistrationStatus.REGISTERED:
+        print("HI")
+        front_desk = await FrontDesk.get_one(db_session,[FrontDesk.id==registration_data.get('front_desk_id')])
+        if front_desk:
+            update_dict = {
+                "updated_by": current_user["id"],
+            }
+            update_data = {"status":FrontDeskStatus.REGISTERED, **update_dict}
+            front_desk.update_front_desk(update_data)
+
     await db_session.commit()
     # Create batches associated with the registration
     # for batch_data in batches_data:
@@ -116,14 +129,14 @@ async def create_registration_with_batches(
     #     batch_data = {**batch_data, **update_dict}
     #     batch = Batch(**batch_data, registration_id=registration.id)
     #     db_session.add(batch)
-    for params_data in test_params_data:
-        # batch_data = batch_data.model_dump()
-        params_data = {**params_data, **update_dict}
-        print(params_data)
-        test_param = RegistrationTestParameter(
-            **params_data, registration_id=registration.id
-        )
-        db_session.add(test_param)
+    # for params_data in test_params_data:
+    #     # batch_data = batch_data.model_dump()
+    #     params_data = {**params_data, **update_dict}
+    #     print(params_data)
+    #     test_param = RegistrationTestParameter(
+    #         **params_data, registration_id=registration.id
+    #     )
+    #     db_session.add(test_param)
 
     for sample in samples:
         # batch_data = batch_data.model_dump()
@@ -145,45 +158,45 @@ async def create_registration_with_batches(
         )
         db_session.add(new_sample)
         await db_session.commit()
-        if new_sample.test_type_id == 1:
-            for params_data in micro_params_data:
-                update_dict = {
-                    "created_at": time,
-                    "updated_at": time,
-                    "created_by": current_user["id"],
-                    "updated_by": current_user["id"],
-                }
-                params_data = {
-                    "test_parameter_id": params_data["test_params_id"],
-                    **update_dict,
-                }
-                print(params_data)
-                test_param = SampleTestParameter(
-                    **params_data,
-                    order=params_data.get("order"),
-                    sample_id=new_sample.id,
-                )
-                db_session.add(test_param)
+        # if new_sample.test_type_id == 1:
+        #     for params_data in micro_params_data:
+        #         update_dict = {
+        #             "created_at": time,
+        #             "updated_at": time,
+        #             "created_by": current_user["id"],
+        #             "updated_by": current_user["id"],
+        #         }
+        #         params_data = {
+        #             "test_parameter_id": params_data["test_params_id"],
+        #             **update_dict,
+        #         }
+        #         print(params_data)
+        #         test_param = SampleTestParameter(
+        #             **params_data,
+        #             order=params_data.get("order"),
+        #             sample_id=new_sample.id,
+        #         )
+        #         db_session.add(test_param)
 
-        if new_sample.test_type_id == 2:
-            for params_data in mech_params_data:
-                update_dict = {
-                    "created_at": time,
-                    "updated_at": time,
-                    "created_by": current_user["id"],
-                    "updated_by": current_user["id"],
-                }
-                params_data = {
-                    "test_parameter_id": params_data["test_params_id"],
-                    **update_dict,
-                }
-                print(params_data)
-                test_param = SampleTestParameter(
-                    **params_data,
-                    order=params_data.get("order"),
-                    sample_id=new_sample.id,
-                )
-                db_session.add(test_param)
+        # if new_sample.test_type_id == 2:
+        #     for params_data in mech_params_data:
+        #         update_dict = {
+        #             "created_at": time,
+        #             "updated_at": time,
+        #             "created_by": current_user["id"],
+        #             "updated_by": current_user["id"],
+        #         }
+        #         params_data = {
+        #             "test_parameter_id": params_data["test_params_id"],
+        #             **update_dict,
+        #         }
+        #         print(params_data)
+        #         test_param = SampleTestParameter(
+        #             **params_data,
+        #             order=params_data.get("order"),
+        #             sample_id=new_sample.id,
+        #         )
+        #         db_session.add(test_param)
     # for types_data in test_types_data:
     #     # batch_data = batch_data.model_dump()
     #     types_data = {**types_data, **update_dict}
@@ -216,9 +229,9 @@ async def update_registration_with_batches(
     current_user: dict = Depends(get_current_user),
 ):
     registration_data = registration.model_dump()
-    micro_params_data = registration_data.pop("micro_params", [])
-    mech_params_data = registration_data.pop("mech_params", [])
-    test_params_data = micro_params_data + mech_params_data
+    # micro_params_data = registration_data.pop("micro_params", [])
+    # mech_params_data = registration_data.pop("mech_params", [])
+    # test_params_data = micro_params_data + mech_params_data
     samples = registration_data.pop("samples", [])
     # batches_data = registration_data.pop("batches",[])
     # test_types_data = registration_data.pop("test_types",[])
@@ -236,15 +249,25 @@ async def update_registration_with_batches(
     }
     registration_data = {**registration_data, **update_dict}
     registration.update_registration(registration_data)
+    if registration_data.get('status')==RegistrationStatus.REGISTERED:
+        print("HI")
+        front_desk = await FrontDesk.get_one(db_session,[FrontDesk.id==registration_data.get('front_desk_id')])
+        if front_desk:
+            update_dict = {
+                "updated_by": current_user["id"],
+            }
+            update_data = {"status":FrontDeskStatus.REGISTERED, **update_dict}
+            front_desk.update_front_desk(update_data)
+
     # if batches_data:
     #     await registration.update_batches(db_session, batches_data, current_user)
-    if test_params_data:
-        await registration.update_test_prams(db_session, test_params_data, current_user)
+    # if test_params_data:
+    #     await registration.update_test_prams(db_session, test_params_data, current_user)
     # if test_types_data:
     #     await registration.update_test_types(db_session, test_types_data, current_user)
     if samples:
         await registration.update_samples(
-            db_session, samples, current_user,  mech_params_data, micro_params_data
+            db_session, samples, current_user,  [], []
         )
 
     await db_session.commit()

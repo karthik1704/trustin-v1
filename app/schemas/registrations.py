@@ -14,6 +14,7 @@ from ..models.registrations import (
     DisposalProcessEnum,
     Registration,
     Batch,
+    RegistrationStatus,
     ReportSentByEnum,
     SamplingByEnum,
     TestingProcessEnum,
@@ -89,19 +90,19 @@ class RegistrationTestTypeSchema(BaseModel):
 
 class RegistrationListSchema(BaseModel):
     id: int
-    branch_id: int
+    # branch_id: int
     code: (
         str | None
     )  # added none temp, because code null in already created registration
     # trf_id: int
-    trf_code: str
+    # trf_code: str
     company_id: int
     company_name: str
-    customer_address_line1: str
-    customer_address_line2: str
-    city: str
-    state: str
-    pincode_no: str
+    # customer_address_line1: str
+    # customer_address_line2: str
+    # city: str
+    # state: str
+    # pincode_no: str
     gst: str
     date_of_registration: datetime
     date_of_received: datetime
@@ -111,6 +112,7 @@ class RegistrationListSchema(BaseModel):
     updated_by: int
     # test_type: str
     product_id: int
+    status: RegistrationStatus
 
 
 class RegistrationSampleSchema(BaseModel):
@@ -264,16 +266,17 @@ class RegSamples(BaseModel):
 class RegistrationSchema(BaseModel):
     id: int
     code: str
-    branch_id: int
+    # branch_id: int
     front_desk_id:int
-    trf_code: str
+    # trf_code: str
     company_id: int
     company_name: str
-    customer_address_line1: str
-    customer_address_line2: str
-    city: str
-    state: str
-    pincode_no: str
+    full_address: str
+    # customer_address_line1: str
+    # customer_address_line2: str
+    # city: str
+    # state: str
+    # pincode_no: str
     gst: str
     date_of_registration: datetime
     date_of_received: datetime
@@ -285,23 +288,24 @@ class RegistrationSchema(BaseModel):
     product_id: int
     # test_type_id: int
     license_no: str
-    nabl_logo: bool
+    # nabl_logo: bool
     testing_process: TestingProcessEnum
     sampled_by: SamplingByEnum
     sample_disposal_process: DisposalProcessEnum
 
-    sample_name: str
-    batch_or_lot_no: str
-    manufactured_date: date
-    expiry_date: date
+    # sample_name: str
+    # batch_or_lot_no: str
+    # manufactured_date: date
+    # expiry_date: date
     batch_size: int
-    received_quantity: int
-    no_of_samples: int
-    controlled_quantity: int
+    # received_quantity: int
+    # no_of_samples: int
+    no_of_batches: int
+    # controlled_quantity: int
     # batches : Optional[list[BatchSchema]]
-    test_params: Optional[list[RegistrationTestParamsSchema]]
+    # test_params: Optional[list[RegistrationTestParamsSchema]]
     samples: Optional[list[RegSamples]]
-
+    status: RegistrationStatus
     # test_types: Optional[list[RegistrationTestTypeSchema]]
     # trf : TRFSchema
     # reg_samples:Optional[List[RegistrationSamplesSchema]]
@@ -342,38 +346,40 @@ class SampleCreateSchema(BaseModel):
 
 
 class RegistrationCreate(BaseModel):
-    branch_id: int
-    trf_code: str
+    # branch_id: int
+    # trf_code: str
     company_id: int
     front_desk_id: int
     # test_type_id: int
     company_name: str
-    customer_address_line1: str
-    customer_address_line2: str
-    city: str
-    state: str
-    pincode_no: str
+    full_address: str
+    # customer_address_line1: str
+    # customer_address_line2: str
+    # city: str
+    # state: str
+    # pincode_no: str
     gst: str
     date_of_received: date
     product_id: int
     reports_send_by: ReportSentByEnum
     license_no: str
-    nabl_logo: bool
+    # nabl_logo: bool
     testing_process: TestingProcessEnum
     sampled_by: SamplingByEnum
     sample_disposal_process: DisposalProcessEnum
-
-    sample_name: str
-    batch_or_lot_no: str
-    manufactured_date: date
-    expiry_date: date
+    status: RegistrationStatus
+    # sample_name: str
+    # batch_or_lot_no: str
+    # manufactured_date: date
+    # expiry_date: date
     batch_size: int
-    received_quantity: int
-    controlled_quantity: int
+    # received_quantity: int
+    # controlled_quantity: int
 
-    no_of_samples: int
-    micro_params: List[RegistrationTestParamsCreate]
-    mech_params: List[RegistrationTestParamsCreate]
+    # no_of_samples: int
+    no_of_batches: int
+    # micro_params: List[RegistrationTestParamsCreate]
+    # mech_params: List[RegistrationTestParamsCreate]
     samples: List[SampleCreateSchema]
     # batches: List[BatchCreate]
     # test_types : List[RegistrationTestTypeCreate]
@@ -409,7 +415,7 @@ class RegistrationSampleUpdate(BaseModel):
 
 
 class SampleUpdateSchema(BaseModel):
-    id: int | None
+    id: int | str
     sample_name: str
     batch_or_lot_no: str
     manufactured_date: date
@@ -420,39 +426,41 @@ class SampleUpdateSchema(BaseModel):
 
 
 class RegistrationUpdate(BaseModel):
-    branch_id: Optional[int]
+    # branch_id: Optional[int]
     # trf_id: Optional[int]
-    trf_code: str
+    # trf_code: str
     # test_type_id: int
     front_desk_id:int
     company_id: Optional[int]
     company_name: Optional[str]
-    customer_address_line1: Optional[str]
-    customer_address_line2: Optional[str]
-    city: Optional[str]
-    state: Optional[str]
-    pincode_no: Optional[str]
+    full_address: Optional[str]
+    # customer_address_line1: Optional[str]
+    # customer_address_line2: Optional[str]
+    # city: Optional[str]
+    # state: Optional[str]
+    # pincode_no: Optional[str]
     gst: Optional[str]
     date_of_received: Optional[date]
     product_id: Optional[int]
     reports_send_by: ReportSentByEnum
     license_no: str
-    nabl_logo: bool
+    # nabl_logo: bool
     testing_process: TestingProcessEnum
     sampled_by: SamplingByEnum
     sample_disposal_process: DisposalProcessEnum
-
-    sample_name: str
-    batch_or_lot_no: str
-    manufactured_date: date
-    expiry_date: date
+    status: RegistrationStatus
+    # sample_name: str
+    # batch_or_lot_no: str
+    # manufactured_date: date
+    # expiry_date: date
     batch_size: int
-    received_quantity: int
-    controlled_quantity: int
+    # received_quantity: int
+    # controlled_quantity: int
 
-    no_of_samples: int
-    micro_params: List[RegistrationTestParamsCreate]
-    mech_params: List[RegistrationTestParamsCreate]
+    # no_of_samples: int
+    no_of_batches: int
+    # micro_params: List[RegistrationTestParamsCreate]
+    # mech_params: List[RegistrationTestParamsCreate]
     samples: List[SampleUpdateSchema]
     # created_by: Optional[int]
     # updated_by: Optional[int]
