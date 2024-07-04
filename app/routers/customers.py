@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, Path, status, HTTPException, Header
 from sqlalchemy.orm import Session, joinedload
-
+from typing import Optional
 from app.dependencies.auth import get_current_user
 from app.utils import get_unique_code
 from ..schemas.customers import CustomerCreate
@@ -15,17 +15,36 @@ user_dep = Annotated[dict, Depends(get_current_user)]
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
-async def get_all_Customers(db: db_dep, user: user_dep):
+async def get_all_Customers(db: db_dep, user: user_dep,
+                            page: int = 1, 
+                            size: int = 10, 
+                            search: Optional[str] = None, 
+                            sort_by: str = "id", 
+                            sort_order: str = "desc"):
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
 
-    customers = db.query(Customer).order_by(Customer.updated_at.desc()).all()
-
-    return customers
-
-
+    # customers = db.query(Customer).order_by(Customer.updated_at.desc()).all()
+    query = db.query(Customer)
+    if search:
+        query = query.filter(Customer.company_name.ilike(f"%{search}%"))
+    print(sort_by)
+    print(sort_order)
+    if sort_by and hasattr(Customer, sort_by):
+        if sort_order == "asc":
+            query = query.order_by(getattr(Customer, sort_by).asc())
+        else:
+            query = query.order_by(getattr(Customer, sort_by).desc())
+    total_customers = query.count()
+    customers = query.offset((page - 1) * size).limit(size).all()
+    return {
+        "data": customers,
+        "total": total_customers,
+        "page": page,
+        "size": size
+    }
 
 @router.get("/{customer_id}", status_code=status.HTTP_200_OK)
 async def get_Customer(db: db_dep, user: user_dep, customer_id: int = Path(gt=0)):
