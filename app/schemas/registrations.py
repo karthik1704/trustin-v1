@@ -117,18 +117,19 @@ class RegistrationListSchema(BaseModel):
 
 class RegistrationSampleSchema(BaseModel):
     id: int
-    branch_id: int
+    # branch_id: int
     code: (
         str | None
     )  # added none temp, because code null in already created registration
-    trf_code: str
+    # trf_code: str
     company_id: int
     company_name: str
-    customer_address_line1: str
-    customer_address_line2: str
-    city: str
-    state: str
-    pincode_no: str
+    full_address: str
+    # customer_address_line1: str
+    # customer_address_line2: str
+    # city: str
+    # state: str
+    # pincode_no: str
     gst: str
     date_of_registration: datetime
     date_of_received: datetime
