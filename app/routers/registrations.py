@@ -148,6 +148,7 @@ async def create_registration_with_batches(
             "created_by": current_user["id"],
             "updated_by": current_user["id"],
         }
+        test_params = sample.pop('test_params')
         sample_data = {**sample, **update_dict}
         print(sample_data)
         sample_id = await Sample.generate_next_code(db_session, registration.id)
@@ -158,6 +159,23 @@ async def create_registration_with_batches(
         )
         db_session.add(new_sample)
         await db_session.commit()
+        for params_data in test_params:
+            update_dict = {
+                "created_at": time,
+                "updated_at": time,
+                "created_by": current_user["id"],
+                "updated_by": current_user["id"],
+            }
+            params_data = {
+               **params_data,
+                **update_dict,
+            }
+            print(params_data)
+            test_param = SampleTestParameter(
+                **params_data,
+                sample_id=new_sample.id,
+            )
+            db_session.add(test_param)
         # if new_sample.test_type_id == 1:
         #     for params_data in micro_params_data:
         #         update_dict = {
@@ -249,15 +267,15 @@ async def update_registration_with_batches(
     }
     registration_data = {**registration_data, **update_dict}
     registration.update_registration(registration_data)
-    if registration_data.get('status')==RegistrationStatus.REGISTERED:
-        print("HI")
-        front_desk = await FrontDesk.get_one(db_session,[FrontDesk.id==registration_data.get('front_desk_id')])
-        if front_desk:
-            update_dict = {
-                "updated_by": current_user["id"],
-            }
-            update_data = {"status":FrontDeskStatus.REGISTERED, **update_dict}
-            front_desk.update_front_desk(update_data)
+    # if registration_data.get('status')==RegistrationStatus.REGISTERED:
+    #     print("HI")
+    #     front_desk = await FrontDesk.get_one(db_session,[FrontDesk.id==registration_data.get('front_desk_id')])
+    #     if front_desk:
+    #         update_dict = {
+    #             "updated_by": current_user["id"],
+    #         }
+    #         update_data = {"status":FrontDeskStatus.REGISTERED, **update_dict}
+    #         front_desk.update_front_desk(update_data)
 
     # if batches_data:
     #     await registration.update_batches(db_session, batches_data, current_user)

@@ -260,6 +260,7 @@ class RegSamples(BaseModel):
     batch_size: int
     received_quantity: int
     status_id: int
+    sample_test_parameters: Optional[list[SampleTestParameterSchema]]
     
 
 
@@ -334,6 +335,9 @@ class RegistrationTestTypeCreate(BaseModel):
 class RegistrationSampleCreate(BaseModel):
     sample_id: int
 
+class SampleTestParams(BaseModel):
+    test_parameter_id: int
+    order: int
 
 class SampleCreateSchema(BaseModel):
     sample_name: str
@@ -343,7 +347,7 @@ class SampleCreateSchema(BaseModel):
     batch_size: int
     received_quantity: int
     test_type_id: int
-
+    test_params: List[SampleTestParams]
 
 class RegistrationCreate(BaseModel):
     # branch_id: int
@@ -414,6 +418,10 @@ class RegistrationSampleUpdate(BaseModel):
     sample_id: Optional[int]
 
 
+class SampleTestParamsUpdate(BaseModel):
+    test_params_id:int
+    order: int
+
 class SampleUpdateSchema(BaseModel):
     id: int | str
     sample_name: str
@@ -423,6 +431,7 @@ class SampleUpdateSchema(BaseModel):
     batch_size: int
     received_quantity: int
     test_type_id: int
+    test_params: List[SampleTestParamsUpdate]
 
 
 class RegistrationUpdate(BaseModel):

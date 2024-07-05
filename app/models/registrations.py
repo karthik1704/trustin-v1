@@ -276,6 +276,7 @@ class Registration(Base):
         print("update test params")
         time = datetime.now()
         for sample_data in samples_data:
+            test_params = sample_data.pop("test_params")
             sample_id = sample_data.get("id", None)
             reg_sample = None
             if sample_id:
@@ -297,6 +298,9 @@ class Registration(Base):
                 }
                 sample_data = {**sample_data, **update_dict}
                 await reg_sample.update_sample(sample_data)
+                await reg_sample.update_test_params(
+                        database_session, test_params, current_user
+                    )
                 # for params_data in reg_params:
 
                 # if reg_sample.test_type_id == 1:
@@ -341,6 +345,28 @@ class Registration(Base):
                 sample_data.update({"sample_id": sample_id})
                 reg_sample = Sample(**sample_data, registration_id=self.id)
                 database_session.add(reg_sample)
+                await database_session.commit()
+                await database_session.refresh(reg_sample)
+
+                update_dict = {
+                    "created_at": time,
+                    "updated_at": time,
+                    "created_by": current_user["id"],
+                    "updated_by": current_user["id"],
+                }
+                for params_data in test_params:
+                    test_data = {
+                        "test_parameter_id":params_data['test_params_id'],
+                        "order":params_data['order'],
+                        **update_dict,
+                    }
+                    print(params_data)
+                    test_param = SampleTestParameter(
+                        **test_data,
+                        sample_id=reg_sample.id,
+                    )
+                    database_session.add(test_param)
+                    await database_session.commit()
                 # await database_session.commit()
                 # await database_session.refresh(reg_sample)
                 # update_dict = {
@@ -381,14 +407,14 @@ class Registration(Base):
         existing_samples = await Sample.get_all(
             database_session, [Sample.registration_id == self.id]
         )
-        for sample in existing_samples:
-            for sample_data in samples_data:
-                print(sample_data)
-                if sample.id == sample_data.get("id", ""):
-                    break
-            else:
-                print("Hi 2")
-                await database_session.delete(sample)
+        # for sample in existing_samples:
+        #     for sample_data in samples_data:
+        #         print(sample_data)
+        #         if sample.id == sample_data.get("id", ""):
+        #             break
+        #     else:
+        #         print("Hi 2")
+        #         await database_session.delete(sample)
 
 
     async def update_test_types(

@@ -26,28 +26,28 @@ def create_access_token(
     email: str, user_id: int, role_id: int,department_id:Optional[int], expires_delta: int = None
 ) -> str:
     if expires_delta is not None:
-        expires_delta = datetime.now(UTC) + timedelta(days=30)
+        expires_at = datetime.now(UTC) + timedelta(days=30)
     else:
-        expires_delta = datetime.now(UTC) + timedelta(days=30)
+        expires_at = datetime.now(UTC) + timedelta(days=30)
 
-    print(expires_delta)
+    print(expires_at)
 
     encode = {"sub": email, "id": user_id, "role_id": role_id, "dept_id" : department_id}
-    encode.update({"exp": expires_delta})
+    encode.update({"exp": expires_at})
     encoded_jwt = jwt.encode(encode, JWT_SECRET_KEY, ALGORITHM)
     return encoded_jwt
 
 
 def create_refresh_token(
-    email: str, user_id: int, role: str, expires_delta: int = None
+    email: str, user_id: int, role: str, expires_delta: int | None = None
 ) -> str:
     if expires_delta is not None:
-        expires_delta = datetime.now(UTC) + expires_delta
+        expires_at = datetime.now(UTC) + expires_delta
 
     else:
-        expires_delta = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_MINUTES)
+        expires_at = datetime.now(UTC) + timedelta(days=REFRESH_TOKEN_EXPIRE_MINUTES)
     encode = {"sub": email, "id": user_id, "role": role}
-    encode.update({"exp": expires_delta})
+    encode.update({"exp": expires_at})
     encoded_jwt = jwt.encode(encode, JWT_SECRET_KEY, ALGORITHM)
     return encoded_jwt
 
