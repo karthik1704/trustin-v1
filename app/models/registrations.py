@@ -57,16 +57,20 @@ class YesOrNoEnum(PyEnum):
     YES = "YES"
     NO = "NO"
 
+
 class RegistrationStatus(PyEnum):
-    UNDER_REGISTRATION = 'UNDER_REGISTRATION'
-    REGISTERED = 'REGISTERED'
+    UNDER_REGISTRATION = "UNDER_REGISTRATION"
+    REGISTERED = "REGISTERED"
+
 
 class Registration(Base):
     __tablename__ = "registrations"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     code: Mapped[str] = mapped_column(String, nullable=True)
-    branch_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(Branch.id), nullable=True)
+    branch_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey(Branch.id), nullable=True
+    )
     trf_id: Mapped[int] = mapped_column(Integer, ForeignKey(TRF.id), nullable=True)
     trf_code: Mapped[Optional[str]]
     company_id: Mapped[int] = mapped_column(Integer, ForeignKey(Customer.id))
@@ -101,13 +105,17 @@ class Registration(Base):
     # test_type  : Mapped[str] =  mapped_column(String)
     product_id: Mapped[int] = mapped_column(Integer, ForeignKey("products.id"))
 
-    testing_process: Mapped[TestingProcessEnum] = mapped_column(Enum(TestingProcessEnum))
+    testing_process: Mapped[TestingProcessEnum] = mapped_column(
+        Enum(TestingProcessEnum)
+    )
 
     # nabl_logo: Mapped[Optional[bool]]
     license_no: Mapped[Optional[str]]
     sampled_by: Mapped[Optional[SamplingByEnum]] = mapped_column(Enum(SamplingByEnum))
 
-    sample_disposal_process: Mapped[Optional[DisposalProcessEnum]] = mapped_column(Enum(DisposalProcessEnum))
+    sample_disposal_process: Mapped[Optional[DisposalProcessEnum]] = mapped_column(
+        Enum(DisposalProcessEnum)
+    )
 
     sample_name: Mapped[Optional[str]]
     batch_or_lot_no: Mapped[Optional[str]]
@@ -120,7 +128,9 @@ class Registration(Base):
     no_of_samples: Mapped[int] = mapped_column(default=0)
     no_of_batches: Mapped[int] = mapped_column(default=0)
     controlled_quantity: Mapped[Optional[int]] = mapped_column(default=0)
-    reports_send_by: Mapped[Optional[ReportSentByEnum]] = mapped_column(Enum(ReportSentByEnum))
+    reports_send_by: Mapped[Optional[ReportSentByEnum]] = mapped_column(
+        Enum(ReportSentByEnum)
+    )
 
     trf = relationship("TRF", back_populates="registrations", lazy="selectin")
     # batches = relationship("Batch", back_populates="registration", lazy="selectin")
@@ -162,8 +172,48 @@ class Registration(Base):
         return new_code
 
     @classmethod
-    async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
-        _stmt = select(cls).where(*where_conditions).order_by(desc(cls.code))
+    async def get_all(
+        cls,
+        database_session: AsyncSession,
+        where_conditions: list[Any],
+    ):
+        _stmt = select(cls).where(*where_conditions)
+
+        _result = await database_session.execute(_stmt)
+        return _result.scalars()
+
+    @classmethod
+    async def get_all_with_pagination(
+        cls,
+        database_session: AsyncSession,
+        where_conditions: list[Any],
+        page: int = 1,
+        size: int = 10,
+        search: Optional[str] = None,
+        sort_by: str = "id",
+        sort_order: str = "desc",
+    ):
+        _stmt = select(cls)
+
+        if search:
+            _stmt = _stmt.where(Registration.company_name.ilike(f"%{search}%"))
+        print(sort_by)
+        print(sort_order)
+        if sort_by and hasattr(Registration, sort_by):
+            if sort_order == "asc":
+                _stmt = _stmt.order_by(getattr(Registration, sort_by).asc())
+            else:
+                _stmt = _stmt.order_by(getattr(Registration, sort_by).desc())
+        total_customers_query = select(func.count()).select_from(_stmt.subquery())
+        total_customers_result = await database_session.execute(total_customers_query)
+        total_customers = total_customers_result.scalar()
+        customers = _stmt.offset((page - 1) * size).limit(size)
+
+        result = await database_session.execute(customers)
+        customers = result.scalars().all()
+
+        return {"data": customers, "total": total_customers, "page": page, "size": size}
+
         _result = await database_session.execute(_stmt)
         return _result.scalars()
 
@@ -290,7 +340,7 @@ class Registration(Base):
                 )
                 print(reg_sample)
             if reg_sample:
-                
+
                 print("u[date]")
                 update_dict = {
                     "updated_at": time,
@@ -299,8 +349,8 @@ class Registration(Base):
                 sample_data = {**sample_data, **update_dict}
                 await reg_sample.update_sample(sample_data)
                 await reg_sample.update_test_params(
-                        database_session, test_params, current_user
-                    )
+                    database_session, test_params, current_user
+                )
                 # for params_data in reg_params:
 
                 # if reg_sample.test_type_id == 1:
@@ -356,8 +406,8 @@ class Registration(Base):
                 }
                 for params_data in test_params:
                     test_data = {
-                        "test_parameter_id":params_data['test_params_id'],
-                        "order":params_data['order'],
+                        "test_parameter_id": params_data["test_params_id"],
+                        "order": params_data["order"],
                         **update_dict,
                     }
                     print(params_data)
@@ -402,7 +452,7 @@ class Registration(Base):
                 #             sample_id=reg_sample.id,
                 #         )
                 #         database_session.add(test_param)
-                        # await database_session.commit()
+                # await database_session.commit()
 
         existing_samples = await Sample.get_all(
             database_session, [Sample.registration_id == self.id]
@@ -415,7 +465,6 @@ class Registration(Base):
         #     else:
         #         print("Hi 2")
         #         await database_session.delete(sample)
-
 
     async def update_test_types(
         self, database_session: AsyncSession, test_types_data, current_user

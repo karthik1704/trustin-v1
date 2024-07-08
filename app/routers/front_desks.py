@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies.auth import get_current_user
 from app.database import get_db, get_async_db
 from app.models.front_desks import FrontDesk
-from app.schemas.front_desks import FrontDeskCreate, FrontDeskSchema
+from app.schemas.front_desks import FrontDeskCreate, FrontDeskSchema, FrontDeskUpdate
 
 
 router = APIRouter(prefix="/front-desks", tags=["front-desk"])
@@ -65,7 +65,7 @@ async def create_front_desk(
 
 @router.put("/{id}", response_model=FrontDeskSchema)
 async def update_front_desk(
-    id: int, data: FrontDeskCreate, db_session: db_dep, current_user: user_dep
+    id: int, data: FrontDeskUpdate, db_session: db_dep, current_user: user_dep
 ):
     _data = data.model_dump()
 

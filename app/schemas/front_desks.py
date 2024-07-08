@@ -16,8 +16,19 @@ class FrontDeskCreate(BaseModel):
     deparment_id:int
     status: FrontDeskStatus
 
+class FrontDeskUpdate(BaseModel):
+    customer_id: int
+    courier_name: str
+    date_of_received: datetime 
+    received_condition: ReceivedCondition
+    temperature:str
+    deparment_id:int
+    reason:str
+    
+
 class FrontDeskSchema(FrontDeskCreate):
     id: int
     customer: Optional[CustomerSchema]
     user_received_by: Optional[UserSchema]
+    reason:Optional[str]
     

@@ -15,7 +15,7 @@ user_dep = Annotated[dict, Depends(get_current_user)]
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
-async def get_all_Customers(db: db_dep, user: user_dep,
+async def get_all_Customers_with_pagination(db: db_dep, user: user_dep,
                             page: int = 1, 
                             size: int = 10, 
                             search: Optional[str] = None, 
@@ -45,6 +45,16 @@ async def get_all_Customers(db: db_dep, user: user_dep,
         "page": page,
         "size": size
     }
+@router.get("/all/", status_code=status.HTTP_200_OK)
+async def get_all_Customers(db: db_dep, user: user_dep,):
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+        )
+
+    customers = db.query(Customer).order_by(Customer.updated_at.desc()).all()
+   
+    return customers
 
 @router.get("/{customer_id}", status_code=status.HTTP_200_OK)
 async def get_Customer(db: db_dep, user: user_dep, customer_id: int = Path(gt=0)):

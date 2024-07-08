@@ -50,14 +50,27 @@ db_dep = Annotated[Session, Depends(get_db)]
 user_dep = Annotated[dict, Depends(get_current_user)]
 
 
-@router.get("/", response_model=list[RegistrationListSchema])
+@router.get("/", )
 async def get_all_registrations(
     request: Request,
     db_session: AsyncSession = Depends(get_async_db),
     current_user: dict = Depends(get_current_user),
+    page: int = 1,
+    size: int = 10,
+    search: Optional[str] = None,
+    sort_by: str = "id",
+    sort_order: str = "desc",
 ):
     try:
-        _registrations = await Registration.get_all(db_session, [])
+        _registrations = await Registration.get_all_with_pagination(
+            db_session,
+            [],
+            page,
+            size,
+            search,
+            sort_by,
+            sort_order,
+        )
         return _registrations
 
     except Exception as e:
@@ -111,15 +124,17 @@ async def create_registration_with_batches(
     registration_data.update({"code": code})
     registration = Registration(**registration_data)
     db_session.add(registration)
-    print(registration_data.get('status'))
-    if registration_data.get('status')==RegistrationStatus.REGISTERED:
+    print(registration_data.get("status"))
+    if registration_data.get("status") == RegistrationStatus.REGISTERED:
         print("HI")
-        front_desk = await FrontDesk.get_one(db_session,[FrontDesk.id==registration_data.get('front_desk_id')])
+        front_desk = await FrontDesk.get_one(
+            db_session, [FrontDesk.id == registration_data.get("front_desk_id")]
+        )
         if front_desk:
             update_dict = {
                 "updated_by": current_user["id"],
             }
-            update_data = {"status":FrontDeskStatus.REGISTERED, **update_dict}
+            update_data = {"status": FrontDeskStatus.REGISTERED, **update_dict}
             front_desk.update_front_desk(update_data)
 
     await db_session.commit()
@@ -148,7 +163,7 @@ async def create_registration_with_batches(
             "created_by": current_user["id"],
             "updated_by": current_user["id"],
         }
-        test_params = sample.pop('test_params')
+        test_params = sample.pop("test_params")
         sample_data = {**sample, **update_dict}
         print(sample_data)
         sample_id = await Sample.generate_next_code(db_session, registration.id)
@@ -167,7 +182,7 @@ async def create_registration_with_batches(
                 "updated_by": current_user["id"],
             }
             params_data = {
-               **params_data,
+                **params_data,
                 **update_dict,
             }
             print(params_data)
@@ -284,9 +299,7 @@ async def update_registration_with_batches(
     # if test_types_data:
     #     await registration.update_test_types(db_session, test_types_data, current_user)
     if samples:
-        await registration.update_samples(
-            db_session, samples, current_user,  [], []
-        )
+        await registration.update_samples(db_session, samples, current_user, [], [])
 
     await db_session.commit()
     await db_session.refresh(registration)

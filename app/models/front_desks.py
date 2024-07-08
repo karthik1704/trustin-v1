@@ -7,6 +7,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     Date,
+    Text,
     func,
     UUID,
     Enum,
@@ -59,6 +60,7 @@ class FrontDesk(Base):
     deparment_id: Mapped[Optional[int]] = mapped_column(ForeignKey(Department.id))
     status: Mapped[FrontDeskStatus] = mapped_column(Enum(FrontDeskStatus))
     received_by: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(User.id))
+    reason: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
