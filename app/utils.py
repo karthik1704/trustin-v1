@@ -60,8 +60,8 @@ def get_unique_code(prefix: str, unique_number: int) -> str:
     setup_fiscal_calendar(start_month=4)
     start_year = FiscalYear.current().start.strftime("%Y")[-2:]
     end_year = FiscalYear.current().end.strftime("%Y")[-2:]
-
-    new_code = f"TAS/{prefix+"/" if prefix else ""}{start_year}-{end_year}/{unique_number:04}" 
+    pre=prefix+"/" if prefix else ""
+    new_code = f"TAS/{pre}{start_year}-{end_year}/{unique_number:04}" 
 
     return new_code
 
