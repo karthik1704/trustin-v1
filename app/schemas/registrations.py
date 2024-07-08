@@ -5,7 +5,7 @@ from typing import List
 # from pydantic import BaseModel
 # from ..models.test_request_forms import SamplingByEnum, TestingDetail, YesOrNoEnum, ReportSentByEnum, DocumentsTypeEnum, TestingProcessEnum, DisposalProcessEnum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator, validator
 from typing import List, Optional
 from datetime import datetime
 
@@ -196,8 +196,9 @@ class SampleListSchema(BaseModel):
     sample_id: str
     sample_name: str
     batch_or_lot_no: str
-    manufactured_date: date
-    expiry_date: date
+    manufactured_date: Optional[date]
+    expiry_date: Optional[date]
+    tat:Optional[date] 
     batch_size: int
     received_quantity: int
     registration_id: int | None
@@ -219,8 +220,9 @@ class SampleSchema(BaseModel):
     sample_id: str
     sample_name: str
     batch_or_lot_no: str
-    manufactured_date: date
-    expiry_date: date
+    manufactured_date: Optional[date]
+    expiry_date: Optional[date]
+    tat:Optional[date]
     batch_size: int
     received_quantity: int
     registration_id: int | None
@@ -256,8 +258,9 @@ class RegSamples(BaseModel):
     sample_name: str
     test_type_id: int
     batch_or_lot_no: str
-    manufactured_date: date
-    expiry_date: date
+    manufactured_date: Optional[date]
+    expiry_date: Optional[date]
+    tat: Optional[date]
     batch_size: int
     received_quantity: int
     status_id: int
@@ -343,13 +346,25 @@ class SampleTestParams(BaseModel):
 class SampleCreateSchema(BaseModel):
     sample_name: str
     batch_or_lot_no: str
-    manufactured_date: date
-    expiry_date: date
+    manufactured_date: Optional[date] 
+    expiry_date: Optional[date] 
+    tat: Optional[date] | None
     batch_size: int
     received_quantity: int
     test_type_id: int
     test_params: List[SampleTestParams]
 
+
+    @staticmethod
+    def handle_empty_string(value: Optional[str]):
+        if value == "":
+            return None
+        return value
+
+    @field_validator('manufactured_date', 'expiry_date', 'tat', mode='before')
+    def check_empty_string(cls, value):
+        return cls.handle_empty_string(value)
+    
 class RegistrationCreate(BaseModel):
     # branch_id: int
     # trf_code: str
@@ -427,12 +442,24 @@ class SampleUpdateSchema(BaseModel):
     id: int | str
     sample_name: str
     batch_or_lot_no: str
-    manufactured_date: date
-    expiry_date: date
+    manufactured_date: Optional[date]
+    expiry_date: Optional[date]
+    tat: Optional[date]
     batch_size: int
     received_quantity: int
     test_type_id: int
     test_params: List[SampleTestParamsUpdate]
+
+    
+    @staticmethod
+    def handle_empty_string(value: Optional[str]):
+        if value == "":
+            return None
+        return value
+
+    @field_validator('manufactured_date', 'expiry_date', 'tat', mode='before')
+    def check_empty_string(cls, value):
+        return cls.handle_empty_string(value)
 
 
 class RegistrationUpdate(BaseModel):

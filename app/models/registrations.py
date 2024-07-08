@@ -166,7 +166,7 @@ class Registration(Base):
             highest_code_int = 1
         # Generate the new code by combining the prefix and the incremented integer
         new_code = get_unique_code(
-            "REG", highest_code_int
+            "", highest_code_int
         )  # Adjust the format based on your requirements
         # session.close()
         return new_code
@@ -760,10 +760,13 @@ class Sample(Base):
 
     sample_name: Mapped[Optional[str]]
     batch_or_lot_no: Mapped[Optional[str]]
-    manufactured_date: Mapped[Optional[date]]
-    expiry_date: Mapped[Optional[date]]
+    manufactured_date: Mapped[Optional[date]] = mapped_column(nullable=True)
+    expiry_date: Mapped[Optional[date]] = mapped_column(nullable=True)
     batch_size: Mapped[Optional[int]]
     received_quantity: Mapped[Optional[int]]
+    tat: Mapped[Optional[date]] = mapped_column(
+    nullable=True
+    )
 
     assigned_to: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True
