@@ -764,9 +764,7 @@ class Sample(Base):
     expiry_date: Mapped[Optional[date]] = mapped_column(nullable=True)
     batch_size: Mapped[Optional[int]]
     received_quantity: Mapped[Optional[int]]
-    tat: Mapped[Optional[date]] = mapped_column(
-    nullable=True
-    )
+    tat: Mapped[Optional[date]] = mapped_column(nullable=True)
 
     assigned_to: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True
@@ -849,8 +847,48 @@ class Sample(Base):
         return _result.scalars().all()
 
     @classmethod
+    async def get_all_with_pagination(
+        cls,
+        database_session: AsyncSession,
+        where_conditions: list[Any],
+        page: int = 1,
+        size: int = 10,
+        search: Optional[str] = None,
+        sort_by: str = "id",
+        sort_order: str = "desc",
+    ):
+        _stmt = select(cls).where(*where_conditions)
+
+        if search:
+            _stmt = _stmt.where(cls.sample_name.ilike(f"%{search}%"))
+        print(sort_by)
+        print(sort_order)
+        if sort_by and hasattr(cls, sort_by):
+            if sort_order == "asc":
+                _stmt = _stmt.order_by(getattr(cls, sort_by).asc())
+            else:
+                _stmt = _stmt.order_by(getattr(cls, sort_by).desc())
+        total_customers_query = select(func.count()).select_from(_stmt.subquery())
+        total_customers_result = await database_session.execute(total_customers_query)
+        total_customers = total_customers_result.scalar()
+        customers = _stmt.offset((page - 1) * size).limit(size)
+
+        result = await database_session.execute(customers)
+        customers = result.scalars().all()
+
+        return {"data": customers, "total": total_customers, "page": page, "size": size}
+
+    @classmethod
     async def get_for_qa_hod(
-        cls, database_session: AsyncSession, user, where_conditions: list[Any]
+        cls,
+        database_session: AsyncSession,
+        user,
+        where_conditions: list[Any],
+        page: int = 1,
+        size: int = 10,
+        search: Optional[str] = None,
+        sort_by: str = "id",
+        sort_order: str = "desc",
     ):
         _stmt = (
             select(cls)
@@ -858,13 +896,40 @@ class Sample(Base):
             .join(User, cls.test_type_id == User.qa_type_id)
             .where(User.id == user.get("id"), cls.status == "Submitted")
         )
-        # _stmt = select(cls).where(*where_conditions)
-        _result = await database_session.execute(_stmt)
-        return _result.scalars()
+ 
+        if search:
+            _stmt = _stmt.where(cls.sample_name.ilike(f"%{search}%"))
+        print(sort_by)
+        print(sort_order)
+        if sort_by and hasattr(cls, sort_by):
+            if sort_order == "asc":
+                _stmt = _stmt.order_by(getattr(cls, sort_by).asc())
+            else:
+                _stmt = _stmt.order_by(getattr(cls, sort_by).desc())
+        total_customers_query = select(func.count()).select_from(_stmt.subquery())
+        total_customers_result = await database_session.execute(total_customers_query)
+        total_customers = total_customers_result.scalar()
+        customers = _stmt.offset((page - 1) * size).limit(size)
+
+        result = await database_session.execute(customers)
+        customers = result.scalars().all()
+
+        return {"data": customers, "total": total_customers, "page": page, "size": size}
+        # # _stmt = select(cls).where(*where_conditions)
+        # _result = await database_session.execute(_stmt)
+        # return _result.scalars()
 
     @classmethod
     async def get_for_qa_analyst(
-        cls, database_session: AsyncSession, user, where_conditions: list[Any]
+        cls,
+        database_session: AsyncSession,
+        user,
+        where_conditions: list[Any],
+        page: int = 1,
+        size: int = 10,
+        search: Optional[str] = None,
+        sort_by: str = "id",
+        sort_order: str = "desc",
     ):
         _stmt = (
             select(cls)
@@ -876,9 +941,28 @@ class Sample(Base):
                 SampleWorkflow.assigned_to == user.get("id"), cls.status == "Submitted"
             )
         )
+
+        if search:
+            _stmt = _stmt.where(cls.sample_name.ilike(f"%{search}%"))
+        print(sort_by)
+        print(sort_order)
+        if sort_by and hasattr(cls, sort_by):
+            if sort_order == "asc":
+                _stmt = _stmt.order_by(getattr(cls, sort_by).asc())
+            else:
+                _stmt = _stmt.order_by(getattr(cls, sort_by).desc())
+        total_customers_query = select(func.count()).select_from(_stmt.subquery())
+        total_customers_result = await database_session.execute(total_customers_query)
+        total_customers = total_customers_result.scalar()
+        customers = _stmt.offset((page - 1) * size).limit(size)
+
+        result = await database_session.execute(customers)
+        customers = result.scalars().all()
+
+        return {"data": customers, "total": total_customers, "page": page, "size": size}
         # _stmt = select(cls).where(*where_conditions)
-        _result = await database_session.execute(_stmt)
-        return _result.scalars()
+        # _result = await database_session.execute(_stmt)
+        # return _result.scalars()
 
     @classmethod
     async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):

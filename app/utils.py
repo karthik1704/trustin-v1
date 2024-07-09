@@ -23,7 +23,7 @@ def verify_password(password: str, hashed_pass: str) -> bool:
 
 
 def create_access_token(
-    email: str, user_id: int, role_id: int,department_id:Optional[int], expires_delta: int = None
+    email: str, user_id: int, role_id: int,department_id:Optional[int], expires_delta: int|None = None
 ) -> str:
     if expires_delta is not None:
         expires_at = datetime.now(UTC) + timedelta(days=30)

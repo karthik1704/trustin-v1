@@ -302,7 +302,7 @@ class RegistrationSchema(BaseModel):
     # batch_or_lot_no: str
     # manufactured_date: date
     # expiry_date: date
-    batch_size: int
+    # batch_size: int
     # received_quantity: int
     # no_of_samples: int
     no_of_batches: int
@@ -392,7 +392,7 @@ class RegistrationCreate(BaseModel):
     # batch_or_lot_no: str
     # manufactured_date: date
     # expiry_date: date
-    batch_size: int
+    # batch_size: int
     # received_quantity: int
     # controlled_quantity: int
 
@@ -490,7 +490,7 @@ class RegistrationUpdate(BaseModel):
     # batch_or_lot_no: str
     # manufactured_date: date
     # expiry_date: date
-    batch_size: int
+    # batch_size: int
     # received_quantity: int
     # controlled_quantity: int
 
