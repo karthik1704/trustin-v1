@@ -35,6 +35,7 @@ from app.schemas.registrations import (
     RegistrationsGet,
     RegistrationListSchema,
     SampleCreate,
+    SampleListWithPaginationSchema,
     SampleSchema,
     SampleListSchema,
     PatchSample,
@@ -48,10 +49,7 @@ user_dep = Annotated[dict, Depends(get_current_user)]
 
 
 # GET method to retrieve all samples
-# response_model=Optional[list[SampleListSchema]]
-@router.get(
-    "/",
-)
+@router.get("/", response_model=Optional[SampleListWithPaginationSchema])
 async def get_all_samples_with_pagination(
     db_session: AsyncSession = Depends(get_async_db),
     current_user: dict = Depends(get_current_user),
@@ -69,11 +67,11 @@ async def get_all_samples_with_pagination(
             db_session, [], page, size, search, sort_by, sort_order
         )
     elif current_user.get("role_id", "") == 3:
-        samples = await Sample.get_for_qa_hod(
+        samples = await Sample.get_for_qa_hod_with_pagination(
             db_session, current_user, [], page, size, search, sort_by, sort_order
         )
     elif current_user.get("role_id", "") == 4:
-        samples = await Sample.get_for_qa_analyst(
+        samples = await Sample.get_for_qa_analyst_with_pagination(
             db_session, current_user, [], page, size, search, sort_by, sort_order
         )
 

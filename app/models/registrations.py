@@ -879,7 +879,7 @@ class Sample(Base):
         return {"data": customers, "total": total_customers, "page": page, "size": size}
 
     @classmethod
-    async def get_for_qa_hod(
+    async def get_for_qa_hod_with_pagination(
         cls,
         database_session: AsyncSession,
         user,
@@ -896,7 +896,7 @@ class Sample(Base):
             .join(User, cls.test_type_id == User.qa_type_id)
             .where(User.id == user.get("id"), cls.status == "Submitted")
         )
- 
+
         if search:
             _stmt = _stmt.where(cls.sample_name.ilike(f"%{search}%"))
         print(sort_by)
@@ -920,7 +920,47 @@ class Sample(Base):
         # return _result.scalars()
 
     @classmethod
+    async def get_for_qa_hod(
+        cls,
+        database_session: AsyncSession,
+        user,
+        where_conditions: list[Any],
+    ):
+        _stmt = (
+            select(cls)
+            .select_from(cls)
+            .join(User, cls.test_type_id == User.qa_type_id)
+            .where(User.id == user.get("id"), cls.status == "Submitted")
+        )
+
+        # _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars()
+
+    @classmethod
     async def get_for_qa_analyst(
+        cls,
+        database_session: AsyncSession,
+        user,
+        where_conditions: list[Any],
+    ):
+        _stmt = (
+            select(cls)
+            .distinct()
+            .select_from(cls)
+            .join(SampleWorkflow, cls.id == SampleWorkflow.sample_id)
+            # .join(User, SampleWorkflow.assigned_to == User.sample_id)
+            .where(
+                SampleWorkflow.assigned_to == user.get("id"), cls.status == "Submitted"
+            )
+        )
+
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars()
+
+    @classmethod
+    async def get_for_qa_analyst_with_pagination(
         cls,
         database_session: AsyncSession,
         user,

@@ -214,6 +214,11 @@ class SampleListSchema(BaseModel):
     registration: Optional[RegistrationCodeSchema | None]
     # batch: Optional[BatchSchema]
 
+class SampleListWithPaginationSchema(BaseModel):
+    data: List[SampleListSchema]
+    total: int
+    page: int
+    size: int
 
 class SampleSchema(BaseModel):
     id: int
