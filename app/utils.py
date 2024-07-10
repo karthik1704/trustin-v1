@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timedelta, UTC
+from turtle import st
 from typing import Union, Any, Optional
 from jose import jwt
 from passlib.context import CryptContext
@@ -65,3 +66,23 @@ def get_unique_code(prefix: str, unique_number: int) -> str:
 
     return new_code
 
+start_number:int|None = None
+
+def get_unique_code_registration(unique_number: int, code:str) -> str:
+    setup_fiscal_calendar(start_month=4)
+    code_years = code.split('/')[1]
+    code_end_year = code_years.split('-')[1]
+    start_year = FiscalYear.current().start.strftime("%Y")[-2:]
+    end_year = FiscalYear.current().end.strftime("%Y")[-2:]
+    if code_end_year == start_year:
+        unique_number=1
+    if start_number is not None:
+        unique_number=start_number
+    new_code = f"TAS/{start_year}-{end_year}/{unique_number:04}" 
+
+    print( new_code)
+    return new_code
+
+if __name__== "__main__":
+    get_unique_code_registration (10, 'TAS/24-25/0009')
+    get_unique_code_registration( 1, 'TAS/23-24/0009')

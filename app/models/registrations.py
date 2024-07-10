@@ -5,6 +5,7 @@ from sqlalchemy import (
     String,
     ForeignKey,
     Boolean,
+    Table,
     func,
     UUID,
     Enum,
@@ -25,7 +26,7 @@ from enum import Enum as PyEnum
 
 from app.models.front_desks import FrontDesk
 from app.models.samples import Product
-from app.utils import get_unique_code
+from app.utils import get_unique_code, get_unique_code_registration
 from .users import User
 
 
@@ -165,8 +166,8 @@ class Registration(Base):
         else:
             highest_code_int = 1
         # Generate the new code by combining the prefix and the incremented integer
-        new_code = get_unique_code(
-            "", highest_code_int
+        new_code = get_unique_code_registration(
+             highest_code_int, highest_code, 
         )  # Adjust the format based on your requirements
         # session.close()
         return new_code
@@ -744,6 +745,12 @@ class SampleHistory(Base):
         foreign_keys=[to_status_id],
         lazy="selectin",
     )
+
+# sample_test_type_association = Table(
+#     'sample_test_type_association', Base.metadata,
+#     Column('sample_id', Integer, ForeignKey('sample.id')),
+#     Column('test_type_id', Integer, ForeignKey('testtypes.id'))
+# )
 
 
 class Sample(Base):
