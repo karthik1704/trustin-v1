@@ -18,10 +18,10 @@ class TestTypeCreate(BaseModel):
     description:str
 
 class TestParameterCreate(BaseModel):
-    branch_id : int
+    # branch_id : int
     test_type_id : int
     product_id : Optional[int]
-    customer_id : Optional[int]
+    # customer_id : Optional[int]
     
     # parameter_code:str
     testing_parameters:str

@@ -52,7 +52,7 @@ class TestingParameter(Base):
     __tablename__ = "testingparameters"
     id = Column(Integer, primary_key=True)
 
-    branch_id = Column(Integer, ForeignKey("branches.id"))
+    branch_id = Column(Integer, ForeignKey("branches.id"), nullable=True)
     test_type_id = Column(Integer, ForeignKey("testtypes.id"))
     product_id = Column(Integer, ForeignKey("products.id"), nullable=True)
     customer_id = Column(Integer, ForeignKey("customers.id"), nullable=True)
