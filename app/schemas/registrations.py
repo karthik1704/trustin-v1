@@ -114,6 +114,12 @@ class RegistrationListSchema(BaseModel):
     product_id: int
     status: RegistrationStatus
 
+class RegistratinListWithPaginationSchema(BaseModel):
+    data: List[RegistrationListSchema]
+    page: int
+    size: int
+    total:int
+
 
 class RegistrationSampleSchema(BaseModel):
     id: int

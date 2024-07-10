@@ -1,5 +1,6 @@
 from random import sample
 from re import M
+from token import OP
 from typing import Annotated
 import datetime
 from fastapi import APIRouter, Depends, Path, status, HTTPException, Request
@@ -27,6 +28,7 @@ from ..models.test_request_forms import TRF, TestingDetail
 
 
 from app.schemas.registrations import (
+    RegistratinListWithPaginationSchema,
     RegistrationSchema,
     RegistrationCreate,
     # RegistrationWithBatchesCreate,
@@ -50,7 +52,7 @@ db_dep = Annotated[Session, Depends(get_db)]
 user_dep = Annotated[dict, Depends(get_current_user)]
 
 
-@router.get("/", )
+@router.get("/", response_model=Optional[RegistratinListWithPaginationSchema])
 async def get_all_registrations(
     request: Request,
     db_session: AsyncSession = Depends(get_async_db),
