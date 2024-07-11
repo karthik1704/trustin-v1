@@ -83,6 +83,6 @@ def get_unique_code_registration(unique_number: int, code:str) -> str:
     print( new_code)
     return new_code
 
-if __name__== "__main__":
-    get_unique_code_registration (10, 'TAS/24-25/0009')
-    get_unique_code_registration( 1, 'TAS/23-24/0009')
+# if __name__== "__main__":
+#     get_unique_code_registration (10, 'TAS/24-25/0009')
+#     get_unique_code_registration( 1, 'TAS/23-24/0009')
