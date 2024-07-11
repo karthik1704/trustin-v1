@@ -764,7 +764,11 @@ class Sample(Base):
     # batch_id: Mapped[int] = mapped_column(Integer, ForeignKey(Batch.id))
     # department_id = Column(Integer, ForeignKey("testtypes.id"))
     test_type_id: Mapped[int] = mapped_column(Integer, ForeignKey(TestType.id))
-
+    # test_types: Mapped[List[TestType]] = relationship(
+    #     "TestType",
+    #     secondary=sample_test_type_association,
+    #     back_populates="samples"
+    # )
     sample_name: Mapped[Optional[str]]
     batch_or_lot_no: Mapped[Optional[str]]
     manufactured_date: Mapped[Optional[date]] = mapped_column(nullable=True)
@@ -772,7 +776,8 @@ class Sample(Base):
     batch_size: Mapped[Optional[int]]
     received_quantity: Mapped[Optional[int]]
     tat: Mapped[Optional[date]] = mapped_column(nullable=True)
-
+    description:Mapped[Optional[str]]=mapped_column(Text)
+    
     assigned_to: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True
     )
@@ -829,20 +834,21 @@ class Sample(Base):
 
         _stmt = (
             select(cls.sample_id)
-            .where(*[cls.registration_id == registration_id])
+            # .where(*[cls.registration_id == registration_id])
             .order_by(
                 desc(cls.sample_id)
             )  # Assuming `code` is the column you want to order by
         )
         _result = await database_session.execute(_stmt)
-        highest_code = _result.scalars().first()
+        if _result:
+            highest_code = _result.scalars().first()
         if highest_code:
             highest_code_int = int(highest_code.split(f"/")[-1]) + 1
         else:
             highest_code_int = 1
         # Generate the new code by combining the prefix and the incremented integer
-        new_code = get_unique_code(
-            f"SAM-REG{registration_id}", highest_code_int
+        new_code = get_unique_code_registration(
+             highest_code_int, highest_code
         )  # Adjust the format based on your requirements
         # database_session.close()
         return new_code

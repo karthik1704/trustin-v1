@@ -149,6 +149,7 @@ class RegistrationSampleSchema(BaseModel):
 
 class RegistrationCodeSchema(BaseModel):
     code: str | None
+    company_name: str
 
 
 class SampleTestParameterSchema(BaseModel):
@@ -205,7 +206,7 @@ class SampleListSchema(BaseModel):
     manufactured_date: Optional[date]
     expiry_date: Optional[date]
     tat:Optional[date] 
-    batch_size: int
+    batch_size: Optional[int]
     received_quantity: int
     registration_id: int | None
     status_id: Optional[int]
@@ -234,7 +235,8 @@ class SampleSchema(BaseModel):
     manufactured_date: Optional[date]
     expiry_date: Optional[date]
     tat:Optional[date]
-    batch_size: int
+    description: Optional[str]
+    batch_size: Optional[int]
     received_quantity: int
     registration_id: int | None
     status_id: Optional[int]
@@ -269,10 +271,11 @@ class RegSamples(BaseModel):
     sample_name: str
     test_type_id: int
     batch_or_lot_no: str
+    description: str
     manufactured_date: Optional[date]
     expiry_date: Optional[date]
     tat: Optional[date]
-    batch_size: int
+    batch_size: Optional[int]
     received_quantity: int
     status_id: int
     sample_test_parameters: Optional[list[SampleTestParameterSchema]]
@@ -360,7 +363,8 @@ class SampleCreateSchema(BaseModel):
     manufactured_date: Optional[date] 
     expiry_date: Optional[date] 
     tat: Optional[date] | None
-    batch_size: int
+    description: Optional[str]
+    batch_size: Optional[int]
     received_quantity: int
     test_type_id: int
     test_params: List[SampleTestParams]
@@ -372,7 +376,7 @@ class SampleCreateSchema(BaseModel):
             return None
         return value
 
-    @field_validator('manufactured_date', 'expiry_date', 'tat', mode='before')
+    @field_validator('manufactured_date', 'expiry_date', 'tat', 'batch_size', mode='before')
     def check_empty_string(cls, value):
         return cls.handle_empty_string(value)
     
@@ -456,7 +460,8 @@ class SampleUpdateSchema(BaseModel):
     manufactured_date: Optional[date]
     expiry_date: Optional[date]
     tat: Optional[date]
-    batch_size: int
+    description: Optional[str]
+    batch_size: Optional[int]
     received_quantity: int
     test_type_id: int
     test_params: List[SampleTestParamsUpdate]
@@ -468,7 +473,7 @@ class SampleUpdateSchema(BaseModel):
             return None
         return value
 
-    @field_validator('manufactured_date', 'expiry_date', 'tat', mode='before')
+    @field_validator('manufactured_date', 'expiry_date', 'tat', 'batch_size', mode='before')
     def check_empty_string(cls, value):
         return cls.handle_empty_string(value)
 
