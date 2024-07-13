@@ -38,6 +38,7 @@ class DisposalProcessEnum(PyEnum):
 class ReportSentByEnum(PyEnum):
     COURIER = "COURIER"
     EMAIL = "EMAIL"
+    
 
 
 class YesOrNoEnum(PyEnum):

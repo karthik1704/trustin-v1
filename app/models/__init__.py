@@ -1,5 +1,6 @@
 # from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import declarative_base
+import alembic_postgresql_enum
 
 Base = declarative_base()
 

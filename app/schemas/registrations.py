@@ -15,7 +15,7 @@ from ..models.registrations import (
     Registration,
     Batch,
     RegistrationStatus,
-    ReportSentByEnum,
+    ReportSentByEnum2,
     SamplingByEnum,
     TestingProcessEnum,
 )
@@ -46,7 +46,7 @@ class BatchSchema(BaseModel):
 
 class TestParameterSchema(BaseModel):
     id: int
-    branch_id: int
+    # branch_id: int 
     test_type_id: int
     product_id: Optional[int]
     customer_id: Optional[int]
@@ -206,7 +206,7 @@ class SampleListSchema(BaseModel):
     manufactured_date: Optional[date]
     expiry_date: Optional[date]
     tat:Optional[date] 
-    batch_size: Optional[int]
+    batch_size: Optional[str]
     received_quantity: int
     registration_id: int | None
     status_id: Optional[int]
@@ -236,7 +236,7 @@ class SampleSchema(BaseModel):
     expiry_date: Optional[date]
     tat:Optional[date]
     description: Optional[str]
-    batch_size: Optional[int]
+    batch_size: Optional[str]
     received_quantity: int
     registration_id: int | None
     status_id: Optional[int]
@@ -275,7 +275,7 @@ class RegSamples(BaseModel):
     manufactured_date: Optional[date]
     expiry_date: Optional[date]
     tat: Optional[date]
-    batch_size: Optional[int]
+    batch_size: Optional[str]
     received_quantity: int
     status_id: int
     sample_test_parameters: Optional[list[SampleTestParameterSchema]]
@@ -311,7 +311,7 @@ class RegistrationSchema(BaseModel):
     testing_process: TestingProcessEnum
     sampled_by: SamplingByEnum
     sample_disposal_process: DisposalProcessEnum
-
+    reports_send: ReportSentByEnum2
     # sample_name: str
     # batch_or_lot_no: str
     # manufactured_date: date
@@ -364,7 +364,7 @@ class SampleCreateSchema(BaseModel):
     expiry_date: Optional[date] 
     tat: Optional[date] | None
     description: Optional[str]
-    batch_size: Optional[int]
+    batch_size: Optional[str]
     received_quantity: int
     test_type_id: int
     test_params: List[SampleTestParams]
@@ -376,7 +376,7 @@ class SampleCreateSchema(BaseModel):
             return None
         return value
 
-    @field_validator('manufactured_date', 'expiry_date', 'tat', 'batch_size', mode='before')
+    @field_validator('manufactured_date', 'expiry_date', 'tat',  mode='before')
     def check_empty_string(cls, value):
         return cls.handle_empty_string(value)
     
@@ -396,7 +396,7 @@ class RegistrationCreate(BaseModel):
     gst: str
     date_of_received: date
     product_id: int
-    reports_send_by: ReportSentByEnum
+    reports_send: ReportSentByEnum2
     license_no: str
     # nabl_logo: bool
     testing_process: TestingProcessEnum
@@ -431,7 +431,7 @@ class BatchUpdate(BaseModel):
     batch_no: Optional[str]
     manufactured_date: Optional[date]
     expiry_date: Optional[date]
-    batch_size: Optional[int]
+    batch_size: Optional[str]
     product_id: Optional[int]
     customer_id: Optional[int]
     received_quantity: Optional[int]
@@ -461,7 +461,7 @@ class SampleUpdateSchema(BaseModel):
     expiry_date: Optional[date]
     tat: Optional[date]
     description: Optional[str]
-    batch_size: Optional[int]
+    batch_size: Optional[str]
     received_quantity: int
     test_type_id: int
     test_params: List[SampleTestParamsUpdate]
@@ -473,7 +473,7 @@ class SampleUpdateSchema(BaseModel):
             return None
         return value
 
-    @field_validator('manufactured_date', 'expiry_date', 'tat', 'batch_size', mode='before')
+    @field_validator('manufactured_date', 'expiry_date', 'tat',  mode='before')
     def check_empty_string(cls, value):
         return cls.handle_empty_string(value)
 
@@ -495,7 +495,7 @@ class RegistrationUpdate(BaseModel):
     gst: Optional[str]
     date_of_received: Optional[date]
     product_id: Optional[int]
-    reports_send_by: ReportSentByEnum
+    reports_send: ReportSentByEnum2
     license_no: str
     # nabl_logo: bool
     testing_process: TestingProcessEnum
@@ -554,7 +554,7 @@ class SampleCreate(BaseModel):
     batch_or_lot_no: str
     manufactured_date: date
     expiry_date: date
-    batch_size: int
+    batch_size: str
     received_quantity: int
     test_params: list[SampleTestParamsCreate]
 

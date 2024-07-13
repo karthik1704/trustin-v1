@@ -8,11 +8,11 @@ from sqlalchemy import (
     Table,
     func,
     UUID,
-    Enum,
     Date,
     DateTime,
     Text,
 )
+from sqlalchemy.dialects import postgresql
 from typing import Any, List, Optional
 from datetime import date, datetime
 
@@ -22,7 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 from app.models import Base, Branch, TRF, Customer, TestingParameter, TestType
 from pydantic import BaseModel, ConfigDict, ValidationError
-from enum import Enum as PyEnum
+import enum
 
 from app.models.front_desks import FrontDesk
 from app.models.samples import Product
@@ -30,7 +30,7 @@ from app.utils import get_unique_code, get_unique_code_registration
 from .users import User
 
 
-class TestingProcessEnum(PyEnum):
+class TestingProcessEnum(enum.Enum):
     BATCH_ANALYSIS = "BATCH_ANALYSIS"
     METHOD_DEVELOPMENT = "METHOD_DEVELOPMENT"
     METHOD_VALIDATION = "METHOD_VALIDATION"
@@ -38,28 +38,30 @@ class TestingProcessEnum(PyEnum):
     REGULATORY = "REGULATORY"
 
 
-class DisposalProcessEnum(PyEnum):
+class DisposalProcessEnum(enum.Enum):
     DISCARD = "DISCARD"
     RETURN = "RETURN"
 
 
-class ReportSentByEnum(PyEnum):
+
+class ReportSentByEnum2(enum.Enum):
     COURIER = "COURIER"
     EMAIL = "EMAIL"
     EMAIL_COURIER = "EMAIL_COURIER"
+    EMAIL_AND_COURIER = "EMAIL_AND_COURIER"
 
 
-class SamplingByEnum(PyEnum):
+class SamplingByEnum(enum.Enum):
     CUSTOMER = "CUSTOMER"
     LABORATORY = "LABORATORY"
 
 
-class YesOrNoEnum(PyEnum):
+class YesOrNoEnum(enum.Enum):
     YES = "YES"
     NO = "NO"
 
 
-class RegistrationStatus(PyEnum):
+class RegistrationStatus(enum.Enum):
     UNDER_REGISTRATION = "UNDER_REGISTRATION"
     REGISTERED = "REGISTERED"
 
@@ -107,15 +109,15 @@ class Registration(Base):
     product_id: Mapped[int] = mapped_column(Integer, ForeignKey("products.id"))
 
     testing_process: Mapped[TestingProcessEnum] = mapped_column(
-        Enum(TestingProcessEnum)
+        postgresql.ENUM(TestingProcessEnum)
     )
 
     # nabl_logo: Mapped[Optional[bool]]
     license_no: Mapped[Optional[str]]
-    sampled_by: Mapped[Optional[SamplingByEnum]] = mapped_column(Enum(SamplingByEnum))
+    sampled_by: Mapped[Optional[SamplingByEnum]] = mapped_column( postgresql.ENUM(SamplingByEnum))
 
     sample_disposal_process: Mapped[Optional[DisposalProcessEnum]] = mapped_column(
-        Enum(DisposalProcessEnum)
+        postgresql.ENUM(DisposalProcessEnum)
     )
 
     sample_name: Mapped[Optional[str]]
@@ -124,13 +126,15 @@ class Registration(Base):
     expiry_date: Mapped[Optional[date]]
     batch_size: Mapped[Optional[int]]
     received_quantity: Mapped[Optional[int]]
-    status: Mapped[RegistrationStatus] = mapped_column(Enum(RegistrationStatus))
+    status: Mapped[RegistrationStatus] = mapped_column(
+        postgresql.ENUM(RegistrationStatus)
+    )
 
     no_of_samples: Mapped[int] = mapped_column(default=0)
     no_of_batches: Mapped[int] = mapped_column(default=0)
     controlled_quantity: Mapped[Optional[int]] = mapped_column(default=0)
-    reports_send_by: Mapped[Optional[ReportSentByEnum]] = mapped_column(
-        Enum(ReportSentByEnum)
+    reports_send: Mapped[Optional[ReportSentByEnum2]] = mapped_column(
+        postgresql.ENUM(ReportSentByEnum2)
     )
 
     trf = relationship("TRF", back_populates="registrations", lazy="selectin")
@@ -167,7 +171,8 @@ class Registration(Base):
             highest_code_int = 1
         # Generate the new code by combining the prefix and the incremented integer
         new_code = get_unique_code_registration(
-             highest_code_int, highest_code, 
+            highest_code_int,
+            highest_code,
         )  # Adjust the format based on your requirements
         # session.close()
         return new_code
@@ -746,6 +751,7 @@ class SampleHistory(Base):
         lazy="selectin",
     )
 
+
 # sample_test_type_association = Table(
 #     'sample_test_type_association', Base.metadata,
 #     Column('sample_id', Integer, ForeignKey('sample.id')),
@@ -773,11 +779,11 @@ class Sample(Base):
     batch_or_lot_no: Mapped[Optional[str]]
     manufactured_date: Mapped[Optional[date]] = mapped_column(nullable=True)
     expiry_date: Mapped[Optional[date]] = mapped_column(nullable=True)
-    batch_size: Mapped[Optional[int]]
+    batch_size: Mapped[Optional[str]]
     received_quantity: Mapped[Optional[int]]
     tat: Mapped[Optional[date]] = mapped_column(nullable=True)
-    description:Mapped[Optional[str]]=mapped_column(Text)
-    
+    description: Mapped[Optional[str]] = mapped_column(Text)
+
     assigned_to: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True
     )
@@ -848,7 +854,7 @@ class Sample(Base):
             highest_code_int = 1
         # Generate the new code by combining the prefix and the incremented integer
         new_code = get_unique_code_registration(
-             highest_code_int, highest_code
+            highest_code_int, highest_code
         )  # Adjust the format based on your requirements
         # database_session.close()
         return new_code
