@@ -783,7 +783,8 @@ class Sample(Base):
     received_quantity: Mapped[Optional[int]]
     tat: Mapped[Optional[date]] = mapped_column(nullable=True)
     description: Mapped[Optional[str]] = mapped_column(Text)
-
+    testing_start_date: Mapped[Optional[date]] = mapped_column(nullable=True)
+    testing_end_date: Mapped[Optional[date]] = mapped_column(nullable=True)
     assigned_to: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True
     )

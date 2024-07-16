@@ -113,6 +113,7 @@ class RegistrationListSchema(BaseModel):
     # test_type: str
     product_id: int
     status: RegistrationStatus
+    
 
 class RegistratinListWithPaginationSchema(BaseModel):
     data: List[RegistrationListSchema]
@@ -156,6 +157,7 @@ class SampleTestParameterSchema(BaseModel):
     id: int
     sample_id: int
     order: int | None
+    quantity: Optional[int]
     test_parameter_id: int
     test_type: Optional[str]
     value: Optional[str]
@@ -220,6 +222,7 @@ class SampleListSchema(BaseModel):
     updated_by: int
     registration: Optional[RegistrationCodeSchema | None]
     # batch: Optional[BatchSchema]
+    status_data: Optional[SampleStatusSchema]
 
 class SampleListWithPaginationSchema(BaseModel):
     data: List[SampleListSchema]
@@ -234,6 +237,8 @@ class SampleSchema(BaseModel):
     batch_or_lot_no: str
     manufactured_date: Optional[date]
     expiry_date: Optional[date]
+    testing_start_date: Optional[date]
+    testing_end_date: Optional[date]
     tat:Optional[date]
     description: Optional[str]
     batch_size: Optional[str]
@@ -558,17 +563,31 @@ class SampleCreate(BaseModel):
     received_quantity: int
     test_params: list[SampleTestParamsCreate]
 
+ 
 
 class PatchSampleTestParameterSchema(BaseModel):
     id: int
     order: int
+    quantity: int
     value: str
     result: bool
 
 
 class PatchSample(BaseModel):
+    testing_start_date: Optional[date]
+    testing_end_date: Optional[date]
     status: Optional[str] | None
     status_id: Optional[int] | None
     assigned_to: Optional[int] | None
     comments: Optional[str] | None
     test_params: Optional[list[PatchSampleTestParameterSchema]] | None
+
+    @staticmethod
+    def handle_empty_string(value: Optional[str]):
+        if value == "":
+            return None
+        return value
+
+    @field_validator('testing_start_date', 'testing_end_date',   mode='before')
+    def check_empty_string(cls, value):
+        return cls.handle_empty_string(value)
