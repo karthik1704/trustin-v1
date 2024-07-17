@@ -785,6 +785,8 @@ class Sample(Base):
     description: Mapped[Optional[str]] = mapped_column(Text)
     testing_start_date: Mapped[Optional[date]] = mapped_column(nullable=True)
     testing_end_date: Mapped[Optional[date]] = mapped_column(nullable=True)
+    nabl_logo: Mapped[Optional[bool]] = mapped_column(default=False)
+    under_cdsco: Mapped[Optional[bool]] = mapped_column(default=False)
     assigned_to: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True
     )
@@ -799,7 +801,7 @@ class Sample(Base):
     )
     created_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
-    status: Mapped[str] = mapped_column(String, default="Draft", nullable=True)
+    status: Mapped[str] = mapped_column(String, default="Registered", nullable=True)
 
     sample_workflows = relationship(
         "SampleWorkflow",
@@ -1107,14 +1109,14 @@ class Sample(Base):
                 "department_id": status.department_id,
                 "role_id": status.role_id,
                 "assigned_to": (
-                    current_user["id"] if status.name == "Draft" else status.user_id
+                    current_user["id"] if status.name == "Registered" else status.user_id
                 ),
                 "status": (
                     "Done"
-                    if status.name == "Draft"
+                    if status.name == "Registered"
                     else (
                         "In Progress"
-                        if status.name == "Review Pending"
+                        if status.name == "Under review and Sample requested (HOD)"
                         else "Yet To Start"
                     )
                 ),

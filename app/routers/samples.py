@@ -209,7 +209,7 @@ async def update_registration_with_batches(
 
 
 # PUT method to update an existing registration
-@router.patch("/{sample_id}", response_model=SampleSchema)
+@router.patch("/{sample_id}",status_code=status.HTTP_204_NO_CONTENT)
 async def patch_sample(
     sample_id: int,
     updated_sample: PatchSample,
@@ -217,7 +217,7 @@ async def patch_sample(
     current_user: dict = Depends(get_current_user),
 ):
 
-    sample_data = updated_sample.model_dump()
+    sample_data = updated_sample.model_dump(exclude_unset=True)
 
     sample = await Sample.get_one(db_session, [Sample.id == sample_id])
     if sample is None:
@@ -233,14 +233,16 @@ async def patch_sample(
     sample_data = {**sample_data, **update_dict}
     for test_param_data in test_params:
         # test_param_data = test_param_data.model_dump()
+        print(test_param_data)
         test_param_data = {**test_param_data, **update_dict}
         test_param_id = test_param_data.get("id")
         test_param = await SampleTestParameter.get_one(
             db_session, [SampleTestParameter.id == test_param_id]
         )
+        print(test_param)
         if test_param:
             await test_param.update_sample_test_param(test_param_data)
-
+    print('im here')
     prev_status = sample.status
     await sample.update_sample(sample_data)
     if sample_data.get("status", "") == "Submitted" and prev_status != "Submitted":
@@ -372,4 +374,4 @@ async def patch_sample(
     await db_session.commit()
     await db_session.refresh(sample)
 
-    return sample
+    # return sample

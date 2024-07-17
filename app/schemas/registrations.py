@@ -241,6 +241,8 @@ class SampleSchema(BaseModel):
     testing_end_date: Optional[date]
     tat:Optional[date]
     description: Optional[str]
+    under_cdsco:Optional[bool]
+    nabl_logo:Optional[bool]
     batch_size: Optional[str]
     received_quantity: int
     registration_id: int | None
@@ -568,14 +570,16 @@ class SampleCreate(BaseModel):
 class PatchSampleTestParameterSchema(BaseModel):
     id: int
     order: int
-    quantity: int
+    quantity: Optional[int]=None 
     value: str
     result: bool
 
 
 class PatchSample(BaseModel):
-    testing_start_date: Optional[date]
-    testing_end_date: Optional[date]
+    testing_start_date: Optional[date] = None
+    testing_end_date: Optional[date] = None
+    under_cdsco:Optional[bool] = None
+    nabl_logo:Optional[bool] = None
     status: Optional[str] | None
     status_id: Optional[int] | None
     assigned_to: Optional[int] | None
