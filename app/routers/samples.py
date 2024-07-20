@@ -40,6 +40,7 @@ from app.schemas.registrations import (
     SampleListSchema,
     PatchSample,
     SampleTestParameterSchema,
+    SampleUpdate,
 )
 
 router = APIRouter(prefix="/samples", tags=["samples"])
@@ -179,14 +180,14 @@ async def create_sample_with_testparams(
 
 
 @router.put("/{sample_id}", response_model=SampleSchema)
-async def update_registration_with_batches(
+async def update_sample(
     sample_id: int,
-    sample_update: SampleCreate,
+    sample_update: SampleUpdate,
     db_session: AsyncSession = Depends(get_async_db),
     current_user: dict = Depends(get_current_user),
 ):
     sample_data = sample_update.model_dump()
-    test_params_data = sample_data.pop("test_params", [])
+    # test_params_data = sample_data.pop("test_params", [])
 
     sample = await Sample.get_one(db_session, [Sample.id == sample_id])
     if sample is None:
@@ -199,8 +200,8 @@ async def update_registration_with_batches(
     sample_data = {**sample_data, **update_dict}
     await sample.update_sample(sample_data)
 
-    if test_params_data:
-        await sample.update_test_params(db_session, test_params_data, current_user)
+    # if test_params_data:
+    #     await sample.update_test_params(db_session, test_params_data, current_user)
 
     await db_session.commit()
     await db_session.refresh(sample)
@@ -255,6 +256,8 @@ async def patch_sample(
             "to_status_id": 2,
         }
         if sample_data.get("assigned_to", ""):
+            print("assinged_to")
+            print(sample_data.get("assigned_to", ""))
             history.update({"assigned_to": sample_data.get("assigned_to", "")})
         if comments:
             history.update({"comments": comments})
@@ -325,6 +328,7 @@ async def patch_sample(
 
                 # await sample.create_history(db_session, current_user,history)
             elif progress and sample_data.get("status_id", "") == progres_status_id - 1:
+                print('how')
                 # moving forward
                 update_dict = {
                     "status": "Yet To Start",

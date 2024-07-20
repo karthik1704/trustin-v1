@@ -565,6 +565,16 @@ class SampleCreate(BaseModel):
     received_quantity: int
     test_params: list[SampleTestParamsCreate]
 
+class SampleUpdate(BaseModel):
+    # sample_id: str
+    sample_name: str
+    batch_or_lot_no: str
+    manufactured_date: date
+    expiry_date: date
+    batch_size: str
+    received_quantity: int
+    # test_params: list[SampleTestParamsCreate]
+
  
 
 class PatchSampleTestParameterSchema(BaseModel):

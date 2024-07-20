@@ -39,6 +39,7 @@ class Token(BaseModel):
     token_type: str
 
 class UserSchema(BaseModel):
+    id: Optional[int]
     first_name: Optional[str]
     last_name: Optional[str]
     # department_id : Optional[int]
