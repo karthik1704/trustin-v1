@@ -115,11 +115,16 @@ async def create_user(db: db_dep, user: user_dep, data: UserCreate):
             status_code=status.HTTP_403_FORBIDDEN, detail="Password Does not match"
         )
 
-    user_exists = db.query(User).filter(User.email == user_dict.get("email")).first()
+    user_email_exists = db.query(User).filter(User.email == user_dict.get("email")).first()
+    user_username_exists = db.query(User).filter(User.username == user_dict.get("username")).first()
 
-    if user_exists is not None:
+    if user_email_exists is not None:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="User already Exists"
+            status_code=status.HTTP_403_FORBIDDEN, detail="User already exists with this email"
+        )
+    if user_username_exists is not None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Username not avaiable, Try another username"
         )
     is_superuser = False
     if user_dict.get("role") == 1:
@@ -197,6 +202,23 @@ async def update_user(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User Not Found"
         )
+    
+
+    # Check if username already exists
+    if data.username and data.username != user.username:
+        existing_user = db.query(User).filter(User.username == data.username).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists"
+            )
+
+    # Check if email already exists
+    if data.email and data.email != user.email:
+        existing_user = db.query(User).filter(User.email == data.email).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Email already exists"
+            )
 
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(user, field, value)

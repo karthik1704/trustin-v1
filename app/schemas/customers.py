@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, EmailStr
 
 from datetime import date
@@ -58,3 +58,9 @@ class CustomerSchema(BaseModel):
     regulatory: str | None
     pan: str | None
     gst: str | None
+
+class ContactPersonListSchema(ContactPersonCreate):
+    id:int
+
+class CustomerListSchema(CustomerSchema):
+    contact_persons: Optional[list[ContactPersonListSchema]]

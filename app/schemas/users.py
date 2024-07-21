@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr
+import re
+from pydantic import BaseModel, EmailStr, field_validator, validator
 # from ..models.users import RoleType
 from typing import List, Optional
 
@@ -6,6 +7,7 @@ from typing import List, Optional
 class UserCreate(BaseModel):
     first_name:str
     last_name:str
+    username:str
     email: EmailStr
     password: str
     password2: str
@@ -14,14 +16,35 @@ class UserCreate(BaseModel):
     department_id:int
     qa_type_id : Optional[int] | None
 
+    @field_validator('username')
+    def validate_username(cls, value):
+        if len(value) < 3:
+            raise ValueError('Username must be at least 4 characters long')
+        if len(value) > 20:
+            raise ValueError('Username must be at most 20 characters long')
+        if not re.match(r'^[a-zA-Z0-9_]+$', value):
+            raise ValueError('Username can only contain letters, numbers, and underscores')
+        return value
+
 
 class UserUpdate(BaseModel):
     first_name:str
     last_name:str
+    username:str
     email: EmailStr
     phone: str
     department_id:int
     qa_type_id : Optional[int]
+
+    @field_validator('username')
+    def validate_username(cls, value):
+        if len(value) < 3:
+            raise ValueError('Username must be at least 4 characters long')
+        if len(value) > 20:
+            raise ValueError('Username must be at most 20 characters long')
+        if not re.match(r'^[a-zA-Z0-9_]+$', value):
+            raise ValueError('Username can only contain letters, numbers, and underscores')
+        return value
 
 
 class ForgotPassword(BaseModel):

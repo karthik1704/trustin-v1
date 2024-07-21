@@ -88,6 +88,12 @@ class Registration(Base):
     # city: Mapped[str] = mapped_column(String)
     # state: Mapped[str] = mapped_column(String)
     # pincode_no: Mapped[str] = mapped_column(String)
+
+    customer_reference_no: Mapped[Optional[str]]
+    contact_person_name:Mapped[Optional[str]]
+    contact_email: Mapped[Optional[str]]
+    contact_number: Mapped[Optional[str]]
+
     gst: Mapped[str] = mapped_column(String)
     date_of_registration: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -781,6 +787,10 @@ class Sample(Base):
     expiry_date: Mapped[Optional[date]] = mapped_column(nullable=True)
     batch_size: Mapped[Optional[str]]
     received_quantity: Mapped[Optional[int]]
+    sample_issued: Mapped[Optional[int]]
+    issued_to: Mapped[Optional[str]]
+    sample_condition: Mapped[Optional[str]]
+    sterilization_batch_no: Mapped[Optional[str]]
     tat: Mapped[Optional[date]] = mapped_column(nullable=True)
     description: Mapped[Optional[str]] = mapped_column(Text)
     testing_start_date: Mapped[Optional[date]] = mapped_column(nullable=True)

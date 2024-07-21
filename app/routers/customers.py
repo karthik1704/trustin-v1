@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, joinedload
 from typing import Optional
 from app.dependencies.auth import get_current_user
 from app.utils import get_unique_code
-from ..schemas.customers import CustomerCreate
+from ..schemas.customers import CustomerCreate, CustomerListSchema
 from app.database import get_db
 from ..models.customers import Customer, ContactPerson
 
@@ -15,12 +15,15 @@ user_dep = Annotated[dict, Depends(get_current_user)]
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
-async def get_all_Customers_with_pagination(db: db_dep, user: user_dep,
-                            page: int = 1, 
-                            size: int = 10, 
-                            search: Optional[str] = None, 
-                            sort_by: str = "id", 
-                            sort_order: str = "desc"):
+async def get_all_Customers_with_pagination(
+    db: db_dep,
+    user: user_dep,
+    page: int = 1,
+    size: int = 10,
+    search: Optional[str] = None,
+    sort_by: str = "id",
+    sort_order: str = "desc",
+):
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
@@ -39,22 +42,28 @@ async def get_all_Customers_with_pagination(db: db_dep, user: user_dep,
             query = query.order_by(getattr(Customer, sort_by).desc())
     total_customers = query.count()
     customers = query.offset((page - 1) * size).limit(size).all()
-    return {
-        "data": customers,
-        "total": total_customers,
-        "page": page,
-        "size": size
-    }
+    return {"data": customers, "total": total_customers, "page": page, "size": size}
+
+
 @router.get("/all/", status_code=status.HTTP_200_OK)
-async def get_all_Customers(db: db_dep, user: user_dep,):
+async def get_all_Customers(
+    db: db_dep,
+    user: user_dep,
+):
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
 
-    customers = db.query(Customer).order_by(Customer.updated_at.desc()).all()
-   
+    customers = (
+        db.query(Customer)
+        .options(joinedload(Customer.contact_persons))
+        .order_by(Customer.updated_at.desc())
+        .all()
+    )
+
     return customers
+
 
 @router.get("/{customer_id}", status_code=status.HTTP_200_OK)
 async def get_Customer(db: db_dep, user: user_dep, customer_id: int = Path(gt=0)):
@@ -89,7 +98,7 @@ async def create_Customers(db: db_dep, data: CustomerCreate, user: user_dep):
     db.commit()
     db.refresh(customer)
 
-    customer.customer_code = get_unique_code('CUS', customer.id) # type: ignore
+    customer.customer_code = get_unique_code("CUS", customer.id)  # type: ignore
     db.commit()
 
     contacts = [
@@ -113,7 +122,11 @@ async def update_customer(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
-    data_in_modified = data.copy(exclude={"contact_persons", })
+    data_in_modified = data.copy(
+        exclude={
+            "contact_persons",
+        }
+    )
     customer = (
         db.query(Customer)
         .options(joinedload(Customer.contact_persons))
@@ -121,13 +134,10 @@ async def update_customer(
         .first()
     )
 
-
     if customer is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Customer Not Found"
         )
-
- 
 
     for field, value in data_in_modified.model_dump(exclude_unset=True).items():
         setattr(customer, field, value)

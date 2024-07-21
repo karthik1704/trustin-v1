@@ -241,6 +241,10 @@ class SampleSchema(BaseModel):
     testing_end_date: Optional[date]
     tat:Optional[date]
     description: Optional[str]
+    sample_issued:Optional[int]
+    issued_to:Optional[str]
+    sample_condition:Optional[str]
+    sterilization_batch_no:Optional[str]
     under_cdsco:Optional[bool]
     nabl_logo:Optional[bool]
     batch_size: Optional[str]
@@ -284,6 +288,8 @@ class RegSamples(BaseModel):
     tat: Optional[date]
     batch_size: Optional[str]
     received_quantity: int
+    sample_condition:Optional[str]
+    sterilization_batch_no:Optional[str]
     status_id: int
     sample_test_parameters: Optional[list[SampleTestParameterSchema]]
     
@@ -303,6 +309,10 @@ class RegistrationSchema(BaseModel):
     # city: str
     # state: str
     # pincode_no: str
+    customer_reference_no: Optional[str]
+    contact_person_name:Optional[str]
+    contact_email: Optional[str]
+    contact_number: Optional[str]
     gst: str
     date_of_registration: datetime
     date_of_received: datetime
@@ -374,6 +384,10 @@ class SampleCreateSchema(BaseModel):
     batch_size: Optional[str]
     received_quantity: int
     test_type_id: int
+    # sample_issued:int
+    # issued_to:str
+    sample_condition: str
+    sterilization_batch_no: str
     test_params: List[SampleTestParams]
 
 
@@ -400,6 +414,10 @@ class RegistrationCreate(BaseModel):
     # city: str
     # state: str
     # pincode_no: str
+    customer_reference_no: Optional[str]
+    contact_person_name:Optional[str]
+    contact_email: Optional[str]
+    contact_number: Optional[str]
     gst: str
     date_of_received: date
     product_id: int
@@ -471,6 +489,10 @@ class SampleUpdateSchema(BaseModel):
     batch_size: Optional[str]
     received_quantity: int
     test_type_id: int
+    # sample_issued:int
+    # issued_to:str
+    sample_condition: str
+    sterilization_batch_no: str
     test_params: List[SampleTestParamsUpdate]
 
     
@@ -499,6 +521,10 @@ class RegistrationUpdate(BaseModel):
     # city: Optional[str]
     # state: Optional[str]
     # pincode_no: Optional[str]
+    customer_reference_no: Optional[str]
+    contact_person_name:Optional[str]
+    contact_email: Optional[str]
+    contact_number: Optional[str]
     gst: Optional[str]
     date_of_received: Optional[date]
     product_id: Optional[int]
@@ -573,6 +599,10 @@ class SampleUpdate(BaseModel):
     expiry_date: date
     batch_size: str
     received_quantity: int
+    # sample_issued:int
+    # issued_to:str
+    sample_condition: str
+    sterilization_batch_no: str
     # test_params: list[SampleTestParamsCreate]
 
  
@@ -594,6 +624,8 @@ class PatchSample(BaseModel):
     status_id: Optional[int] | None
     assigned_to: Optional[int] | None
     comments: Optional[str] | None
+    sample_issued:Optional[int] | None = None
+    issued_to:Optional[str] | None =None
     test_params: Optional[list[PatchSampleTestParameterSchema]] | None
 
     @staticmethod

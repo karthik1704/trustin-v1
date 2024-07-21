@@ -22,7 +22,7 @@ def verify_password(password: str, hashed_pass: str) -> bool:
     return password_context.verify(password, hashed_pass)
 
 
-def create_access_token(
+def create_access_token(username: str,
     email: str, user_id: int, role_id: int,department_id:Optional[int], expires_delta: int|None = None
 ) -> str:
     if expires_delta is not None:
@@ -42,7 +42,7 @@ def create_refresh_token(
     email: str, user_id: int, role: str, expires_delta: int | None = None
 ) -> str:
     if expires_delta is not None:
-        expires_at = datetime.now(UTC) + expires_delta
+        expires_at = datetime.now(UTC) + timedelta(days=expires_delta)
 
     else:
         expires_at = datetime.now(UTC) + timedelta(days=REFRESH_TOKEN_EXPIRE_MINUTES)
