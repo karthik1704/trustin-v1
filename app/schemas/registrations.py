@@ -1,5 +1,6 @@
 from datetime import date
 import decimal
+from token import OP
 from typing import List
 
 # from pydantic import BaseModel
@@ -205,8 +206,8 @@ class SampleListSchema(BaseModel):
     sample_id: str
     sample_name: str
     batch_or_lot_no: str
-    manufactured_date: Optional[date]
-    expiry_date: Optional[date]
+    manufactured_date: Optional[str]
+    expiry_date: Optional[str]
     tat:Optional[date] 
     batch_size: Optional[str]
     received_quantity: int
@@ -235,8 +236,8 @@ class SampleSchema(BaseModel):
     sample_id: str
     sample_name: str
     batch_or_lot_no: str
-    manufactured_date: Optional[date]
-    expiry_date: Optional[date]
+    manufactured_date: Optional[str]
+    expiry_date: Optional[str]
     testing_start_date: Optional[date]
     testing_end_date: Optional[date]
     tat:Optional[date]
@@ -246,6 +247,7 @@ class SampleSchema(BaseModel):
     sample_condition:Optional[str]
     sterilization_batch_no:Optional[str]
     under_cdsco:Optional[bool]
+    samples_received:Optional[bool]
     nabl_logo:Optional[bool]
     batch_size: Optional[str]
     received_quantity: int
@@ -283,8 +285,8 @@ class RegSamples(BaseModel):
     test_type_id: int
     batch_or_lot_no: str
     description: str
-    manufactured_date: Optional[date]
-    expiry_date: Optional[date]
+    manufactured_date: Optional[str]
+    expiry_date: Optional[str]
     tat: Optional[date]
     batch_size: Optional[str]
     received_quantity: int
@@ -377,8 +379,8 @@ class SampleTestParams(BaseModel):
 class SampleCreateSchema(BaseModel):
     sample_name: str
     batch_or_lot_no: str
-    manufactured_date: Optional[date] 
-    expiry_date: Optional[date] 
+    manufactured_date: Optional[str] 
+    expiry_date: Optional[str] 
     tat: Optional[date] | None
     description: Optional[str]
     batch_size: Optional[str]
@@ -482,8 +484,8 @@ class SampleUpdateSchema(BaseModel):
     id: int | str
     sample_name: str
     batch_or_lot_no: str
-    manufactured_date: Optional[date]
-    expiry_date: Optional[date]
+    manufactured_date: Optional[str]
+    expiry_date: Optional[str]
     tat: Optional[date]
     description: Optional[str]
     batch_size: Optional[str]
@@ -576,7 +578,7 @@ class RegistrationsGet(BaseModel):
 
 
 class SampleTestParamsCreate(BaseModel):
-    test_parameter_id: int
+    test_params_id: int
     order: int
     # test_type  :  Optional[str]
 
@@ -595,15 +597,15 @@ class SampleUpdate(BaseModel):
     # sample_id: str
     sample_name: str
     batch_or_lot_no: str
-    manufactured_date: date
-    expiry_date: date
+    manufactured_date: str
+    expiry_date: str
     batch_size: str
     received_quantity: int
     # sample_issued:int
     # issued_to:str
     sample_condition: str
     sterilization_batch_no: str
-    # test_params: list[SampleTestParamsCreate]
+    test_params: list[SampleTestParamsCreate]
 
  
 
@@ -611,22 +613,23 @@ class PatchSampleTestParameterSchema(BaseModel):
     id: int
     order: int
     quantity: Optional[int]=None 
-    value: str
-    result: bool
+    value: Optional[str]=None
+    result: Optional[bool]=None
 
 
 class PatchSample(BaseModel):
     testing_start_date: Optional[date] = None
     testing_end_date: Optional[date] = None
     under_cdsco:Optional[bool] = None
+    samples_received:Optional[bool] = None
     nabl_logo:Optional[bool] = None
     status: Optional[str] | None
     status_id: Optional[int] | None
-    assigned_to: Optional[int] | None
+    assigned_to: Optional[int] | None = None
     comments: Optional[str] | None
     sample_issued:Optional[int] | None = None
     issued_to:Optional[str] | None =None
-    test_params: Optional[list[PatchSampleTestParameterSchema]] | None
+    test_params: Optional[list[PatchSampleTestParameterSchema]] | None  = None
 
     @staticmethod
     def handle_empty_string(value: Optional[str]):

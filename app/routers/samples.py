@@ -187,7 +187,7 @@ async def update_sample(
     current_user: dict = Depends(get_current_user),
 ):
     sample_data = sample_update.model_dump()
-    # test_params_data = sample_data.pop("test_params", [])
+    test_params_data = sample_data.pop("test_params", [])
 
     sample = await Sample.get_one(db_session, [Sample.id == sample_id])
     if sample is None:
@@ -200,8 +200,8 @@ async def update_sample(
     sample_data = {**sample_data, **update_dict}
     await sample.update_sample(sample_data)
 
-    # if test_params_data:
-    #     await sample.update_test_params(db_session, test_params_data, current_user)
+    if test_params_data:
+        await sample.update_test_params(db_session, test_params_data, current_user)
 
     await db_session.commit()
     await db_session.refresh(sample)

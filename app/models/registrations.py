@@ -783,8 +783,8 @@ class Sample(Base):
     # )
     sample_name: Mapped[Optional[str]]
     batch_or_lot_no: Mapped[Optional[str]]
-    manufactured_date: Mapped[Optional[date]] = mapped_column(nullable=True)
-    expiry_date: Mapped[Optional[date]] = mapped_column(nullable=True)
+    manufactured_date: Mapped[Optional[str]] = mapped_column(String,nullable=True)
+    expiry_date: Mapped[Optional[str]] = mapped_column(String,nullable=True)
     batch_size: Mapped[Optional[str]]
     received_quantity: Mapped[Optional[int]]
     sample_issued: Mapped[Optional[int]]
@@ -797,6 +797,7 @@ class Sample(Base):
     testing_end_date: Mapped[Optional[date]] = mapped_column(nullable=True)
     nabl_logo: Mapped[Optional[bool]] = mapped_column(default=False)
     under_cdsco: Mapped[Optional[bool]] = mapped_column(default=False)
+    samples_received: Mapped[Optional[bool]] = mapped_column(default=False)
     assigned_to: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True
     )
