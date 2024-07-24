@@ -24,6 +24,7 @@ class Role(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     sample_workflow_role = relationship("SampleWorkflow", back_populates="role",  lazy="selectin")
+    users = relationship("User",back_populates="role")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
@@ -38,6 +39,7 @@ class Department(Base):
     name = Column(String)    
     sample_workflow_department = relationship("SampleWorkflow", back_populates="department",  lazy="selectin")
     front_desks = relationship("FrontDesk",back_populates="department", uselist=True,   lazy="selectin")
+    users = relationship("User",back_populates="department")
 
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
@@ -77,6 +79,8 @@ class User(Base):
     
     assingee = relationship("CustomerFollowUp", back_populates="marketing_user")
     followup_updated_user = relationship("CustomerFollowUpHistory", back_populates="user")
+    department = relationship("Department", back_populates="users")
+    role = relationship("Role", back_populates="users")
     # front_desks = relationship("FrontDesk", back_populates="user", foreign_keys=[FrontDesk.received_by])
     sample_assignee = relationship("Sample", foreign_keys="[Sample.assigned_to]", back_populates="assignee")
     sample_workflow_assignee = relationship("SampleWorkflow", foreign_keys="[SampleWorkflow.assigned_to]",   back_populates="assignee")

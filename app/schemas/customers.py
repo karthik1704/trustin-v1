@@ -11,7 +11,9 @@ class ContactPersonCreate(BaseModel):
     mobile_number: str
     landline_number: str
     contact_email: str
-
+class ContactPersonUpdate(ContactPersonCreate):
+    id:Optional[int]
+   
 
 class CustomerCreate(BaseModel):
     company_name: str
@@ -30,6 +32,8 @@ class CustomerCreate(BaseModel):
     gst: str
 
     contact_persons: List[ContactPersonCreate]
+class CustomerUpdate(CustomerCreate):
+    contact_persons: List[ContactPersonUpdate]
 
 
 class CustomerFollowupCreate(BaseModel):
