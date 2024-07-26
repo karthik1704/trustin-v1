@@ -138,6 +138,7 @@ class RegistrationSampleSchema(BaseModel):
     # city: str
     # state: str
     # pincode_no: str
+    product_id:int
     gst: str
     date_of_registration: datetime
     date_of_received: datetime
