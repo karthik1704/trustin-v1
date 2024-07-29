@@ -24,11 +24,11 @@ class Customer(Base):
     __tablename__ = "customers"
     id = Column(Integer, primary_key=True)
 
-    # branch = models.ForeignKey(Branch, related_name='customer_branch',on_delete=models.CASCADE)
     
     customer_code =  Column(String)
     company_name =  Column(String)
     company_id =  Column(String)
+    full_address = Column(Text)
     customer_address_line1 =  Column(String)
     customer_address_line2 =  Column(String)
     city =  Column(String)

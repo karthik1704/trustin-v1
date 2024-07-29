@@ -4,7 +4,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies.auth import get_current_user
 from app.database import get_db, get_async_db
 from app.models.front_desks import FrontDesk
-from app.schemas.front_desks import FrontDeskCreate, FrontDeskSchema, FrontDeskUpdate
+from app.schemas.front_desks import (
+    FrontDeskCreate,
+    FrontDeskSchema,
+    FrontDeskSchemaWithPagination,
+    FrontDeskUpdate,
+)
 
 
 router = APIRouter(prefix="/front-desks", tags=["front-desk"])
@@ -13,7 +18,35 @@ db_dep = Annotated[AsyncSession, Depends(get_async_db)]
 user_dep = Annotated[dict, Depends(get_current_user)]
 
 
-@router.get("/", response_model=list[FrontDeskSchema])
+@router.get("/", response_model=Optional[FrontDeskSchemaWithPagination])
+async def get_all_front_desks_with_pagination(
+    request: Request,
+    db_session: db_dep,
+    current_user: user_dep,
+    page: int = 1,
+    size: int = 10,
+    search: Optional[str] = None,
+    sort_by: str = "id",
+    sort_order: str = "desc",
+):
+
+    try:
+        _front_desks = await FrontDesk.get_all_with_pagination(
+            db_session,
+            [],
+            page,
+            size,
+            search,
+            sort_by,
+            sort_order,
+        )
+        return _front_desks
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/all", response_model=list[FrontDeskSchema])
 async def get_all_front_desks(
     request: Request, db_session: db_dep, current_user: user_dep
 ):
@@ -27,13 +60,18 @@ async def get_all_front_desks(
 
 
 @router.get("/under-registrations", response_model=list[FrontDeskSchema])
-async def get_all_front_desk_by_under_registration(db_session: db_dep, current_user: user_dep):
+async def get_all_front_desk_by_under_registration(
+    db_session: db_dep, current_user: user_dep
+):
     try:
-        _data = await FrontDesk.get_all(db_session, [FrontDesk.status == "UNDER_REGISTRATION"])
+        _data = await FrontDesk.get_all(
+            db_session, [FrontDesk.status == "UNDER_REGISTRATION"]
+        )
         return _data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+
 @router.get("/{id}", response_model=Optional[FrontDeskSchema])
 async def get_front_desk(id: int, db_session: db_dep, current_user: user_dep):
     try:
@@ -83,15 +121,13 @@ async def update_front_desk(
 
     return front_desk
 
+
 @router.delete("/{id}")
-async def delete_front_desk(
-    id: int, db_session: db_dep, current_user: user_dep
-):
-    
+async def delete_front_desk(id: int, db_session: db_dep, current_user: user_dep):
+
     front_desk = await FrontDesk.get_one(db_session, [FrontDesk.id == id])
     if front_desk is None:
         raise HTTPException(status_code=404, detail="Data not found")
-   
+
     await db_session.delete(front_desk)
     await db_session.commit()
-    

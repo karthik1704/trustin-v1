@@ -11,7 +11,10 @@ from sqlalchemy import (
     func,
     UUID,
     Enum,
+    or_,
 )
+from sqlalchemy.orm import selectinload
+
 from typing import TYPE_CHECKING, Any, Literal, Optional
 import datetime
 
@@ -24,26 +27,29 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 from enum import Enum as PyEnum
 
 from .users import Department, User
+
 if TYPE_CHECKING:
     from app.models.registrations import Registration
 
+
 class ReceivedCondition(PyEnum):
-    DAMAGED = 'DAMAGED'
-    GOOD = 'GOOD'
+    DAMAGED = "DAMAGED"
+    GOOD = "GOOD"
+
+
 class FrontDeskStatus(PyEnum):
-    UNDER_REGISTRATION = 'UNDER_REGISTRATION'
-    REGISTERED = 'REGISTERED'
+    UNDER_REGISTRATION = "UNDER_REGISTRATION"
+    REGISTERED = "REGISTERED"
+
 
 class ParcelType(PyEnum):
-    SAMPLE = 'SAMPLE'
-    Material = 'Material'
-
-
+    SAMPLE = "SAMPLE"
+    Material = "Material"
 
 
 class FrontDesk(Base):
     __tablename__ = "frontdesks"
-    
+
     type_annotation_map = {
         PyEnum: Enum(PyEnum, native_enum=False),
     }
@@ -55,7 +61,9 @@ class FrontDesk(Base):
         DateTime(timezone=True), server_default=func.now()
     )
     # parcel_received: Mapped[ParcelType] = mapped_column(Enum(ParcelType))
-    received_condition: Mapped[ReceivedCondition] = mapped_column(Enum(ReceivedCondition))
+    received_condition: Mapped[ReceivedCondition] = mapped_column(
+        Enum(ReceivedCondition)
+    )
     temperature: Mapped[str]
     deparment_id: Mapped[Optional[int]] = mapped_column(ForeignKey(Department.id))
     status: Mapped[FrontDeskStatus] = mapped_column(Enum(FrontDeskStatus))
@@ -70,19 +78,60 @@ class FrontDesk(Base):
     created_by: Mapped[int] = mapped_column(Integer, ForeignKey(User.id))
     updated_by: Mapped[int] = mapped_column(Integer, ForeignKey(User.id))
 
-    customer: Mapped["Customer"] = relationship(back_populates="front_desks", uselist=False,  lazy="selectin")
+    customer: Mapped["Customer"] = relationship(
+        back_populates="front_desks", uselist=False, lazy="selectin"
+    )
     # user: Mapped["User"] = relationship(back_populates="front_desks", uselist=False,  lazy="selectin")
     user_received_by = relationship("User", foreign_keys=[received_by], lazy="selectin")
     user_created_by = relationship("User", foreign_keys=[created_by], lazy="selectin")
     user_updated_by = relationship("User", foreign_keys=[updated_by], lazy="selectin")
-    department: Mapped["Department"] = relationship(back_populates="front_desks",   lazy="selectin")
+    department: Mapped["Department"] = relationship(
+        back_populates="front_desks", lazy="selectin"
+    )
     registration: Mapped["Registration"] = relationship(back_populates="front_desk")
-    
+
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
         _stmt = select(cls).where(*where_conditions).order_by(desc(cls.created_at))
         _result = await database_session.execute(_stmt)
         return _result.scalars()
+
+    @classmethod
+    async def get_all_with_pagination(
+        cls,
+        database_session: AsyncSession,
+        where_conditions: list[Any],
+        page: int = 1,
+        size: int = 10,
+        search: Optional[str] = None,
+        sort_by: str = "id",
+        sort_order: str = "desc",
+    ):
+        _stmt = select(cls).where(*where_conditions)
+
+        if search:
+            _stmt = _stmt.where(cls.courier_name.ilike(f"%{search}%"))
+        print(sort_by)
+        print(sort_order)
+        if sort_by and hasattr(cls, sort_by):
+            if sort_order == "asc":
+                _stmt = _stmt.order_by(getattr(cls, sort_by).asc())
+            else:
+                _stmt = _stmt.order_by(getattr(cls, sort_by).desc())
+        total_front_desk_query = select(func.count()).select_from(_stmt.subquery())
+        total_front_desk_result = await database_session.execute(total_front_desk_query)
+        total_front_desk = total_front_desk_result.scalar()
+        front_desk = _stmt.offset((page - 1) * size).limit(size)
+
+        result = await database_session.execute(front_desk)
+        front_desk = result.scalars().all()
+
+        return {
+            "data": front_desk,
+            "total": total_front_desk,
+            "page": page,
+            "size": size,
+        }
 
     @classmethod
     async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):

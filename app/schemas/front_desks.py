@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from pydantic import BaseModel
-from typing import  Optional
+from typing import  List, Optional
 
 from app.models.front_desks import FrontDeskStatus, ParcelType, ReceivedCondition
 from app.schemas.customers import CustomerSchema
@@ -31,4 +31,10 @@ class FrontDeskSchema(FrontDeskCreate):
     customer: Optional[CustomerSchema]
     user_received_by: Optional[UserSchema]
     reason:Optional[str]
+
+class FrontDeskSchemaWithPagination(BaseModel):
+    data: List[FrontDeskSchema]
+    page: int
+    size: int
+    total:int
     
