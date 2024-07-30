@@ -19,7 +19,7 @@ db_name = os.getenv('DB_NAME')
 def get_database_url():
     # print(Debug)
     if Debug:
-        return f"postgresql+psycopg://postgres:postgres@localhost/trustin_fa"
+        return f"postgresql+psycopg://postgres:postgres@localhost/trustin_fa2"
     else:
 
         return f"postgresql+psycopg://{username}:{password}@{host}/{db_name}"
