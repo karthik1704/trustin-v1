@@ -21,6 +21,7 @@ from app.models.registrations import (
     Sample,
     SampleTestParameter,
     RegistrationTestType,
+    SampleTestType,
 )
 from ..schemas.test_request_form import TRFCreate
 from app.database import get_db, get_async_db
@@ -166,6 +167,7 @@ async def create_registration_with_batches(
             "updated_by": current_user["id"],
         }
         test_params = sample.pop("test_params")
+        test_types = sample.pop("test_types")
         sample_data = {**sample, **update_dict}
         print(sample_data)
         sample_id = await Sample.generate_next_code(db_session, registration.id)
@@ -176,6 +178,23 @@ async def create_registration_with_batches(
         )
         db_session.add(new_sample)
         await db_session.commit()
+        for types_data in test_types:
+            update_dict = {
+                "created_at": time,
+                "updated_at": time,
+                "created_by": current_user["id"],
+                "updated_by": current_user["id"],
+            }
+            types_data = {
+                    "test_type_id" : types_data,
+                **update_dict,
+            }
+            print(types_data)
+            test_type = SampleTestType(
+                **types_data,
+                sample_id=new_sample.id,
+            )
+            db_session.add(test_type)
         for params_data in test_params:
             update_dict = {
                 "created_at": time,

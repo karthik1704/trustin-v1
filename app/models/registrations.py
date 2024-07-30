@@ -2,6 +2,7 @@ from token import OP
 from sqlalchemy import (
     Column,
     Integer,
+    Nullable,
     String,
     ForeignKey,
     Boolean,
@@ -720,6 +721,7 @@ class SampleHistory(Base):
     __tablename__ = "sample_history"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sample_id: Mapped[int] = mapped_column(Integer, ForeignKey("samples.id"))
+    test_type_id: Mapped[int] = mapped_column(Integer, ForeignKey(TestType.id), nullable=True)
     from_status_id: Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
     to_status_id: Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
     assigned_to: Mapped[int] = mapped_column(
@@ -756,6 +758,9 @@ class SampleHistory(Base):
         foreign_keys=[to_status_id],
         lazy="selectin",
     )
+    test_type = relationship(
+        "TestType", back_populates="sample_history_test_type", lazy="selectin"
+    )
 
 
 # sample_test_type_association = Table(
@@ -775,7 +780,7 @@ class Sample(Base):
     )
     # batch_id: Mapped[int] = mapped_column(Integer, ForeignKey(Batch.id))
     # department_id = Column(Integer, ForeignKey("testtypes.id"))
-    test_type_id: Mapped[int] = mapped_column(Integer, ForeignKey(TestType.id))
+    test_type_id: Mapped[int] = mapped_column(Integer, ForeignKey(TestType.id), nullable=True)
     # test_types: Mapped[List[TestType]] = relationship(
     #     "TestType",
     #     secondary=sample_test_type_association,
@@ -825,6 +830,12 @@ class Sample(Base):
         back_populates="sample",
         lazy="selectin",
         order_by="SampleTestParameter.order",
+        cascade="all, delete",
+    )
+    sample_test_types = relationship(
+        "SampleTestType",
+        back_populates="sample",
+        lazy="selectin",
         cascade="all, delete",
     )
     sample_history = relationship(
@@ -1113,29 +1124,39 @@ class Sample(Base):
             "created_by": current_user["id"],
             "updated_by": current_user["id"],
         }
-        for status in status_list:
-            workflow_dict = {
-                "sample_id": self.id,
-                "sample_status_id": status.id,
-                "department_id": status.department_id,
-                "role_id": status.role_id,
-                "assigned_to": (
-                    current_user["id"] if status.name == "Registered" else status.user_id
-                ),
-                "status": (
-                    "Done"
-                    if status.name == "Registered"
-                    else (
-                        "In Progress"
-                        if status.name == "Under review and Sample requested (HOD)"
-                        else "Yet To Start"
+        for sample_type in self.sample_test_types:
+            for status in status_list:
+                workflow_dict = {
+                     "test_type_id" : sample_type.id,
+                    "sample_id": self.id,
+                    "sample_status_id": status.id,
+                    "department_id": status.department_id,
+                    "role_id": status.role_id,
+                    "assigned_to": (
+                        current_user["id"] if status.name == "Registered" else status.user_id
+                    ),
+                    "status": (
+                        "Done"
+                        if status.name == "Registered"
+                        else (
+                            "In Progress"
+                            if status.name == "Under review and Sample requested (HOD)"
+                            else "Yet To Start"
+                        )
                     )
-                ),
-            }
-            workflow_dict = {**workflow_dict, **update_dict}
-            print(workflow_dict)
-            workflow = SampleWorkflow(**workflow_dict)
-            db_session.add(workflow)
+                }
+                
+                
+                workflow_dict = {**workflow_dict, **update_dict}
+                print(workflow_dict)
+                workflow = SampleWorkflow(**workflow_dict)
+                db_session.add(workflow)
+                continue
+
+            # workflow_dict = {**workflow_dict, **update_dict}
+            # print(workflow_dict)
+            # workflow = SampleWorkflow(**workflow_dict)
+            # db_session.add(workflow)
         await db_session.commit()
 
     async def create_history(self, db_session, current_user, history):
@@ -1149,6 +1170,26 @@ class Sample(Base):
         db_session.add(history)
         await db_session.commit()
 
+class SampleTestType(Base):
+    __tablename__ = "sample_test_types"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    sample_id: Mapped[int] = mapped_column(Integer, ForeignKey(Sample.id))
+    test_type_id: Mapped[int] = mapped_column(Integer, ForeignKey(TestType.id))
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now()
+    )
+    created_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+    updated_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+
+    sample = relationship(
+        "Sample", back_populates="sample_test_types", lazy="selectin"
+    )
+    test_type = relationship(
+        "TestType", back_populates="sample_test_types", lazy="selectin"
+    )
 
 class SampleTestParameter(Base):
     __tablename__ = "sample_test_parameters"
@@ -1205,6 +1246,7 @@ class SampleWorkflow(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sample_id: Mapped[int] = mapped_column(Integer, ForeignKey(Sample.id))
     sample_status_id: Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
+    test_type_id: Mapped[int] = mapped_column(Integer, ForeignKey(TestType.id), nullable=True)
     department_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("departments.id"), nullable=True
     )
@@ -1235,6 +1277,9 @@ class SampleWorkflow(Base):
     role = relationship("Role", back_populates="sample_workflow_role", lazy="selectin")
     sample_status = relationship(
         "SampleStatus", back_populates="sample_workflow_status", lazy="selectin"
+    )
+    test_type = relationship(
+        "TestType", back_populates="sample_workflow_test_type", lazy="selectin"
     )
 
     # sample_workflow_history= relationship("SampleRequestHistory", back_populates="sample_request")

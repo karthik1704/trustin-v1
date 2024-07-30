@@ -230,6 +230,7 @@ async def patch_sample(
     }
     # if "comment" in sample_data:
     comments = sample_data.pop("comments", "")
+    test_type_id = sample_data.pop("test_type_id", None)
     test_params = sample_data.pop("test_params", [])
     sample_data = {**sample_data, **update_dict}
     for test_param_data in test_params:
@@ -243,9 +244,14 @@ async def patch_sample(
         print(test_param)
         if test_param:
             await test_param.update_sample_test_param(test_param_data)
-    print('im here')
     prev_status = sample.status
+    if "status_id" in sample_data:
+        status_id = sample_data.pop("status_id","")
+
     await sample.update_sample(sample_data)
+    sample_data.update({
+        "status_id" : status_id
+    })
     if sample_data.get("status", "") == "Submitted" and prev_status != "Submitted":
         await sample.create_workflow(db_session, current_user)
         history = {
@@ -264,12 +270,13 @@ async def patch_sample(
 
         await sample.create_history(db_session, current_user, history)
     else:
-        if sample_data.get("status_id", ""):
+        if sample_data.get("status_id", "") and test_type_id:
 
             progress = await SampleWorkflow.get_one(
                 db_session,
                 [
                     SampleWorkflow.sample_id == sample_id,
+                    SampleWorkflow.test_type_id == test_type_id,
                     SampleWorkflow.status == "In Progress",
                 ],
             )
@@ -295,6 +302,7 @@ async def patch_sample(
                     [
                         SampleWorkflow.sample_id == sample_id,
                         SampleWorkflow.sample_status_id == progres_status_id + 1,
+                        SampleWorkflow.test_type_id == test_type_id
                     ],
                 )
                 if new_status:
@@ -346,6 +354,7 @@ async def patch_sample(
                     [
                         SampleWorkflow.sample_id == sample_id,
                         SampleWorkflow.sample_status_id == progres_status_id - 1,
+                        SampleWorkflow.test_type_id == test_type_id
                     ],
                 )
                 if new_status:
@@ -362,6 +371,7 @@ async def patch_sample(
             if progress:
                 history = {
                     "sample_id": sample_id,
+                    "test_type_id" : test_type_id,
                     "created_at": time,
                     "created_by": current_user["id"],
                     "to_status_id": sample_data.get("status_id", ""),
@@ -374,7 +384,29 @@ async def patch_sample(
                     history.update({"comments": comments})
 
                 await sample.create_history(db_session, current_user, history)
-
+            await db_session.commit()
+            #auto update sample status
+            mech = await SampleWorkflow.get_one(
+                db_session,
+                [
+                    SampleWorkflow.sample_id == sample_id,
+                    SampleWorkflow.test_type_id == 1,
+                    SampleWorkflow.status == "In Progress",
+                ],
+            )
+            micro = await SampleWorkflow.get_one(
+                db_session,
+                [
+                    SampleWorkflow.sample_id == sample_id,
+                    SampleWorkflow.test_type_id == 2,
+                    SampleWorkflow.status == "In Progress",
+                ],
+            )
+            if mech and micro and mech.sample_status_id == micro.sample_status_id:
+                update_data = {
+                    "status_id" : mech.sample_status_id
+                }
+                await sample.update_sample(update_data)
     await db_session.commit()
     await db_session.refresh(sample)
 

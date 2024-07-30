@@ -48,6 +48,9 @@ class TestType(Base):
     trfs = relationship('TRF', secondary=testtype_association_table, back_populates='test_types')
     # samples = relationship('Sample', secondary=sample_test, back_populates='test_types')
     registration_test_types = relationship('RegistrationTestType',  back_populates='test_type')
+    sample_test_types = relationship('SampleTestType',  back_populates='test_type')
+    sample_workflow_test_type = relationship('SampleWorkflow',  back_populates='test_type')
+    sample_history_test_type = relationship('SampleHistory',  back_populates='test_type')
 
 class TestingParameter(Base):
     __tablename__ = "testingparameters"

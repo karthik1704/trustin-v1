@@ -170,6 +170,14 @@ class SampleTestParameterSchema(BaseModel):
     updated_by: int
     test_parameter: Optional[TestParameterSchema]
 
+class SampleTestTypeSchema(BaseModel):
+    id: int
+    sample_id: Optional[int]
+    test_type_id: Optional[int]
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
+    test_type: Optional[TestTypeSchema]
+
 
 class SampleStatusSchema(BaseModel):
     id: int
@@ -190,6 +198,7 @@ class SampleWorkflowSchema(BaseModel):
 
 class SampleHistorySchema(BaseModel):
     id: int
+    test_type : Optional[TestTypeSchema]
     from_status_id: int
     to_status_id: int
     assigned_to: Optional[int]
@@ -225,6 +234,7 @@ class SampleListSchema(BaseModel):
     registration: Optional[RegistrationCodeSchema | None]
     # batch: Optional[BatchSchema]
     status_data: Optional[SampleStatusSchema]
+    sample_test_types: Optional[list[SampleTestTypeSchema]]
 
 class SampleListWithPaginationSchema(BaseModel):
     data: List[SampleListSchema]
@@ -263,6 +273,7 @@ class SampleSchema(BaseModel):
     updated_by: int
     status: Optional[str]
     sample_test_parameters: Optional[list[SampleTestParameterSchema]]
+    sample_test_types: Optional[list[SampleTestTypeSchema]]
     sample_workflows: Optional[list[SampleWorkflowSchema]]
     sample_history: Optional[list[SampleHistorySchema]]
     status_data: Optional[SampleStatusSchema]
@@ -283,7 +294,7 @@ class RegSamples(BaseModel):
     id: int
     sample_id: str
     sample_name: str
-    test_type_id: int
+    test_type_id: Optional[int]
     batch_or_lot_no: str
     description: str
     manufactured_date: Optional[str]
@@ -295,6 +306,7 @@ class RegSamples(BaseModel):
     sterilization_batch_no:Optional[str]
     status_id: int
     sample_test_parameters: Optional[list[SampleTestParameterSchema]]
+    sample_test_types: Optional[list[SampleTestTypeSchema]]
     
 
 
@@ -386,12 +398,13 @@ class SampleCreateSchema(BaseModel):
     description: Optional[str]
     batch_size: Optional[str]
     received_quantity: int
-    test_type_id: int
+    # test_type_id: int
     # sample_issued:int
     # issued_to:str
     sample_condition: str
     sterilization_batch_no: str
     test_params: List[SampleTestParams]
+    test_types : List[int]
 
 
     @staticmethod
@@ -491,7 +504,7 @@ class SampleUpdateSchema(BaseModel):
     description: Optional[str]
     batch_size: Optional[str]
     received_quantity: int
-    test_type_id: int
+    test_type_id: Optional[int]
     # sample_issued:int
     # issued_to:str
     sample_condition: str
@@ -629,6 +642,7 @@ class PatchSample(BaseModel):
     assigned_to: Optional[int] | None = None
     comments: Optional[str] | None
     sample_issued:Optional[int] | None = None
+    test_type_id:Optional[int] | None = None
     issued_to:Optional[str] | None =None
     test_params: Optional[list[PatchSampleTestParameterSchema]] | None  = None
 
