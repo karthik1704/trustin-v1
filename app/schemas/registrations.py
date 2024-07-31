@@ -187,6 +187,7 @@ class SampleWorkflowSchema(BaseModel):
     id: int
     sample_status_id: int
     assigned_to: Optional[int]
+    test_type_id: Optional[int]
     status: str
     assignee: Optional[UserSchema]
     department: Optional[DepartmentSchema]
