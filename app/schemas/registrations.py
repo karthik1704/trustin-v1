@@ -504,7 +504,8 @@ class SampleUpdateSchema(BaseModel):
     description: Optional[str]
     batch_size: Optional[str]
     received_quantity: int
-    test_type_id: Optional[int]
+    # test_type_id: Optional[int]
+    test_types:Optional[List[int]]
     # sample_issued:int
     # issued_to:str
     sample_condition: str
