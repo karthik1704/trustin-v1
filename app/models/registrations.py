@@ -44,7 +44,6 @@ class DisposalProcessEnum(enum.Enum):
     RETURN = "RETURN"
 
 
-
 class ReportSentByEnum2(enum.Enum):
     COURIER = "COURIER"
     EMAIL = "EMAIL"
@@ -91,7 +90,7 @@ class Registration(Base):
     # pincode_no: Mapped[str] = mapped_column(String)
 
     customer_reference_no: Mapped[Optional[str]]
-    contact_person_name:Mapped[Optional[str]]
+    contact_person_name: Mapped[Optional[str]]
     contact_email: Mapped[Optional[str]]
     contact_number: Mapped[Optional[str]]
 
@@ -121,7 +120,9 @@ class Registration(Base):
 
     # nabl_logo: Mapped[Optional[bool]]
     license_no: Mapped[Optional[str]]
-    sampled_by: Mapped[Optional[SamplingByEnum]] = mapped_column( postgresql.ENUM(SamplingByEnum))
+    sampled_by: Mapped[Optional[SamplingByEnum]] = mapped_column(
+        postgresql.ENUM(SamplingByEnum)
+    )
 
     sample_disposal_process: Mapped[Optional[DisposalProcessEnum]] = mapped_column(
         postgresql.ENUM(DisposalProcessEnum)
@@ -340,6 +341,8 @@ class Registration(Base):
         time = datetime.now()
         for sample_data in samples_data:
             test_params = sample_data.pop("test_params")
+            test_types = sample_data.pop("test_types")
+
             sample_id = sample_data.get("id", None)
             reg_sample = None
             if sample_id:
@@ -360,7 +363,30 @@ class Registration(Base):
                     "updated_by": current_user["id"],
                 }
                 sample_data = {**sample_data, **update_dict}
+
                 await reg_sample.update_sample(sample_data)
+                existing_test_types = await SampleTestType.get_all(
+                    database_session, [SampleTestType.sample_id == reg_sample.id]
+                )
+                for existing_param in existing_test_types:
+                    await database_session.delete(existing_param)
+                for types_data in test_types:
+                    update_dict = {
+                        "created_at": time,
+                        "updated_at": time,
+                        "created_by": current_user["id"],
+                        "updated_by": current_user["id"],
+                    }
+                    types_data = {
+                        "test_type_id": types_data,
+                        **update_dict,
+                    }
+                    print(types_data)
+                    test_type = SampleTestType(
+                        **types_data,
+                        sample_id=reg_sample.id,
+                    )
+                    database_session.add(test_type)
                 await reg_sample.update_test_params(
                     database_session, test_params, current_user
                 )
@@ -410,6 +436,24 @@ class Registration(Base):
                 database_session.add(reg_sample)
                 await database_session.commit()
                 await database_session.refresh(reg_sample)
+
+                for types_data in test_types:
+                    update_dict = {
+                        "created_at": time,
+                        "updated_at": time,
+                        "created_by": current_user["id"],
+                        "updated_by": current_user["id"],
+                    }
+                    types_data = {
+                        "test_type_id": types_data,
+                        **update_dict,
+                    }
+                    print(types_data)
+                    test_type = SampleTestType(
+                        **types_data,
+                        sample_id=reg_sample.id,
+                    )
+                    database_session.add(test_type)
 
                 update_dict = {
                     "created_at": time,
@@ -721,7 +765,9 @@ class SampleHistory(Base):
     __tablename__ = "sample_history"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sample_id: Mapped[int] = mapped_column(Integer, ForeignKey("samples.id"))
-    test_type_id: Mapped[int] = mapped_column(Integer, ForeignKey(TestType.id), nullable=True)
+    test_type_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey(TestType.id), nullable=True
+    )
     from_status_id: Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
     to_status_id: Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
     assigned_to: Mapped[int] = mapped_column(
@@ -780,7 +826,9 @@ class Sample(Base):
     )
     # batch_id: Mapped[int] = mapped_column(Integer, ForeignKey(Batch.id))
     # department_id = Column(Integer, ForeignKey("testtypes.id"))
-    test_type_id: Mapped[int] = mapped_column(Integer, ForeignKey(TestType.id), nullable=True)
+    test_type_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey(TestType.id), nullable=True
+    )
     # test_types: Mapped[List[TestType]] = relationship(
     #     "TestType",
     #     secondary=sample_test_type_association,
@@ -788,8 +836,8 @@ class Sample(Base):
     # )
     sample_name: Mapped[Optional[str]]
     batch_or_lot_no: Mapped[Optional[str]]
-    manufactured_date: Mapped[Optional[str]] = mapped_column(String,nullable=True)
-    expiry_date: Mapped[Optional[str]] = mapped_column(String,nullable=True)
+    manufactured_date: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    expiry_date: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     batch_size: Mapped[Optional[str]]
     received_quantity: Mapped[Optional[int]]
     sample_issued: Mapped[Optional[int]]
@@ -1127,13 +1175,15 @@ class Sample(Base):
         for sample_type in self.sample_test_types:
             for status in status_list:
                 workflow_dict = {
-                     "test_type_id" : sample_type.id,
+                    "test_type_id": sample_type.test_type_id,
                     "sample_id": self.id,
                     "sample_status_id": status.id,
                     "department_id": status.department_id,
                     "role_id": status.role_id,
                     "assigned_to": (
-                        current_user["id"] if status.name == "Registered" else status.user_id
+                        current_user["id"]
+                        if status.name == "Registered"
+                        else status.user_id
                     ),
                     "status": (
                         "Done"
@@ -1143,10 +1193,9 @@ class Sample(Base):
                             if status.name == "Under review and Sample requested (HOD)"
                             else "Yet To Start"
                         )
-                    )
+                    ),
                 }
-                
-                
+
                 workflow_dict = {**workflow_dict, **update_dict}
                 print(workflow_dict)
                 workflow = SampleWorkflow(**workflow_dict)
@@ -1170,6 +1219,7 @@ class Sample(Base):
         db_session.add(history)
         await db_session.commit()
 
+
 class SampleTestType(Base):
     __tablename__ = "sample_test_types"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -1184,12 +1234,18 @@ class SampleTestType(Base):
     created_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
     updated_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
-    sample = relationship(
-        "Sample", back_populates="sample_test_types", lazy="selectin"
-    )
+    sample = relationship("Sample", back_populates="sample_test_types", lazy="selectin")
     test_type = relationship(
         "TestType", back_populates="sample_test_types", lazy="selectin"
     )
+
+    
+    @classmethod
+    async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions).order_by(desc(cls.id))
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().all()
+
 
 class SampleTestParameter(Base):
     __tablename__ = "sample_test_parameters"
@@ -1246,7 +1302,9 @@ class SampleWorkflow(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     sample_id: Mapped[int] = mapped_column(Integer, ForeignKey(Sample.id))
     sample_status_id: Mapped[int] = mapped_column(Integer, ForeignKey(SampleStatus.id))
-    test_type_id: Mapped[int] = mapped_column(Integer, ForeignKey(TestType.id), nullable=True)
+    test_type_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey(TestType.id), nullable=True
+    )
     department_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("departments.id"), nullable=True
     )

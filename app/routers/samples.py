@@ -253,22 +253,25 @@ async def patch_sample(
         "status_id" : status_id
     })
     if sample_data.get("status", "") == "Submitted" and prev_status != "Submitted":
+        print('comes here')
         await sample.create_workflow(db_session, current_user)
-        history = {
-            "sample_id": sample_id,
-            "created_at": time,
-            "created_by": current_user["id"],
-            "from_status_id": 1,
-            "to_status_id": 2,
-        }
-        if sample_data.get("assigned_to", ""):
-            print("assinged_to")
-            print(sample_data.get("assigned_to", ""))
-            history.update({"assigned_to": sample_data.get("assigned_to", "")})
-        if comments:
-            history.update({"comments": comments})
+        for test_type in sample.sample_test_types:
+            history = {
+                "sample_id": sample_id,
+                "created_at": time,
+                "created_by": current_user["id"],
+                "from_status_id": 1,
+                "to_status_id": 2,
+                "test_type_id": test_type.test_type_id,
+            }
+            if sample_data.get("assigned_to", ""):
+                print("assinged_to")
+                print(sample_data.get("assigned_to", ""))
+                history.update({"assigned_to": sample_data.get("assigned_to", "")})
+            if comments:
+                history.update({"comments": comments})
 
-        await sample.create_history(db_session, current_user, history)
+            await sample.create_history(db_session, current_user, history)
     else:
         if sample_data.get("status_id", "") and test_type_id:
 
@@ -294,7 +297,7 @@ async def patch_sample(
                     update_dict.update(
                         {"assigned_to": sample_data.get("assigned_to", "")}
                     )
-
+                print(update_dict)
                 await progress.update_workflow(update_dict)
 
                 new_status = await SampleWorkflow.get_one(
@@ -369,6 +372,7 @@ async def patch_sample(
                         )
                     await new_status.update_workflow(update_dict)
             if progress:
+                print(sample_data.get('status_id', ""))
                 history = {
                     "sample_id": sample_id,
                     "test_type_id" : test_type_id,
