@@ -406,9 +406,24 @@ async def patch_sample(
                     SampleWorkflow.status == "In Progress",
                 ],
             )
-            if mech and micro and mech.sample_status_id == micro.sample_status_id:
+            if mech and micro :
+                print("if here")
+                if mech.test_type_id == test_type_id:
+                    if mech.sample_status_id <= micro.sample_status_id:
+                        update_data = {
+                            "status_id" : mech.sample_status_id
+                        }
+                        await sample.update_sample(update_data)
+                elif micro.test_type_id == test_type_id:
+                    if micro.sample_status_id <= mech.sample_status_id:
+                        update_data = {
+                            "status_id" : micro.sample_status_id
+                        }
+                        await sample.update_sample(update_data)
+            else: 
+                print('else here')
                 update_data = {
-                    "status_id" : mech.sample_status_id
+                    "status_id" : sample_data.get("status_id", "")
                 }
                 await sample.update_sample(update_data)
     await db_session.commit()
