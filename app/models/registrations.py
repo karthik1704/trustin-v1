@@ -365,12 +365,31 @@ class Registration(Base):
                 sample_data = {**sample_data, **update_dict}
 
                 await reg_sample.update_sample(sample_data)
+
                 existing_test_types = await SampleTestType.get_all(
                     database_session, [SampleTestType.sample_id == reg_sample.id]
                 )
+               
                 for existing_param in existing_test_types:
                     await database_session.delete(existing_param)
                 for types_data in test_types:
+
+                    # sample_detail = await SampleDetail.get_one(
+                    #     database_session,
+                    #     [
+                    #         SampleDetail.sample_id == reg_sample.id,
+                    #         SampleDetail.
+                    #     ],
+                    # )
+
+                    # if sample_detail is not None: 
+                    #     update_dict = {
+                    #     "updated_at": time,
+                    #     "updated_by": current_user["id"],
+                    #     }
+                    #     sample_detail_data= {"test_type_id": types_data, **update_dict}
+                    #     await sample_detail.update_sample_detail(sample_detail_data)
+
                     update_dict = {
                         "created_at": time,
                         "updated_at": time,
@@ -387,6 +406,7 @@ class Registration(Base):
                         sample_id=reg_sample.id,
                     )
                     database_session.add(test_type)
+
                 await reg_sample.update_test_params(
                     database_session, test_params, current_user
                 )
@@ -453,6 +473,14 @@ class Registration(Base):
                         **types_data,
                         sample_id=reg_sample.id,
                     )
+
+                    new_sample_detail = SampleDetail(
+                        sample_id=reg_sample.id,
+                        test_type_id=types_data.get("test_type_id"),
+                        assigned_to = current_user["id"],
+                        **update_dict,
+                    )
+                    database_session.add(new_sample_detail)
                     database_session.add(test_type)
 
                 update_dict = {
@@ -886,6 +914,12 @@ class Sample(Base):
         lazy="selectin",
         cascade="all, delete",
     )
+    sample_detail = relationship(
+        "SampleDetail",
+        back_populates="sample",
+        lazy="selectin",
+        cascade="all, delete",
+    )
     sample_history = relationship(
         "SampleHistory",
         back_populates="sample",
@@ -1021,7 +1055,7 @@ class Sample(Base):
         _stmt = (
             select(cls)
             .select_from(cls)
-            .join(User, cls.test_type_id == User.qa_type_id)
+            .join(User, cls.sample_test_types == User.qa_type_id)
             .where(User.id == user.get("id"), cls.status == "Submitted")
         )
 
@@ -1239,12 +1273,70 @@ class SampleTestType(Base):
         "TestType", back_populates="sample_test_types", lazy="selectin"
     )
 
-    
     @classmethod
     async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
         _stmt = select(cls).where(*where_conditions).order_by(desc(cls.id))
         _result = await database_session.execute(_stmt)
         return _result.scalars().all()
+
+
+class SampleDetail(Base):
+    __tablename__ = "sample_details"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    sample_id: Mapped[int] = mapped_column(Integer, ForeignKey(Sample.id))
+    test_type_id: Mapped[int] = mapped_column(Integer, ForeignKey(TestType.id))
+    testing_start_date: Mapped[Optional[date]] = mapped_column(nullable=True)
+    testing_end_date: Mapped[Optional[date]] = mapped_column(nullable=True)
+    received_quantity: Mapped[Optional[int]]
+    samples_received: Mapped[Optional[bool]] = mapped_column(default=False)
+    assigned_to: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=True
+    )
+    sample_issued: Mapped[Optional[int]]
+    issued_to: Mapped[Optional[str]]
+    authorized_sign_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=True
+    )
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[DateTime] = mapped_column(
+        DateTime(timezone=True), onupdate=func.now()
+    )
+    created_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+    updated_by: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
+
+    assignee = relationship(
+        "User",
+        back_populates="sample_detail_assignee",
+        foreign_keys=[assigned_to],
+        lazy="selectin",
+    )
+    authorized_sign = relationship(
+        "User",
+        back_populates="sample_authorized_sign",
+        foreign_keys=[authorized_sign_id],
+        lazy="selectin",
+    )
+
+    sample = relationship("Sample", back_populates="sample_detail")
+
+    @classmethod
+    async def get_all(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions).order_by(desc(cls.id))
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().all()
+
+    @classmethod
+    async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):
+        _stmt = select(cls).where(*where_conditions)
+        _result = await database_session.execute(_stmt)
+        return _result.scalars().first()
+
+    async def update_sample_detail(self, updated_data):
+
+        for field, value in updated_data.items():
+            setattr(self, field, value) if value else None
 
 
 class SampleTestParameter(Base):

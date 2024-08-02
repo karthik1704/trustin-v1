@@ -19,6 +19,7 @@ from app.models.registrations import (
     RegistrationStatus,
     RegistrationTestParameter,
     Sample,
+    SampleDetail,
     SampleTestParameter,
     RegistrationTestType,
     SampleTestType,
@@ -179,6 +180,7 @@ async def create_registration_with_batches(
         db_session.add(new_sample)
         await db_session.commit()
         for types_data in test_types:
+            print(types_data)
             update_dict = {
                 "created_at": time,
                 "updated_at": time,
@@ -186,7 +188,7 @@ async def create_registration_with_batches(
                 "updated_by": current_user["id"],
             }
             types_data = {
-                    "test_type_id" : types_data,
+                "test_type_id": types_data,
                 **update_dict,
             }
             print(types_data)
@@ -194,6 +196,16 @@ async def create_registration_with_batches(
                 **types_data,
                 sample_id=new_sample.id,
             )
+            # create sample detail
+
+            new_sample_detail = SampleDetail(
+                sample_id=new_sample.id,
+                test_type_id=types_data.get("test_type_id"),
+                assigned_to = current_user["id"],
+
+                **update_dict,
+            )
+            db_session.add(new_sample_detail)
             db_session.add(test_type)
         for params_data in test_params:
             update_dict = {

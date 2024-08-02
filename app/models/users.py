@@ -83,6 +83,8 @@ class User(Base):
     role = relationship("Role", back_populates="users")
     # front_desks = relationship("FrontDesk", back_populates="user", foreign_keys=[FrontDesk.received_by])
     sample_assignee = relationship("Sample", foreign_keys="[Sample.assigned_to]", back_populates="assignee")
+    sample_detail_assignee = relationship("SampleDetail", foreign_keys="[SampleDetail.assigned_to]", back_populates="assignee")
+    sample_authorized_sign = relationship("SampleDetail", foreign_keys="[SampleDetail.authorized_sign_id]", back_populates="authorized_sign")
     sample_workflow_assignee = relationship("SampleWorkflow", foreign_keys="[SampleWorkflow.assigned_to]",   back_populates="assignee")
     sample_history_assignee = relationship("SampleHistory", foreign_keys="[SampleHistory.assigned_to]",   back_populates="assignee")
     sample_history_created = relationship("SampleHistory", foreign_keys="[SampleHistory.created_by]",   back_populates="created_by_user")

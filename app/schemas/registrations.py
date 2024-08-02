@@ -243,6 +243,20 @@ class SampleListWithPaginationSchema(BaseModel):
     page: int
     size: int
 
+class SampleDetailSchema(BaseModel):
+
+    id: int
+    sample_id: int
+    test_type_id: int
+    assigned_to: Optional[int]
+    testing_start_date: Optional[date]
+    testing_end_date: Optional[date]
+    sample_issued:Optional[int]
+    issued_to:Optional[str]
+    samples_received:Optional[bool]
+    # received_quantity: Optional[int]
+
+
 class SampleSchema(BaseModel):
     id: int
     sample_id: str
@@ -281,6 +295,7 @@ class SampleSchema(BaseModel):
     assignee: Optional[UserSchema]
     # batch: Optional[BatchSchema]
     registration: Optional[RegistrationSampleSchema]
+    sample_detail: Optional[List[SampleDetailSchema]]
 
 
 class RegistrationSamplesSchema(BaseModel):
