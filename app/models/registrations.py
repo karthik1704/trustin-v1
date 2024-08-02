@@ -369,43 +369,59 @@ class Registration(Base):
                 existing_test_types = await SampleTestType.get_all(
                     database_session, [SampleTestType.sample_id == reg_sample.id]
                 )
-               
+                delete= False
                 for existing_param in existing_test_types:
-                    await database_session.delete(existing_param)
+                    if existing_param.test_type_id not in test_types:
+                        delete=True
+                        break
+
                 for types_data in test_types:
+                    existing_types = [existing_param.test_type_id for existing_param in existing_test_types]
 
-                    # sample_detail = await SampleDetail.get_one(
-                    #     database_session,
-                    #     [
-                    #         SampleDetail.sample_id == reg_sample.id,
-                    #         SampleDetail.
-                    #     ],
-                    # )
+                    if types_data not in existing_types:
+                        delete=True
+                        break
 
-                    # if sample_detail is not None: 
-                    #     update_dict = {
-                    #     "updated_at": time,
-                    #     "updated_by": current_user["id"],
-                    #     }
-                    #     sample_detail_data= {"test_type_id": types_data, **update_dict}
-                    #     await sample_detail.update_sample_detail(sample_detail_data)
+                if delete:        
+                    for existing_param in existing_test_types:
+                        await database_session.delete(existing_param)
+                    for types_data in test_types:
+                        
 
-                    update_dict = {
-                        "created_at": time,
-                        "updated_at": time,
-                        "created_by": current_user["id"],
-                        "updated_by": current_user["id"],
-                    }
-                    types_data = {
-                        "test_type_id": types_data,
-                        **update_dict,
-                    }
-                    print(types_data)
-                    test_type = SampleTestType(
-                        **types_data,
-                        sample_id=reg_sample.id,
-                    )
-                    database_session.add(test_type)
+
+
+                        # sample_detail = await SampleDetail.get_one(
+                        #     database_session,
+                        #     [
+                        #         SampleDetail.sample_id == reg_sample.id,
+                        #         SampleDetail.
+                        #     ],
+                        # )
+
+                        # if sample_detail is not None: 
+                        #     update_dict = {
+                        #     "updated_at": time,
+                        #     "updated_by": current_user["id"],
+                        #     }
+                        #     sample_detail_data= {"test_type_id": types_data, **update_dict}
+                        #     await sample_detail.update_sample_detail(sample_detail_data)
+
+                        update_dict = {
+                            "created_at": time,
+                            "updated_at": time,
+                            "created_by": current_user["id"],
+                            "updated_by": current_user["id"],
+                        }
+                        types_data = {
+                            "test_type_id": types_data,
+                            **update_dict,
+                        }
+                        print(types_data)
+                        test_type = SampleTestType(
+                            **types_data,
+                            sample_id=reg_sample.id,
+                        )
+                        database_session.add(test_type)
 
                 await reg_sample.update_test_params(
                     database_session, test_params, current_user
@@ -1019,7 +1035,8 @@ class Sample(Base):
         _stmt = (
             select(cls)
             .select_from(cls)
-            .join(User, cls.test_type_id == User.qa_type_id)
+            .join(SampleTestType, cls.id==SampleTestType.sample_id)
+            .join(User, SampleTestType.test_type_id == User.qa_type_id)
             .where(User.id == user.get("id"), cls.status == "Submitted")
         )
 
@@ -1055,7 +1072,7 @@ class Sample(Base):
         _stmt = (
             select(cls)
             .select_from(cls)
-            .join(User, cls.sample_test_types == User.qa_type_id)
+            .join(User, cls.sample_test_types.test_type_id == User.qa_type_id)
             .where(User.id == user.get("id"), cls.status == "Submitted")
         )
 
@@ -1102,9 +1119,10 @@ class Sample(Base):
             .distinct()
             .select_from(cls)
             .join(SampleWorkflow, cls.id == SampleWorkflow.sample_id)
+            .join(SampleDetail, cls.id == SampleDetail.sample_id)
             # .join(User, SampleWorkflow.assigned_to == User.sample_id)
             .where(
-                SampleWorkflow.assigned_to == user.get("id"), cls.status == "Submitted"
+                SampleDetail.assigned_to == user.get("id"), cls.status == "Submitted"
             )
         )
 

@@ -276,13 +276,18 @@ async def patch_sample(
         if test_param:
             await test_param.update_sample_test_param(test_param_data)
     prev_status = sample.status
-    if "status_id" in sample_data:
-        status_id = sample_data.pop("status_id", "")
+    # if "status_id" in sample_data:
+    #     status_id = sample_data.pop("status_id", "")
 
-    await sample.update_sample(sample_data)
-    sample_data.update({"status_id": status_id})
+    # await sample.update_sample(sample_data)
+    # sample_data.update({"status_id": status_id})
     if sample_data.get("status", "") == "Submitted" and prev_status != "Submitted":
-        print("comes here")
+        print("comes here",test_type_id)
+        # if "status_id" in sample_data:
+        #     status_id = sample_data.pop("status_id", "")
+
+        await sample.update_sample(sample_data)
+        
         await sample.create_workflow(db_session, current_user)
         for test_type in sample.sample_test_types:
             history = {
@@ -303,7 +308,11 @@ async def patch_sample(
             await sample.create_history(db_session, current_user, history)
     else:
         if sample_data.get("status_id", "") and test_type_id:
+            if "status_id" in sample_data:
+                status_id = sample_data.pop("status_id", "")
 
+            await sample.update_sample(sample_data)
+            sample_data.update({"status_id": status_id})
             progress = await SampleWorkflow.get_one(
                 db_session,
                 [
