@@ -254,6 +254,9 @@ class SampleDetailSchema(BaseModel):
     sample_issued:Optional[int]
     issued_to:Optional[str]
     samples_received:Optional[bool]
+    assignee: Optional[UserSchema]
+    authorized_sign: Optional[UserSchema]
+
     # received_quantity: Optional[int]
 
 
