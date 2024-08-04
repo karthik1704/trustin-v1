@@ -233,8 +233,16 @@ async def patch_sample(
     # if "comment" in sample_data:
     comments = sample_data.pop("comments", "")
     test_type_id = sample_data.pop("test_type_id", None)
+    authorized_sign_id = sample_data.pop("authorized_sign_id", None)
     test_params = sample_data.pop("test_params", [])
-    sample_data = {**sample_data, **update_dict}
+
+    extra_data:dict[str, str] = {}
+    if sample_data.get('nabl_logo', None) and not sample.nabl_logo:
+        next_code =await Sample.generate_ulr_next_code(db_session)
+        extra_data['ulr_no']=next_code 
+        
+
+    sample_data = {**sample_data, **update_dict, **extra_data}
     sample_detail = await SampleDetail.get_one(
         db_session,
         [
@@ -243,7 +251,7 @@ async def patch_sample(
         ],
     )
 
-    sample_detail_data = {**sample_data, **update_dict}
+    sample_detail_data = {"authorized_sign_id":authorized_sign_id, **sample_data, **update_dict, }
     sample_detail_data.pop("nabl_logo", None)
     sample_detail_data.pop("under_cdsco", None)
     if sample_detail is not None:
@@ -462,3 +470,16 @@ async def patch_sample(
     await db_session.refresh(sample)
 
     # return sample
+
+
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_sample( sample_id: int,
+    db_session: AsyncSession = Depends(get_async_db),
+    current_user: dict = Depends(get_current_user),):
+
+    sample = await Sample.get_one(db_session, [Sample.id == sample_id])
+    if sample is None:
+        raise HTTPException(status_code=404, detail="Sample not found")
+    
+    await db_session.delete(sample)
+    await db_session.commit()

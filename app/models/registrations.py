@@ -27,7 +27,7 @@ import enum
 
 from app.models.front_desks import FrontDesk
 from app.models.samples import Product
-from app.utils import get_unique_code, get_unique_code_registration
+from app.utils import get_ulr_no, get_unique_code, get_unique_code_registration
 from .users import User
 
 
@@ -895,6 +895,7 @@ class Sample(Base):
     nabl_logo: Mapped[Optional[bool]] = mapped_column(default=False)
     under_cdsco: Mapped[Optional[bool]] = mapped_column(default=False)
     samples_received: Mapped[Optional[bool]] = mapped_column(default=False)
+    ulr_no:Mapped[Optional[str]]
     assigned_to: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True
     )
@@ -978,6 +979,30 @@ class Sample(Base):
         # Generate the new code by combining the prefix and the incremented integer
         new_code = get_unique_code_registration(
             highest_code_int, highest_code
+        )  # Adjust the format based on your requirements
+        # database_session.close()
+        return new_code
+
+    @classmethod
+    async def generate_ulr_next_code(cls, database_session):
+
+        _stmt = (
+            select(cls.ulr_no)
+            .where(cls.nabl_logo == True)
+            .order_by(
+                desc(cls.ulr_no)
+            )  # Assuming `code` is the column you want to order by
+        )
+        _result = await database_session.execute(_stmt)
+        if _result:
+            highest_code = _result.scalars().first()
+        if highest_code:
+            highest_code_int = int(highest_code[-10:-1]) + 1 
+        else:
+            highest_code_int = 1
+        # Generate the new code by combining the prefix and the incremented integer
+        new_code = get_ulr_no(
+            highest_code_int
         )  # Adjust the format based on your requirements
         # database_session.close()
         return new_code

@@ -133,6 +133,10 @@ class RegistrationSampleSchema(BaseModel):
     company_id: int
     company_name: str
     full_address: str
+    customer_reference_no: str
+    contact_person_name: str
+    contact_number: str
+    license_no: str
     # customer_address_line1: str
     # customer_address_line2: str
     # city: str
@@ -148,7 +152,7 @@ class RegistrationSampleSchema(BaseModel):
     updated_by: int
     # test_type: str
     product_data: ProductSchema
-
+    
 
 class RegistrationCodeSchema(BaseModel):
     code: str | None
@@ -255,6 +259,7 @@ class SampleDetailSchema(BaseModel):
     issued_to:Optional[str]
     samples_received:Optional[bool]
     assignee: Optional[UserSchema]
+    authorized_sign_id: Optional[int]
     authorized_sign: Optional[UserSchema]
 
     # received_quantity: Optional[int]
@@ -284,6 +289,7 @@ class SampleSchema(BaseModel):
     status_id: Optional[int]
     test_type_id: Optional[int]
     assigned_to: Optional[int]
+    ulr_no: Optional[str]
     # batch_id: int
     created_at: datetime
     updated_at: datetime
@@ -660,6 +666,7 @@ class PatchSample(BaseModel):
     status: Optional[str] | None
     status_id: Optional[int] | None
     assigned_to: Optional[int] | None = None
+    authorized_sign_id: Optional[int] | None = None
     comments: Optional[str] | None
     sample_issued:Optional[int] | None = None
     test_type_id:Optional[int] | None = None

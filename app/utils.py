@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, UTC, date
 from typing import Union, Any, Optional
 from jose import jwt
 from passlib.context import CryptContext
@@ -83,6 +83,14 @@ def get_unique_code_registration(unique_number: int, code:str) -> str:
 
     print( new_code)
     return new_code
+
+def get_ulr_no(uniue_number:int)->str:
+    current_year = datetime.now().year % 100  # Gets the last two digits of the current year
+    
+    code_number = f"{uniue_number:09d}"  # Pads the number with leading zeros to make it 9 digits
+    code = f"TC5410{current_year:02d}{code_number}F"
+    
+    return code
 
 if __name__== "__main__":
     get_unique_code_registration (10, 'TAS/24-25/0009')

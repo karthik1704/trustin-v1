@@ -76,6 +76,17 @@ async def get_menus(
     return menus
 
 
+@router.get("/departments/{deparment_id}", status_code=status.HTTP_200_OK)
+async def get_all_user_by_department(db: db_dep, user: user_dep, deparment_id: int = Path(gt=0)):
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+        )
+
+    users = db.query(User).filter(User.department_id == deparment_id).all()
+
+    return users
+
 @router.get("/{user_id}", status_code=status.HTTP_200_OK)
 async def get_user(db: db_dep, user: user_dep, user_id: int = Path(gt=0)):
     if user is None:
@@ -83,9 +94,9 @@ async def get_user(db: db_dep, user: user_dep, user_id: int = Path(gt=0)):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
 
-    user = db.query(User).filter(User.id == user_id).first()
+    user_data = db.query(User).filter(User.id == user_id).first()
 
-    return user
+    return user_data
 
 
 @router.get("/role/{role}", status_code=status.HTTP_200_OK)
