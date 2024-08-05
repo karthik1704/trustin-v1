@@ -988,13 +988,14 @@ class Sample(Base):
 
         _stmt = (
             select(cls.ulr_no)
-            .where(cls.nabl_logo == True)
+            .where(cls.nabl_logo == True, cls.ulr_no !=None)
             .order_by(
                 desc(cls.ulr_no)
             )  # Assuming `code` is the column you want to order by
         )
         _result = await database_session.execute(_stmt)
         if _result:
+            print(_result)
             highest_code = _result.scalars().first()
         if highest_code:
             highest_code_int = int(highest_code[-10:-1]) + 1 
