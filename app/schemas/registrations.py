@@ -670,7 +670,7 @@ class PatchSample(BaseModel):
     status_id: Optional[int] | None
     assigned_to: Optional[int] | None = None
     authorized_sign_id: Optional[int] | None = None
-    report_no: Optional[str] = None
+    group: Optional[str] = None
     discipline:Optional[str] = None
     comments: Optional[str] | None
     sample_issued:Optional[int] | None = None
