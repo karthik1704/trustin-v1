@@ -27,6 +27,7 @@ import enum
 
 from app.models.front_desks import FrontDesk
 from app.models.samples import Product
+from app.settings import TEST_REPORT_START_NUMBER
 from app.utils import get_report_no, get_ulr_no, get_unique_code, get_unique_code_registration
 from .users import User
 
@@ -897,6 +898,9 @@ class Sample(Base):
     samples_received: Mapped[Optional[bool]] = mapped_column(default=False)
     ulr_no:Mapped[Optional[str]]
     report_no:Mapped[Optional[str]]
+    discipline:Mapped[Optional[str]]
+    group:Mapped[Optional[str]]
+    report_no:Mapped[Optional[str]]
     assigned_to: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True
     )
@@ -1026,7 +1030,7 @@ class Sample(Base):
         if highest_code:
             highest_code_int = int(highest_code.split(f"/")[-1]) + 1
         else:
-            highest_code_int = 1
+            highest_code_int = TEST_REPORT_START_NUMBER if TEST_REPORT_START_NUMBER is not None else  1
         # Generate the new code by combining the prefix and the incremented integer
         new_code = get_report_no(
             highest_code_int

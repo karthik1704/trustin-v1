@@ -22,8 +22,13 @@ def verify_password(password: str, hashed_pass: str) -> bool:
     return password_context.verify(password, hashed_pass)
 
 
-def create_access_token(username: str,
-    email: str, user_id: int, role_id: int,department_id:Optional[int], expires_delta: int|None = None
+def create_access_token(
+    username: str,
+    email: str,
+    user_id: int,
+    role_id: int,
+    department_id: Optional[int],
+    expires_delta: int | None = None,
 ) -> str:
     if expires_delta is not None:
         expires_at = datetime.now(UTC) + timedelta(days=30)
@@ -32,7 +37,7 @@ def create_access_token(username: str,
 
     print(expires_at)
 
-    encode = {"sub": email, "id": user_id, "role_id": role_id, "dept_id" : department_id}
+    encode = {"sub": email, "id": user_id, "role_id": role_id, "dept_id": department_id}
     encode.update({"exp": expires_at})
     encoded_jwt = jwt.encode(encode, JWT_SECRET_KEY, ALGORITHM)
     return encoded_jwt
@@ -60,45 +65,64 @@ def get_unique_code(prefix: str, unique_number: int) -> str:
     setup_fiscal_calendar(start_month=4)
     start_year = FiscalYear.current().start.strftime("%Y")[-2:]
     end_year = FiscalYear.current().end.strftime("%Y")[-2:]
-    pre=prefix+"/" if prefix else ""
-    new_code = f"TAS/{pre}{start_year}-{end_year}/{unique_number:04}" 
+    pre = prefix + "/" if prefix else ""
+    new_code = f"TAS/{pre}{start_year}-{end_year}/{unique_number:04}"
 
     return new_code
 
-start_number:int|None = None
 
-def get_unique_code_registration(unique_number: int, code:str) -> str:
+def get_unique_para_code(prefix: str, unique_number: int) -> str:
+
+    pre = prefix + "/" if prefix else ""
+    new_code = f"{pre}/{unique_number:04}"
+
+    return new_code
+
+
+start_number: int | None = None
+
+
+def get_unique_code_registration(unique_number: int, code: str) -> str:
     setup_fiscal_calendar(start_month=4)
-   
+
     start_year = FiscalYear.current().start.strftime("%Y")[-2:]
     end_year = FiscalYear.current().end.strftime("%Y")[-2:]
     if code is not None:
-        code_years = code.split('/')[1]
-        code_end_year = code_years.split('-')[1]
+        code_years = code.split("/")[1]
+        code_end_year = code_years.split("-")[1]
         if code_end_year == start_year:
-            unique_number=1
+            unique_number = 1
     if start_number is not None:
-        unique_number=start_number
-    new_code = f"TAS/{start_year}-{end_year}/{unique_number:04}" 
+        unique_number = start_number
+    new_code = f"TAS/{start_year}-{end_year}/{unique_number:04}"
 
-    print( new_code)
+    print(new_code)
     return new_code
 
-def get_ulr_no(uniue_number:int)->str:
-    current_year = datetime.now().year % 100  # Gets the last two digits of the current year
-    
-    code_number = f"{uniue_number:09d}"  # Pads the number with leading zeros to make it 9 digits
+
+def get_ulr_no(uniue_number: int) -> str:
+    current_year = (
+        datetime.now().year % 100
+    )  # Gets the last two digits of the current year
+
+    code_number = (
+        f"{uniue_number:09d}"  # Pads the number with leading zeros to make it 9 digits
+    )
     code = f"TC5410{current_year:02d}{code_number}F"
-    
+
     return code
 
-def get_report_no(uniue_number:int)->str:
-    
-    code_number = f"{uniue_number:04d}"  # Pads the number with leading zeros to make it 9 digits
+
+def get_report_no(uniue_number: int) -> str:
+
+    code_number = (
+        f"{uniue_number:04d}"  # Pads the number with leading zeros to make it 9 digits
+    )
     code = f"TAS/REP/{code_number}"
-    
+
     return code
 
-if __name__== "__main__":
-    get_unique_code_registration (10, 'TAS/24-25/0009')
-    get_unique_code_registration( 1, 'TAS/23-24/0009')
+
+if __name__ == "__main__":
+    get_unique_code_registration(10, "TAS/24-25/0009")
+    get_unique_code_registration(1, "TAS/23-24/0009")

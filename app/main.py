@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import dashboard, departments
+from app.routers import dashboard, departments, pdf
 from app.schemas.users import DepartmentSchema
 
 
@@ -62,3 +62,4 @@ app.include_router(batches.router)
 app.include_router(samples.router)
 app.include_router(dashboard.router)
 app.include_router(front_desks.router)
+app.include_router(pdf.router)

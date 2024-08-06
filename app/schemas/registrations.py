@@ -291,6 +291,8 @@ class SampleSchema(BaseModel):
     assigned_to: Optional[int]
     ulr_no: Optional[str]
     report_no: Optional[str]
+    discipline:Optional[str]
+    group:Optional[str]
     # batch_id: int
     created_at: datetime
     updated_at: datetime
@@ -668,6 +670,8 @@ class PatchSample(BaseModel):
     status_id: Optional[int] | None
     assigned_to: Optional[int] | None = None
     authorized_sign_id: Optional[int] | None = None
+    report_no: Optional[str] = None
+    discipline:Optional[str] = None
     comments: Optional[str] | None
     sample_issued:Optional[int] | None = None
     test_type_id:Optional[int] | None = None

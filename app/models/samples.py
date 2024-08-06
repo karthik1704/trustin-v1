@@ -5,6 +5,7 @@ from sqlalchemy import (
     ForeignKey,
     Boolean,
     DateTime,
+    desc,
     func,
     Enum,
     Text,
@@ -13,6 +14,8 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from app.models import Base
 from enum import Enum as PyEnum
+
+from app.utils import get_unique_para_code
 from .test_request_forms import testtype_association_table
 
 class Product(Base):
@@ -78,4 +81,24 @@ class TestingParameter(Base):
     registration_test_parameters = relationship('RegistrationTestParameter',back_populates = 'test_parameter')
     sample_test_parameters = relationship('SampleTestParameter',back_populates = 'test_parameter')
 
-    
+    @classmethod
+    async def generate_ulr_next_code(cls, database_session):
+        # Use the query API to get the highest ulr_no
+        _query = (
+            database_session.query(cls.parameter_code)
+            .filter(cls.parameter_code != None)
+            .order_by(desc(cls.parameter_code)).first()
+        )
+        
+       
+        highest_code = _query
+
+        if highest_code:
+            highest_code_int = int(highest_code[-10:-1]) + 1 
+        else:
+            highest_code_int = 1
+
+        # Generate the new code by combining the prefix and the incremented integer
+        new_code = get_unique_para_code("PARA",highest_code_int)  # Adjust the format based on your requirements
+        
+        return new_code

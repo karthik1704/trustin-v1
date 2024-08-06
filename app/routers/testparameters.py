@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Path, Query, status, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from app.dependencies.auth import get_current_user
-from app.utils import get_unique_code
+from app.utils import get_unique_code, get_unique_para_code
 from ..schemas.samples import TestParameterCreate
 from app.database import get_db
 from ..models.samples import TestingParameter
@@ -37,7 +37,7 @@ async def get_all_testing_parameters_by_product_id(
     db: db_dep,
     user: user_dep,
     test_type: List[int] = Query(..., description="List of test_type IDs"),
-    product_id:int=Path(gt=0),
+    product_id: int = Path(gt=0),
 ):
     parameters = (
         db.query(TestingParameter)
@@ -73,12 +73,41 @@ async def create_parameter(db: db_dep, data: TestParameterCreate, user: user_dep
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
 
-    parameter = TestingParameter(**data.model_dump())
-    db.add(parameter)
+    parameter_data = data.model_dump()
+    test_type_id = parameter_data.pop("test_type_id")
+    product_id = parameter_data.pop("product_id", None)
+    methods = parameter_data.pop("methods", [])
+
+    # Check if methods are provided
+    if not methods:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No methods provided"
+        )
+
+    # Collecting all parameters in a single loop
+    parameters_to_add = []
+    for method in methods:
+        method_or_spec = method.pop("method_or_spec")
+        parameters = method.pop("parameters", [])
+        if not parameters:
+            raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No Parameters provided"
+            )
+        for param in parameters:
+            param_data = {
+                **param,
+                "test_type_id": test_type_id,
+                "product_id": product_id,
+                "method_or_spec": method_or_spec,
+                "parameter_code": None,  # Ensure this is handled later if needed
+            }
+            parameter = TestingParameter(**param_data)
+            parameters_to_add.append(parameter)
+
+    # Adding all parameters at once
+    db.add_all(parameters_to_add)
     db.commit()
-    db.refresh(parameter)
-    parameter.parameter_code =  get_unique_code('PARA', parameter.id)
-    db.commit()
+
 
 @router.put("/{para_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def update_test_parameter(
@@ -101,11 +130,8 @@ async def update_test_parameter(
             status_code=status.HTTP_404_NOT_FOUND, detail="Testing Parameter Not Found"
         )
 
-     
-
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(parameter, field, value)
-
 
     db.commit()
     db.refresh(parameter)
