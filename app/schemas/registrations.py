@@ -290,6 +290,7 @@ class SampleSchema(BaseModel):
     test_type_id: Optional[int]
     assigned_to: Optional[int]
     ulr_no: Optional[str]
+    report_no: Optional[str]
     # batch_id: int
     created_at: datetime
     updated_at: datetime

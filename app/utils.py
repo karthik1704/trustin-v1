@@ -92,6 +92,13 @@ def get_ulr_no(uniue_number:int)->str:
     
     return code
 
+def get_report_no(uniue_number:int)->str:
+    
+    code_number = f"{uniue_number:04d}"  # Pads the number with leading zeros to make it 9 digits
+    code = f"TAS/REP/{code_number}"
+    
+    return code
+
 if __name__== "__main__":
     get_unique_code_registration (10, 'TAS/24-25/0009')
     get_unique_code_registration( 1, 'TAS/23-24/0009')
