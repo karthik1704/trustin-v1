@@ -37,7 +37,7 @@ def create_access_token(
 
     print(expires_at)
 
-    encode = {"sub": email, "id": user_id, "role_id": role_id, "dept_id": department_id}
+    encode = {"sub": username, "email":email, "id": user_id, "role_id": role_id, "dept_id": department_id}
     encode.update({"exp": expires_at})
     encoded_jwt = jwt.encode(encode, JWT_SECRET_KEY, ALGORITHM)
     return encoded_jwt
