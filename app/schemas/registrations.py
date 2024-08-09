@@ -167,6 +167,7 @@ class SampleTestParameterSchema(BaseModel):
     test_parameter_id: int
     test_type: Optional[str]
     value: Optional[str]
+    specification_limits: Optional[str]
     result: Optional[bool]
     created_at: datetime
     updated_at: datetime
@@ -657,6 +658,7 @@ class PatchSampleTestParameterSchema(BaseModel):
     order: int
     quantity: Optional[int]=None 
     value: Optional[str]=None
+    specification_limits: Optional[str]=None
     result: Optional[bool]=None
 
 
