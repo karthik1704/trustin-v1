@@ -69,6 +69,7 @@ class FrontDesk(Base):
     status: Mapped[FrontDeskStatus] = mapped_column(Enum(FrontDeskStatus))
     received_by: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(User.id))
     reason: Mapped[Optional[str]] = mapped_column(Text)
+    no_of_boxes_received: Mapped[Optional[str]]
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

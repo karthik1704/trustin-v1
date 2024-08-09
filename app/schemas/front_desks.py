@@ -9,6 +9,7 @@ from app.schemas.users import UserSchema
 class FrontDeskCreate(BaseModel):
     customer_id: int
     courier_name: str
+    no_of_boxes_received: Optional[str]
     date_of_received: datetime 
     # parcel_received: ParcelType
     received_condition: ReceivedCondition

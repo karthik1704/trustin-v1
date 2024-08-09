@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.dependencies.auth import get_current_user
 from app.utils import get_unique_code, get_unique_para_code
-from ..schemas.samples import TestParameterCreate
+from ..schemas.samples import TestParameterCreate, TestParameterUpdate
 from app.database import get_db
 from ..models.samples import TestingParameter
 
@@ -113,7 +113,7 @@ async def create_parameter(db: db_dep, data: TestParameterCreate, user: user_dep
 async def update_test_parameter(
     db: db_dep,
     user: user_dep,
-    data: TestParameterCreate,
+    data: TestParameterUpdate,
     para_id: int = Path(gt=0),
 ):
     if user is None:

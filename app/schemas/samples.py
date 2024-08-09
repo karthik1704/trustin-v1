@@ -18,8 +18,11 @@ class TestTypeCreate(BaseModel):
 
 class Parameters(BaseModel):
     testing_parameters:str
-    amount : Decimal
-    group_of_test_parameters : str | None
+    # amount : Decimal
+    # group_of_test_parameters : str | None
+    specification_limits:Optional[str]=None
+    min_limits:Optional[str]=None
+    max_limits:Optional[str]=None
 
 class MethodAndParam(BaseModel):
     method_or_spec:str
@@ -29,3 +32,14 @@ class TestParameterCreate(BaseModel):
     test_type_id : int
     product_id : Optional[int]
     methods: List[MethodAndParam]
+
+class TestParameterUpdate(BaseModel):
+    testing_parameters:str
+    # amount : Decimal
+    # group_of_test_parameters : str | None
+    specification_limits:Optional[str]=None
+    min_limits:Optional[str]=None
+    max_limits:Optional[str]=None
+    method_or_spec:str
+    test_type_id : int
+    product_id : Optional[int]

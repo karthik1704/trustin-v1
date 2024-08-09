@@ -884,7 +884,7 @@ class Sample(Base):
     manufactured_date: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     expiry_date: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     batch_size: Mapped[Optional[str]]
-    received_quantity: Mapped[Optional[int]]
+    received_quantity: Mapped[Optional[str]]
     sample_issued: Mapped[Optional[int]]
     issued_to: Mapped[Optional[str]]
     sample_condition: Mapped[Optional[str]]
@@ -980,7 +980,7 @@ class Sample(Base):
         if highest_code:
             highest_code_int = int(highest_code.split(f"/")[-1]) + 1
         else:
-            highest_code_int = 1
+            highest_code_int = 1001
         # Generate the new code by combining the prefix and the incremented integer
         new_code = get_unique_code_registration(
             highest_code_int, highest_code

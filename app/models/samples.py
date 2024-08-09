@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy import (
     Column,
     Integer,
@@ -68,6 +69,9 @@ class TestingParameter(Base):
     testing_parameters = Column(String)
     amount = Column(DECIMAL(precision=19, scale=4))
     method_or_spec = Column(String)
+    specification_limits:Mapped[Optional[str]]
+    min_limits:Mapped[Optional[str]]
+    max_limits:Mapped[Optional[str]]
 
     group_of_test_parameters = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

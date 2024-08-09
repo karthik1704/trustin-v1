@@ -237,15 +237,17 @@ async def patch_sample(
     test_params = sample_data.pop("test_params", [])
 
     extra_data:dict[str, str] = {}
-    if sample_data.get('nabl_logo', None) and not sample.nabl_logo:
-        next_code =await Sample.generate_ulr_next_code(db_session)
-        extra_data['ulr_no']=next_code 
+    # if sample_data.get('nabl_logo', None) and not sample.nabl_logo:
+    #     next_code =await Sample.generate_ulr_next_code(db_session)
+    #     extra_data['ulr_no']=next_code 
   
     if sample_data.get('status_id', None) and not sample.report_no:
         if sample_data.get('status_id')==9:
             next_code =await Sample.generate_test_report_no_next_code(db_session)
             extra_data['report_no']=next_code 
-        
+            if sample.nabl_logo and not sample.url_no:
+                next_code =await Sample.generate_ulr_next_code(db_session)
+                extra_data['ulr_no']=next_code 
 
     sample_data = {**sample_data, **update_dict, **extra_data}
     sample_detail = await SampleDetail.get_one(

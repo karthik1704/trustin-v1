@@ -91,7 +91,7 @@ def get_unique_code_registration(unique_number: int, code: str) -> str:
         code_years = code.split("/")[1]
         code_end_year = code_years.split("-")[1]
         if code_end_year == start_year:
-            unique_number = 1
+            unique_number = 1001
     if start_number is not None:
         unique_number = start_number
     new_code = f"TAS/{start_year}-{end_year}/{unique_number:04}"

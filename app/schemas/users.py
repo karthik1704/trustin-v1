@@ -13,6 +13,7 @@ class UserCreate(BaseModel):
     password: str
     password2: str
     phone: str
+    designation: str
     role_id: int
     department_id: int
     qa_type_id: Optional[int] | None
@@ -42,6 +43,7 @@ class UserUpdate(BaseModel):
     username: str
     email: Optional[EmailStr] = None
     phone: str
+    designation: str
     department_id: int
     qa_type_id: Optional[int]
 
@@ -85,6 +87,7 @@ class UserSchema(BaseModel):
     first_name: Optional[str]
     last_name: Optional[str]
     username:Optional[str]
+    designation:Optional[str]
     # department_id : Optional[int]
     # role_id : Optional[int]
     # qa_type_id : Optional[int]

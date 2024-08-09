@@ -226,7 +226,7 @@ class SampleListSchema(BaseModel):
     expiry_date: Optional[str]
     tat:Optional[date] 
     batch_size: Optional[str]
-    received_quantity: int
+    received_quantity: str
     registration_id: int | None
     status_id: Optional[int]
     test_type_id: Optional[int]
@@ -285,7 +285,7 @@ class SampleSchema(BaseModel):
     samples_received:Optional[bool]
     nabl_logo:Optional[bool]
     batch_size: Optional[str]
-    received_quantity: int
+    received_quantity: str
     registration_id: int | None
     status_id: Optional[int]
     test_type_id: Optional[int]
@@ -330,7 +330,7 @@ class RegSamples(BaseModel):
     expiry_date: Optional[str]
     tat: Optional[date]
     batch_size: Optional[str]
-    received_quantity: int
+    received_quantity: str
     sample_condition:Optional[str]
     sterilization_batch_no:Optional[str]
     status_id: int
@@ -426,7 +426,7 @@ class SampleCreateSchema(BaseModel):
     tat: Optional[date] | None
     description: Optional[str]
     batch_size: Optional[str]
-    received_quantity: int
+    received_quantity: str
     # test_type_id: int
     # sample_issued:int
     # issued_to:str
@@ -532,7 +532,7 @@ class SampleUpdateSchema(BaseModel):
     tat: Optional[date]
     description: Optional[str]
     batch_size: Optional[str]
-    received_quantity: int
+    received_quantity: str
     # test_type_id: Optional[int]
     test_types:Optional[List[int]]
     # sample_issued:int
@@ -634,7 +634,7 @@ class SampleCreate(BaseModel):
     manufactured_date: date
     expiry_date: date
     batch_size: str
-    received_quantity: int
+    received_quantity: str
     test_params: list[SampleTestParamsCreate]
 
 class SampleUpdate(BaseModel):
@@ -644,7 +644,7 @@ class SampleUpdate(BaseModel):
     manufactured_date: str
     expiry_date: str
     batch_size: str
-    received_quantity: int
+    received_quantity: str
     # sample_issued:int
     # issued_to:str
     sample_condition: str
