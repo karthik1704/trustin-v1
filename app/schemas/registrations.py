@@ -54,6 +54,9 @@ class TestParameterSchema(BaseModel):
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
     parameter_code: Optional[str]
+    specification_limits: Optional[str]
+    min_limits: Optional[str]
+    max_limits: Optional[str]
     testing_parameters: Optional[str]
     amount: Optional[float]
     method_or_spec: Optional[str]
@@ -168,6 +171,8 @@ class SampleTestParameterSchema(BaseModel):
     test_type: Optional[str]
     value: Optional[str]
     specification_limits: Optional[str]
+    min_limits: Optional[str]
+    max_limits: Optional[str]
     result: Optional[bool]
     created_at: datetime
     updated_at: datetime
@@ -659,6 +664,8 @@ class PatchSampleTestParameterSchema(BaseModel):
     quantity: Optional[int]=None 
     value: Optional[str]=None
     specification_limits: Optional[str]=None
+    min_limits: Optional[str]=None
+    max_limits: Optional[str]=None
     result: Optional[bool]=None
 
 

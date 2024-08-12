@@ -1427,6 +1427,8 @@ class SampleTestParameter(Base):
     test_type: Mapped[str] = mapped_column(String, nullable=True)
     value: Mapped[str] = mapped_column(String, nullable=True)
     specification_limits: Mapped[str] = mapped_column(String, nullable=True)
+    max_limits: Mapped[str] = mapped_column(String, nullable=True)
+    min_limits: Mapped[str] = mapped_column(String, nullable=True)
     result: Mapped[bool] = mapped_column(Boolean, nullable=True)
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
