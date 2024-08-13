@@ -245,7 +245,7 @@ async def patch_sample(
         if sample_data.get('status_id')==9:
             next_code =await Sample.generate_test_report_no_next_code(db_session)
             extra_data['report_no']=next_code 
-            if sample.nabl_logo and not sample.url_no:
+            if sample.nabl_logo and not sample.ulr_no:
                 next_code =await Sample.generate_ulr_next_code(db_session)
                 extra_data['ulr_no']=next_code 
 

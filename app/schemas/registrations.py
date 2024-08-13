@@ -173,6 +173,7 @@ class SampleTestParameterSchema(BaseModel):
     test_parameter_id: int
     test_type: Optional[str]
     value: Optional[str]
+    unit: Optional[str]
     specification_limits: Optional[str]
     min_limits: Optional[str]
     max_limits: Optional[str]
@@ -670,6 +671,7 @@ class PatchSampleTestParameterSchema(BaseModel):
     id: int
     order: int
     quantity: Optional[int]=None 
+    unit: Optional[str]=None
     value: Optional[str]=None
     specification_limits: Optional[str]=None
     min_limits: Optional[str]=None

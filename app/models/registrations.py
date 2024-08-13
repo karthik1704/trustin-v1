@@ -1424,6 +1424,7 @@ class SampleTestParameter(Base):
     )
     order: Mapped[int] = mapped_column(Integer, nullable=True)
     quantity: Mapped[Optional[int]]
+    unit: Mapped[Optional[str]]
 
     test_type: Mapped[str] = mapped_column(String, nullable=True)
     value: Mapped[str] = mapped_column(String, nullable=True)
