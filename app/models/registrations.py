@@ -89,6 +89,7 @@ class Registration(Base):
     # city: Mapped[str] = mapped_column(String)
     # state: Mapped[str] = mapped_column(String)
     # pincode_no: Mapped[str] = mapped_column(String)
+    manufactured_by: Mapped[Optional[str]]
 
     customer_reference_no: Mapped[Optional[str]]
     contact_person_name: Mapped[Optional[str]]

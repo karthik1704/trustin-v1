@@ -140,6 +140,9 @@ class RegistrationSampleSchema(BaseModel):
     contact_person_name: str
     contact_number: str
     license_no: str
+    manufactured_by:Optional[str]
+    sampled_by: Optional[SamplingByEnum]
+
     # customer_address_line1: str
     # customer_address_line2: str
     # city: str
@@ -362,6 +365,7 @@ class RegistrationSchema(BaseModel):
     contact_person_name:Optional[str]
     contact_email: Optional[str]
     contact_number: Optional[str]
+    manufactured_by:Optional[str]
     gst: str
     date_of_registration: datetime
     date_of_received: datetime
@@ -464,6 +468,8 @@ class RegistrationCreate(BaseModel):
     # city: str
     # state: str
     # pincode_no: str
+    manufactured_by:Optional[str]
+
     customer_reference_no: Optional[str]
     contact_person_name:Optional[str]
     contact_email: Optional[str]
@@ -572,6 +578,8 @@ class RegistrationUpdate(BaseModel):
     # city: Optional[str]
     # state: Optional[str]
     # pincode_no: Optional[str]
+    manufactured_by:Optional[str]
+
     customer_reference_no: Optional[str]
     contact_person_name:Optional[str]
     contact_email: Optional[str]
