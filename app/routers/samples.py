@@ -64,7 +64,7 @@ async def get_all_samples_with_pagination(
     print("coming inside")
     print(current_user)
     samples = []
-    if current_user.get("dept_id", "") in (1, 2, 5, 6):
+    if current_user.get("dept_id", "") in (1, 2, 3, 5, 6):
         samples = await Sample.get_all_with_pagination(
             db_session, [], page, size, search, sort_by, sort_order
         )
