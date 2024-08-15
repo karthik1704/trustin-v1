@@ -22,6 +22,7 @@ from .routers import (
     departments,
     dashboard,
     front_desks,
+    email
 )
 from dotenv import load_dotenv
 
@@ -63,3 +64,4 @@ app.include_router(samples.router)
 app.include_router(dashboard.router)
 app.include_router(front_desks.router)
 app.include_router(pdf.router)
+app.include_router(email.router)

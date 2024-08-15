@@ -1,4 +1,3 @@
-from random import sample
 from typing import Annotated, Dict, Any
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, Path, status, HTTPException, Request

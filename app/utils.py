@@ -126,3 +126,5 @@ def get_report_no(uniue_number: int) -> str:
 if __name__ == "__main__":
     get_unique_code_registration(10, "TAS/24-25/0009")
     get_unique_code_registration(1, "TAS/23-24/0009")
+
+
