@@ -1,4 +1,5 @@
 import base64
+from email.message import EmailMessage
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -24,7 +25,7 @@ router = APIRouter(prefix="/email", tags=["E-Mail"])
 db_dep = Annotated[AsyncSession, Depends(get_async_db)]
 user_dep = Annotated[dict, Depends(get_current_user)]
 
-email_cc = ['mahendran@trustingroup.in' , 'benzimen@trustingroup.in']
+email_cc = ["mahendran@trustingroup.in", "benzimen@trustingroup.in"]
 
 darft_subject = "Draft test report for conformation"
 darft_msg = """
@@ -53,34 +54,44 @@ html_message = """
 </html>
 """
 
+
 def send_email(email: EmailSchema):
     try:
-        msg = MIMEMultipart()
+        msg = EmailMessage()
         msg["From"] = FROM_EMAIL
         msg["To"] = email.email
-        msg["Cc"] = ','.join(email_cc)
+        msg["Cc"] = ",".join(email_cc)
 
         if email.email_type == "DRAFT":
             msg["Subject"] = darft_subject
-            msg.attach(MIMEText(darft_msg, "plain"))
-            msg.attach(MIMEText(html_message, "html"))
+            msg.set_content(
+                darft_msg,
+            )
+            msg.add_alternative(html_message, sub_type="html")
         else:
             msg["Subject"] = subject
-            msg.attach(MIMEText(message, "plain"))
+            msg.set_content(
+                message,
+            )
 
         if email.attachment:
             pdf_blob = base64.b64decode(email.attachment)
-            part = MIMEApplication(pdf_blob, Name=email.filename)
-            part["Content-Disposition"] = f'attachment; filename="{email.filename}"'
-            msg.attach(part)
-        
+            # Add the attachment to the EmailMessage
+            msg.add_attachment(
+                pdf_blob, maintype="application", subtype="pdf", filename=email.filename
+            )
+
         recipients = [email.email] + (email_cc if email_cc else [])
 
-
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.set_debuglevel(2)
             server.starttls()
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
-            server.send_message(msg, from_addr=FROM_EMAIL, to_addrs=recipients,)
+            server.send_message(
+                msg,
+                from_addr=FROM_EMAIL,
+                to_addrs=recipients,
+            )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
@@ -88,5 +99,7 @@ def send_email(email: EmailSchema):
 
 @router.post("/", status_code=status.HTTP_200_OK)
 async def send_email_endpoint(email: EmailSchema, background_tasks: BackgroundTasks):
+    print(SMTP_USERNAME, SMTP_PASSWORD, SMTP_SERVER, SMTP_PORT)
+
     background_tasks.add_task(send_email, email)
     return {"message": "Email has been sent in the background."}
