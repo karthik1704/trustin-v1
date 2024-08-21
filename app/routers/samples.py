@@ -3,7 +3,7 @@ from typing import Annotated
 import datetime
 from fastapi import APIRouter, Depends, Path, status, HTTPException, Request
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
@@ -246,8 +246,8 @@ async def patch_sample(
             next_code =await Sample.generate_test_report_no_next_code(db_session)
             extra_data['report_no']=next_code 
             if sample.nabl_logo and not sample.ulr_no:
-                next_code =await Sample.generate_ulr_next_code(db_session)
-                extra_data['ulr_no']=next_code 
+                next_ulr_code =await Sample.generate_ulr_next_code(db_session)
+                extra_data['ulr_no']=next_ulr_code 
 
     sample_data = {**sample_data, **update_dict, **extra_data}
     sample_detail = await SampleDetail.get_one(
@@ -333,7 +333,7 @@ async def patch_sample(
                 [
                     SampleWorkflow.sample_id == sample_id,
                     SampleWorkflow.test_type_id == test_type_id,
-                    SampleWorkflow.status == "In Progress",
+                    or_(SampleWorkflow.status == "In Progress", SampleWorkflow.status == "Done")
                 ],
             )
 

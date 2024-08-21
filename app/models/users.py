@@ -90,6 +90,7 @@ class User(Base):
     sample_workflow_assignee = relationship("SampleWorkflow", foreign_keys="[SampleWorkflow.assigned_to]",   back_populates="assignee")
     sample_history_assignee = relationship("SampleHistory", foreign_keys="[SampleHistory.assigned_to]",   back_populates="assignee")
     sample_history_created = relationship("SampleHistory", foreign_keys="[SampleHistory.created_by]",   back_populates="created_by_user")
+    email_statuses = relationship('EmailStatus', back_populates='emailed_user')
     # sample_created = relationship("Sample", foreign_keys="[Sample.created_by]", back_populates="created")
 
 class MenuControlList(Base):

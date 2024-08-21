@@ -11,6 +11,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from app.schemas.customers import CustomerSchema
+from app.schemas.email import EmailStatusSchema
 from ..models.registrations import (
     DisposalProcessEnum,
     Registration,
@@ -139,6 +140,7 @@ class RegistrationSampleSchema(BaseModel):
     customer_reference_no: str
     contact_person_name: str
     contact_number: str
+    contact_email:str
     license_no: str
     manufactured_by:Optional[str]
     sampled_by: Optional[SamplingByEnum]
@@ -318,6 +320,7 @@ class SampleSchema(BaseModel):
     # batch: Optional[BatchSchema]
     registration: Optional[RegistrationSampleSchema]
     sample_detail: Optional[List[SampleDetailSchema]]
+    emails:Optional[List[EmailStatusSchema]]
 
 
 class RegistrationSamplesSchema(BaseModel):

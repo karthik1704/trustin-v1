@@ -10,6 +10,7 @@ from typing import Annotated, List, Optional
 
 from app.dependencies.auth import get_current_user
 
+from app.models.email import EmailStatus
 from app.schemas.email import EmailSchema
 from app.database import get_async_db
 from app.settings import (
@@ -19,6 +20,10 @@ from app.settings import (
     SMTP_SERVER,
     SMTP_USERNAME,
 )
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/email", tags=["E-Mail"])
 
@@ -35,7 +40,7 @@ Greetings from Trustin Analytical Solutions…!!
  
 Please find the attached draft report for your review and conformation, kindly confirm to proceed further.
 
-
+Note: Kindly respond within three days, otherwise this report will be considered as the final.
 """
 subject = "Final test report"
 message = """
@@ -45,17 +50,29 @@ Greetings from Trustin Analytical Solutions…!!
 
 Please find the attached signed copy of test report for your reference.
 """
-html_message = """
+html_message = """\
 <html>
 <body>
-   <p style="color:"red";"}>Note: Kindly respond within three days, otherwise this report will be considered as the final.<p>
-
+   <p>Dear Sir/Madam,</p>
+   <p>Greetings from Trustin Analytical Solutions…!!</p>
+   <p>Please find the attached draft report for your review and confirmation, kindly confirm to proceed further.</p>
+   <p style="color:red;">Note: Kindly respond within three days, otherwise this report will be considered as the final.</p>
 </body>
 </html>
 """
 
+async def send_email(email: EmailSchema, db:db_dep, user:user_dep):
+    email_status = EmailStatus(
+        recipient=email.email,
+        subject=subject,
+        sent=False,
+        reason=None, 
+        sample_id=email.sample_id,
+        sent_by=user.get('id')
+    )
+    db.add(email_status)
+    await db.commit()
 
-def send_email(email: EmailSchema):
     try:
         msg = EmailMessage()
         msg["From"] = FROM_EMAIL
@@ -67,12 +84,15 @@ def send_email(email: EmailSchema):
             msg.set_content(
                 darft_msg,
             )
-            msg.add_alternative(html_message, sub_type="html")
+            msg.add_alternative(html_message, subtype="html")
+            email_status.subject = darft_subject
         else:
             msg["Subject"] = subject
             msg.set_content(
                 message,
             )
+            email_status.subject = subject
+
 
         if email.attachment:
             pdf_blob = base64.b64decode(email.attachment)
@@ -84,7 +104,7 @@ def send_email(email: EmailSchema):
         recipients = [email.email] + (email_cc if email_cc else [])
 
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.set_debuglevel(2)
+            # server.set_debuglevel(2)
             server.starttls()
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
             server.send_message(
@@ -92,14 +112,19 @@ def send_email(email: EmailSchema):
                 from_addr=FROM_EMAIL,
                 to_addrs=recipients,
             )
+            email_status.sent = True
+    except smtplib.SMTPException as e:
+        email_status.reason = str(e)
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+        email_status.reason = f"Unexpected error: {str(e)}"
+    
+    finally:
+        await db.commit()
 
 
 @router.post("/", status_code=status.HTTP_200_OK)
-async def send_email_endpoint(email: EmailSchema, background_tasks: BackgroundTasks):
-    print(SMTP_USERNAME, SMTP_PASSWORD, SMTP_SERVER, SMTP_PORT)
+async def send_email_endpoint(email: EmailSchema, background_tasks: BackgroundTasks, db:db_dep, user:user_dep):
 
-    background_tasks.add_task(send_email, email)
+    background_tasks.add_task(send_email, email, db, user)
     return {"message": "Email has been sent in the background."}

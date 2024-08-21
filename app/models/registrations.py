@@ -230,8 +230,7 @@ class Registration(Base):
 
         return {"data": customers, "total": total_customers, "page": page, "size": size}
 
-        _result = await database_session.execute(_stmt)
-        return _result.scalars()
+     
 
     @classmethod
     async def get_one(cls, database_session: AsyncSession, where_conditions: list[Any]):
@@ -959,6 +958,9 @@ class Sample(Base):
     registration = relationship(
         "Registration", back_populates="samples", lazy="selectin"
     )
+    emails = relationship(
+        "EmailStatus", back_populates="sample", lazy="selectin"
+    )
     # created = relationship("User", back_populates="sample_created",  foreign_keys=[created_by], lazy="selectin")
     # batch = relationship("Batch", back_populates="sample_batch", lazy="selectin")
     # registration_sample: Mapped["RegistrationSample"] = relationship(
@@ -1094,6 +1096,7 @@ class Sample(Base):
             select(cls)
             .select_from(cls)
             .join(SampleTestType, cls.id==SampleTestType.sample_id)
+            # .join(SampleWorkflow, cls.id ==SampleWorkflow.sample_id)
             .join(User, SampleTestType.test_type_id == User.qa_type_id)
             .where(User.id == user.get("id"), cls.status == "Submitted")
         )
