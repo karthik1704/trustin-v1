@@ -61,7 +61,9 @@ html_message = """\
 </html>
 """
 
-async def send_email(email: EmailSchema, db:db_dep, user:user_dep):
+async def send_email(email: EmailSchema,  user:user_dep, db:db_dep=Depends()):
+    print(email)
+    
     email_status = EmailStatus(
         recipient=email.email,
         subject=subject,
@@ -104,7 +106,7 @@ async def send_email(email: EmailSchema, db:db_dep, user:user_dep):
         recipients = [email.email] + (email_cc if email_cc else [])
 
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            # server.set_debuglevel(2)
+            server.set_debuglevel(2)
             server.starttls()
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
             server.send_message(
@@ -115,9 +117,11 @@ async def send_email(email: EmailSchema, db:db_dep, user:user_dep):
             email_status.sent = True
     except smtplib.SMTPException as e:
         email_status.reason = str(e)
+        print(f"Failed to send email: {e}")
 
     except Exception as e:
         email_status.reason = f"Unexpected error: {str(e)}"
+        print(f"Failed to send email: {e}")
     
     finally:
         await db.commit()
@@ -126,5 +130,5 @@ async def send_email(email: EmailSchema, db:db_dep, user:user_dep):
 @router.post("/", status_code=status.HTTP_200_OK)
 async def send_email_endpoint(email: EmailSchema, background_tasks: BackgroundTasks, db:db_dep, user:user_dep):
 
-    background_tasks.add_task(send_email, email, db, user)
+    background_tasks.add_task(send_email, email,  user)
     return {"message": "Email has been sent in the background."}
