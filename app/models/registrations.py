@@ -1,4 +1,3 @@
-from token import OP
 from sqlalchemy import (
     Column,
     Integer,
@@ -22,7 +21,6 @@ from sqlalchemy.orm import mapped_column, Mapped, relationship, joinedload, Sess
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 from app.models import Base, Branch, TRF, Customer, TestingParameter, TestType
-from pydantic import BaseModel, ConfigDict, ValidationError
 import enum
 
 from app.models.front_desks import FrontDesk

@@ -107,7 +107,9 @@ async def send_email(email: EmailSchema):
 
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
             server.set_debuglevel(2)
+            server.ehlo()
             server.starttls()
+            server.ehlo()
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
             server.send_message(
                 msg,
