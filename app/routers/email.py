@@ -118,10 +118,12 @@ async def send_email(email: EmailSchema):
     except smtplib.SMTPException as e:
         # email_status.reason = str(e)
         print(f"Failed to send email: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
 
     except Exception as e:
         # email_status.reason = f"Unexpected error: {str(e)}"
         print(f"Failed to send email: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
     
     finally:
         pass
