@@ -61,7 +61,7 @@ html_message = """\
 </html>
 """
 
-async def send_email(email: EmailSchema,  user:user_dep):
+async def send_email(email: EmailSchema):
     print(email)
     
     # email_status = EmailStatus(
@@ -131,5 +131,5 @@ async def send_email(email: EmailSchema,  user:user_dep):
 @router.post("/", status_code=status.HTTP_200_OK)
 async def send_email_endpoint(email: EmailSchema, background_tasks: BackgroundTasks, db:db_dep, user:user_dep):
 
-    background_tasks.add_task(send_email, email,  user)
+    background_tasks.add_task(send_email, email)
     return {"message": "Email has been sent in the background."}
