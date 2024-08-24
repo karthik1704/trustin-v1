@@ -61,19 +61,19 @@ html_message = """\
 </html>
 """
 
-async def send_email(email: EmailSchema,  user:user_dep, db:db_dep=Depends()):
+async def send_email(email: EmailSchema,  user:user_dep):
     print(email)
     
-    email_status = EmailStatus(
-        recipient=email.email,
-        subject=subject,
-        sent=False,
-        reason=None, 
-        sample_id=email.sample_id,
-        sent_by=user.get('id')
-    )
-    db.add(email_status)
-    await db.commit()
+    # email_status = EmailStatus(
+    #     recipient=email.email,
+    #     subject=subject,
+    #     sent=False,
+    #     reason=None, 
+    #     sample_id=email.sample_id,
+    #     sent_by=user.get('id')
+    # )
+    # db.add(email_status)
+    # await db.commit()
 
     try:
         msg = EmailMessage()
@@ -87,13 +87,13 @@ async def send_email(email: EmailSchema,  user:user_dep, db:db_dep=Depends()):
                 darft_msg,
             )
             msg.add_alternative(html_message, subtype="html")
-            email_status.subject = darft_subject
+            # email_status.subject = darft_subject
         else:
             msg["Subject"] = subject
             msg.set_content(
                 message,
             )
-            email_status.subject = subject
+            # email_status.subject = subject
 
 
         if email.attachment:
@@ -114,17 +114,18 @@ async def send_email(email: EmailSchema,  user:user_dep, db:db_dep=Depends()):
                 from_addr=FROM_EMAIL,
                 to_addrs=recipients,
             )
-            email_status.sent = True
+            # email_status.sent = True
     except smtplib.SMTPException as e:
-        email_status.reason = str(e)
+        # email_status.reason = str(e)
         print(f"Failed to send email: {e}")
 
     except Exception as e:
-        email_status.reason = f"Unexpected error: {str(e)}"
+        # email_status.reason = f"Unexpected error: {str(e)}"
         print(f"Failed to send email: {e}")
     
     finally:
-        await db.commit()
+        pass
+        # await db.commit()
 
 
 @router.post("/", status_code=status.HTTP_200_OK)
