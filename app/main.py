@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import dashboard, departments, pdf
-from app.schemas.users import DepartmentSchema
+from app.routers import dashboard, departments, pdf, quotations
 
 
 from .routers import (
@@ -22,7 +21,7 @@ from .routers import (
     departments,
     dashboard,
     front_desks,
-    email
+    email,
 )
 from dotenv import load_dotenv
 
@@ -67,3 +66,4 @@ app.include_router(dashboard.router)
 app.include_router(front_desks.router)
 app.include_router(pdf.router)
 app.include_router(email.router)
+app.include_router(quotations.router)
