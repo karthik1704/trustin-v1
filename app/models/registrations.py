@@ -1030,7 +1030,8 @@ class Sample(Base):
             print(_result)
             highest_code = _result.scalars().first()
         if highest_code:
-            highest_code_int = int(highest_code.split(f"/")[-1]) + 1
+            base_report_no = highest_code.split('-A')[0] if '-A' in highest_code else highest_code
+            highest_code_int = int(base_report_no.split(f"/")[-1]) + 1
         else:
             highest_code_int = TEST_REPORT_START_NUMBER if TEST_REPORT_START_NUMBER is not None else  1
         # Generate the new code by combining the prefix and the incremented integer
