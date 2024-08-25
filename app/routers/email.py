@@ -106,6 +106,7 @@ async def send_email(email: EmailSchema):
         recipients = [email.email] + (email_cc if email_cc else [])
 
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.connect(SMTP_SERVER, SMTP_PORT)
             server.set_debuglevel(2)
             server.ehlo()
             server.starttls()
