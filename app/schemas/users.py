@@ -88,9 +88,9 @@ class UserSchema(BaseModel):
     last_name: Optional[str]
     username:Optional[str]
     designation:Optional[str]
-    # department_id : Optional[int]
-    # role_id : Optional[int]
-    # qa_type_id : Optional[int]
+    department_id : Optional[int]
+    role_id : Optional[int]
+    qa_type_id : Optional[int]
 
 
 

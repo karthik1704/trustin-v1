@@ -333,9 +333,10 @@ async def patch_sample(
                 [
                     SampleWorkflow.sample_id == sample_id,
                     SampleWorkflow.test_type_id == test_type_id,
-                    or_(SampleWorkflow.status == "In Progress", SampleWorkflow.status == "Done")
+                    SampleWorkflow.status == "In Progress",
                 ],
             )
+                # or_(SampleWorkflow.status == "In Progress", SampleWorkflow.status == "Done"),
 
             progres_status_id = progress.sample_status_id if progress else 0
             print("progres_status_id", progres_status_id)

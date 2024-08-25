@@ -889,6 +889,7 @@ class Sample(Base):
     sterilization_batch_no: Mapped[Optional[str]]
     tat: Mapped[Optional[date]] = mapped_column(nullable=True)
     description: Mapped[Optional[str]] = mapped_column(Text)
+    additional_detail: Mapped[Optional[str]] = mapped_column(Text)
     testing_start_date: Mapped[Optional[date]] = mapped_column(nullable=True)
     testing_end_date: Mapped[Optional[date]] = mapped_column(nullable=True)
     nabl_logo: Mapped[Optional[bool]] = mapped_column(default=False)

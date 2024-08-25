@@ -62,19 +62,19 @@ html_message = """\
 """
 
 
-async def send_email(email: EmailSchema):
+async def send_email(email: EmailSchema, user: user_dep, db: db_dep):
     print(email)
 
-    # email_status = EmailStatus(
-    #     recipient=email.email,
-    #     subject=subject,
-    #     sent=False,
-    #     reason=None,
-    #     sample_id=email.sample_id,
-    #     sent_by=user.get('id')
-    # )
-    # db.add(email_status)
-    # await db.commit()
+    email_status = EmailStatus(
+        recipient=email.email,
+        subject=subject,
+        sent=False,
+        reason=None,
+        sample_id=email.sample_id,
+        sent_by=user.get("id"),
+    )
+    db.add(email_status)
+    await db.commit()
 
     try:
         msg = EmailMessage()
@@ -106,43 +106,31 @@ async def send_email(email: EmailSchema):
         recipients = [email.email] + (email_cc if email_cc else [])
 
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            try:
-                server.ehlo()
-                server.starttls()
-                server.login(SMTP_USERNAME, SMTP_PASSWORD)
 
-                # Send the email
-                server.send_message(
-                    msg,
-                    from_addr=FROM_EMAIL,
-                    to_addrs=recipients,
-                )
-                # email_status.sent = True
-            except smtplib.SMTPServerDisconnected:
-                logger.error("SMTP server disconnected. Reconnecting...")
-                server.connect(SMTP_SERVER, SMTP_PORT)
-                server.ehlo()
-                server.starttls()
-                server.login(SMTP_USERNAME, SMTP_PASSWORD)
-                server.send_message(
-                    msg,
-                    from_addr=FROM_EMAIL,
-                    to_addrs=recipients,
-                )
-                # email_status.sent = True
+            server.ehlo()
+            server.starttls()
+            server.login(SMTP_USERNAME, SMTP_PASSWORD)
+
+            # Send the email
+            server.send_message(
+                msg,
+                from_addr=FROM_EMAIL,
+                to_addrs=recipients,
+            )
+            email_status.sent = True
+
     except smtplib.SMTPException as e:
-        # email_status.reason = str(e)
+        email_status.reason = f"Unexpected error: {str(e)}"
         print(f"Failed to send email: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
 
     except Exception as e:
-        # email_status.reason = f"Unexpected error: {str(e)}"
+        email_status.reason = f"Unexpected error: {str(e)}"
         print(f"Failed to send email: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
 
     finally:
-        pass
-        # await db.commit()
+        await db.commit()
 
 
 @router.post("/", status_code=status.HTTP_200_OK)
@@ -150,5 +138,5 @@ async def send_email_endpoint(
     email: EmailSchema, background_tasks: BackgroundTasks, db: db_dep, user: user_dep
 ):
 
-    background_tasks.add_task(send_email, email)
+    background_tasks.add_task(send_email, email, user, db)
     return {"message": "Email has been sent in the background."}

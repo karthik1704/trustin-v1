@@ -288,6 +288,7 @@ class SampleSchema(BaseModel):
     testing_end_date: Optional[date]
     tat:Optional[date]
     description: Optional[str]
+    additional_detail: Optional[str]
     sample_issued:Optional[int]
     issued_to:Optional[str]
     sample_condition:Optional[str]
@@ -338,6 +339,7 @@ class RegSamples(BaseModel):
     test_type_id: Optional[int]
     batch_or_lot_no: str
     description: str
+    additional_detail: str
     manufactured_date: Optional[str]
     expiry_date: Optional[str]
     tat: Optional[date]
@@ -438,6 +440,7 @@ class SampleCreateSchema(BaseModel):
     expiry_date: Optional[str] 
     tat: Optional[date] | None
     description: Optional[str]
+    additional_detail: Optional[str]
     batch_size: Optional[str]
     received_quantity: str
     # test_type_id: int
@@ -546,6 +549,7 @@ class SampleUpdateSchema(BaseModel):
     expiry_date: Optional[str]
     tat: Optional[date]
     description: Optional[str]
+    additional_detail: Optional[str]
     batch_size: Optional[str]
     received_quantity: str
     # test_type_id: Optional[int]
