@@ -63,7 +63,11 @@ html_message = """\
 
 
 async def send_email(email: EmailSchema, user: user_dep, db: db_dep):
-    print(email)
+    print(FROM_EMAIL,
+    SMTP_PASSWORD,
+    SMTP_PORT,
+    SMTP_SERVER,
+    SMTP_USERNAME,)
 
     email_status = EmailStatus(
         recipient=email.email,
@@ -88,13 +92,13 @@ async def send_email(email: EmailSchema, user: user_dep, db: db_dep):
                 darft_msg,
             )
             msg.add_alternative(html_message, subtype="html")
-            # email_status.subject = darft_subject
+            email_status.subject = darft_subject
         else:
             msg["Subject"] = subject
             msg.set_content(
                 message,
             )
-            # email_status.subject = subject
+            email_status.subject = subject
 
         if email.attachment:
             pdf_blob = base64.b64decode(email.attachment)
@@ -137,6 +141,11 @@ async def send_email(email: EmailSchema, user: user_dep, db: db_dep):
 async def send_email_endpoint(
     email: EmailSchema, background_tasks: BackgroundTasks, db: db_dep, user: user_dep
 ):
+    print(FROM_EMAIL,
+    SMTP_PASSWORD,
+    SMTP_PORT,
+    SMTP_SERVER,
+    SMTP_USERNAME,)
 
     background_tasks.add_task(send_email, email, user, db)
     return {"message": "Email has been sent in the background."}
