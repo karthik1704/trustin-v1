@@ -295,6 +295,7 @@ class SampleSchema(BaseModel):
     sterilization_batch_no:Optional[str]
     under_cdsco:Optional[bool]
     samples_received:Optional[bool]
+    show_status:Optional[bool]
     nabl_logo:Optional[bool]
     batch_size: Optional[str]
     received_quantity: str
@@ -690,6 +691,7 @@ class PatchSample(BaseModel):
     testing_start_date: Optional[date] = None
     testing_end_date: Optional[date] = None
     under_cdsco:Optional[bool] = None
+    show_status:Optional[bool] = None
     samples_received:Optional[bool] = None
     nabl_logo:Optional[bool] = None
     status: Optional[str] | None

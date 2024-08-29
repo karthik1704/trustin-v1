@@ -895,6 +895,7 @@ class Sample(Base):
     nabl_logo: Mapped[Optional[bool]] = mapped_column(default=False)
     under_cdsco: Mapped[Optional[bool]] = mapped_column(default=False)
     samples_received: Mapped[Optional[bool]] = mapped_column(default=False)
+    show_status: Mapped[Optional[bool]] = mapped_column(default=True)
     ulr_no:Mapped[Optional[str]]
     report_no:Mapped[Optional[str]]
     discipline:Mapped[Optional[str]]
