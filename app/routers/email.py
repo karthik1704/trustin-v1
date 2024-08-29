@@ -62,7 +62,7 @@ html_message = """\
 """
 
 
-async def send_email(email: EmailSchema, user: user_dep,  db: AsyncSession = Depends(get_async_db),):
+async def send_email(email: EmailSchema, user: user_dep,  db: AsyncSession ):
     print(FROM_EMAIL,
     SMTP_PASSWORD,
     SMTP_PORT,
@@ -147,5 +147,5 @@ async def send_email_endpoint(
     SMTP_SERVER,
     SMTP_USERNAME,)
 
-    background_tasks.add_task(send_email, email, user)
+    background_tasks.add_task(send_email, email, user, db)
     return {"message": "Email has been sent in the background."}
