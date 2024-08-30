@@ -260,7 +260,7 @@ async def patch_sample(
                 next_ulr_code =await Sample.generate_ulr_next_code(db_session)
                 extra_data['ulr_no']=next_ulr_code 
        
-
+    print("sample", sample_data)
     sample_data = {**sample_data, **update_dict, **extra_data}
     sample_detail = await SampleDetail.get_one(
         db_session,
@@ -273,6 +273,7 @@ async def patch_sample(
     sample_detail_data = {"authorized_sign_id":authorized_sign_id, **sample_data, **update_dict, }
     sample_detail_data.pop("nabl_logo", None)
     sample_detail_data.pop("under_cdsco", None)
+    sample_detail_data.pop("show_status", None)
     if sample_detail is not None:
         await sample_detail.update_sample_detail(sample_detail_data)
     else:

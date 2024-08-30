@@ -1369,6 +1369,7 @@ class SampleDetail(Base):
     testing_end_date: Mapped[Optional[date]] = mapped_column(nullable=True)
     received_quantity: Mapped[Optional[int]]
     samples_received: Mapped[Optional[bool]] = mapped_column(default=False)
+    sign_verified: Mapped[Optional[bool]] = mapped_column(default=False)
     assigned_to: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True
     )

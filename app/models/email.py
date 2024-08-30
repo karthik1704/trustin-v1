@@ -22,4 +22,4 @@ class EmailStatus(Base):
     sent_by:Mapped[int] = mapped_column(ForeignKey(User.id))
 
     sample = relationship("Sample", back_populates="emails")
-    emailed_user = relationship('User', back_populates='email_statuses')
+    emailed_user = relationship('User', back_populates='email_statuses', lazy="selectin")

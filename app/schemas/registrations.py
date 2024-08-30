@@ -270,6 +270,7 @@ class SampleDetailSchema(BaseModel):
     sample_issued:Optional[int]
     issued_to:Optional[str]
     samples_received:Optional[bool]
+    sign_verified:Optional[bool]
     assignee: Optional[UserSchema]
     authorized_sign_id: Optional[int]
     authorized_sign: Optional[UserSchema]
@@ -694,6 +695,7 @@ class PatchSample(BaseModel):
     show_status:Optional[bool] = None
     samples_received:Optional[bool] = None
     nabl_logo:Optional[bool] = None
+    sign_verified:Optional[bool] = None
     status: Optional[str] | None
     status_id: Optional[int] | None
     assigned_to: Optional[int] | None = None

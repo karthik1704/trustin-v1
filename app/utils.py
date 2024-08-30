@@ -116,7 +116,7 @@ def get_ulr_no(uniue_number: int) -> str:
 def get_report_no(uniue_number: int) -> str:
 
     code_number = (
-        f"{uniue_number:04d}"  # Pads the number with leading zeros to make it 9 digits
+        f"{uniue_number:05d}"  # Pads the number with leading zeros to make it 5 digits
     )
     code = f"TAS/REP/{code_number}"
 

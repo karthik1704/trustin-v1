@@ -18,10 +18,10 @@ class EmailSchema(BaseModel):
 class EmailStatusSchema(BaseModel):
     id:int
     recipient:str
-    sample_id:int
+    sample_id:int | None
     subject:str
     sent:bool
     sent_by:int
     timestamp:datetime
     reason:Optional[str]
-    emailed_user:Optional[UserSchema]
+    emailed_user:Optional[UserSchema] | None
