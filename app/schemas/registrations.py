@@ -284,6 +284,9 @@ class SampleSchema(BaseModel):
     sample_name: str
     batch_or_lot_no: str
     manufactured_date: Optional[str]
+    test_method: Optional[str]
+    statement_of_conformity: Optional[str]
+    reason: Optional[str]
     expiry_date: Optional[str]
     testing_start_date: Optional[date]
     testing_end_date: Optional[date]
@@ -342,6 +345,7 @@ class RegSamples(BaseModel):
     batch_or_lot_no: str
     description: str
     additional_detail: str
+    test_method:Optional[str]
     manufactured_date: Optional[str]
     expiry_date: Optional[str]
     tat: Optional[date]
@@ -439,6 +443,7 @@ class SampleCreateSchema(BaseModel):
     sample_name: str
     batch_or_lot_no: str
     manufactured_date: Optional[str] 
+    test_method:Optional[str]
     expiry_date: Optional[str] 
     tat: Optional[date] | None
     description: Optional[str]
@@ -548,6 +553,7 @@ class SampleUpdateSchema(BaseModel):
     sample_name: str
     batch_or_lot_no: str
     manufactured_date: Optional[str]
+    test_method:Optional[str]
     expiry_date: Optional[str]
     tat: Optional[date]
     description: Optional[str]
@@ -665,6 +671,7 @@ class SampleUpdate(BaseModel):
     sample_name: str
     batch_or_lot_no: str
     manufactured_date: str
+    test_method:str
     expiry_date: str
     batch_size: str
     received_quantity: str
@@ -693,6 +700,8 @@ class PatchSample(BaseModel):
     testing_end_date: Optional[date] = None
     under_cdsco:Optional[bool] = None
     show_status:Optional[bool] = None
+    statement_of_conformity:Optional[str] = None
+    reason:Optional[str] = None
     samples_received:Optional[bool] = None
     nabl_logo:Optional[bool] = None
     sign_verified:Optional[bool] = None

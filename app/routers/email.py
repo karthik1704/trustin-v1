@@ -100,7 +100,7 @@ async def send_email(email: EmailSchema, user: user_dep , db:AsyncSession = Depe
             pdf_blob = base64.b64decode(email.attachment)
             # Add the attachment to the EmailMessage
             msg.add_attachment(
-                pdf_blob, maintype="application", subtype="pdf", filename=email.filename
+                pdf_blob, maintype="application", subtype="pdf", filename= f"{email.filename}.pdf" if email.email_type == "DRAFT" else f"{email.filename}(Draft).pdf"
             )
 
         recipients = [email.email] + (email_cc if email_cc else [])

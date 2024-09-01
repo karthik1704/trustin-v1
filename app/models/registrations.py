@@ -896,6 +896,9 @@ class Sample(Base):
     under_cdsco: Mapped[Optional[bool]] = mapped_column(default=False)
     samples_received: Mapped[Optional[bool]] = mapped_column(default=False)
     show_status: Mapped[Optional[bool]] = mapped_column(default=True)
+    statement_of_conformity:Mapped[Optional[str]] = mapped_column(Text)
+    reason:Mapped[Optional[str]] = mapped_column(Text)
+    test_method:Mapped[Optional[str]] 
     ulr_no:Mapped[Optional[str]]
     report_no:Mapped[Optional[str]]
     discipline:Mapped[Optional[str]]
