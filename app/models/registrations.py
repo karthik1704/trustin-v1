@@ -11,6 +11,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     Text,
+    or_,
 )
 from sqlalchemy.dialects import postgresql
 from typing import Any, List, Optional
@@ -1187,7 +1188,7 @@ class Sample(Base):
             .join(SampleDetail, cls.id == SampleDetail.sample_id)
             # .join(User, SampleWorkflow.assigned_to == User.sample_id)
             .where(
-                SampleDetail.assigned_to == user.get("id"), cls.status == "Submitted"
+            or_(SampleDetail.assigned_to == user.get("id"),SampleDetail.authorized_sign_id == user.get("id") ), cls.status == "Submitted"
             )
         )
 
