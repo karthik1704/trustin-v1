@@ -267,6 +267,7 @@ class SampleDetailSchema(BaseModel):
     assigned_to: Optional[int]
     testing_start_date: Optional[date]
     testing_end_date: Optional[date]
+    authorized_sign_date: Optional[date]
     sample_issued:Optional[int]
     issued_to:Optional[str]
     samples_received:Optional[bool]
@@ -285,6 +286,7 @@ class SampleSchema(BaseModel):
     batch_or_lot_no: str
     manufactured_date: Optional[str]
     test_method: Optional[str]
+    abbreviations: Optional[str]
     statement_of_conformity: Optional[str]
     reason: Optional[str]
     expiry_date: Optional[str]
@@ -299,7 +301,7 @@ class SampleSchema(BaseModel):
     sterilization_batch_no:Optional[str]
     under_cdsco:Optional[bool]
     samples_received:Optional[bool]
-    show_status:Optional[bool]
+    show_status_report:Optional[bool]
     nabl_logo:Optional[bool]
     batch_size: Optional[str]
     received_quantity: str
@@ -699,8 +701,9 @@ class PatchSample(BaseModel):
     testing_start_date: Optional[date] = None
     testing_end_date: Optional[date] = None
     under_cdsco:Optional[bool] = None
-    show_status:Optional[bool] = None
+    show_status_report:Optional[bool] = None
     statement_of_conformity:Optional[str] = None
+    abbreviations:Optional[str] = None
     reason:Optional[str] = None
     samples_received:Optional[bool] = None
     nabl_logo:Optional[bool] = None
@@ -709,6 +712,7 @@ class PatchSample(BaseModel):
     status_id: Optional[int] | None
     assigned_to: Optional[int] | None = None
     authorized_sign_id: Optional[int] | None = None
+    authorized_sign_date: Optional[date] = None
     group: Optional[str] = None
     discipline:Optional[str] = None
     comments: Optional[str] | None

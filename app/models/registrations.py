@@ -896,12 +896,13 @@ class Sample(Base):
     nabl_logo: Mapped[Optional[bool]] = mapped_column(default=False)
     under_cdsco: Mapped[Optional[bool]] = mapped_column(default=False)
     samples_received: Mapped[Optional[bool]] = mapped_column(default=False)
-    show_status: Mapped[Optional[bool]] = mapped_column(default=True)
+    show_status_report: Mapped[Optional[bool]] = mapped_column(default=True)
     statement_of_conformity:Mapped[Optional[str]] = mapped_column(Text)
     reason:Mapped[Optional[str]] = mapped_column(Text)
     test_method:Mapped[Optional[str]] 
     ulr_no:Mapped[Optional[str]]
     report_no:Mapped[Optional[str]]
+    abbreviations:Mapped[Optional[str]]
     discipline:Mapped[Optional[str]]
     group:Mapped[Optional[str]]
     report_no:Mapped[Optional[str]]
@@ -1382,6 +1383,8 @@ class SampleDetail(Base):
     authorized_sign_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=True
     )
+    authorized_sign_date: Mapped[Optional[date]] = mapped_column(nullable=True)
+
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
