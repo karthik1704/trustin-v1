@@ -241,24 +241,24 @@ async def patch_sample(
     #     next_code =await Sample.generate_ulr_next_code(db_session)
     #     extra_data['ulr_no']=next_code 
   
-    if sample_data.get('status_id', None):
-        if sample_data.get('status_id')==9 :
-            if not sample.report_no:
-                next_code = await Sample.generate_test_report_no_next_code(db_session)
-                extra_data['report_no'] = next_code
+   
+    if sample.status_id==8 :
+        if  not sample.report_no:
+            next_code = await Sample.generate_test_report_no_next_code(db_session)
+            extra_data['report_no'] = next_code
+        else:
+        # If report_no exists, add or increment -A1
+            existing_report_no = sample.report_no
+            if '-A' in existing_report_no:
+                base_report_no, version = existing_report_no.rsplit('-A', 1)
+                new_version = int(version) + 1
+                extra_data['report_no'] = f"{base_report_no}-A{new_version}"
             else:
-            # If report_no exists, add or increment -A1
-                existing_report_no = sample.report_no
-                if '-A' in existing_report_no:
-                    base_report_no, version = existing_report_no.rsplit('-A', 1)
-                    new_version = int(version) + 1
-                    extra_data['report_no'] = f"{base_report_no}-A{new_version}"
-                else:
-                    extra_data['report_no'] = f"{existing_report_no}-A1" 
-            # Generate ULR        
-            if sample.nabl_logo and not sample.ulr_no:
-                next_ulr_code =await Sample.generate_ulr_next_code(db_session)
-                extra_data['ulr_no']=next_ulr_code 
+                extra_data['report_no'] = f"{existing_report_no}-A1" 
+        # Generate ULR        
+        if  sample.nabl_logo and not sample.ulr_no:
+            next_ulr_code =await Sample.generate_ulr_next_code(db_session)
+            extra_data['ulr_no']=next_ulr_code 
        
     print("sample", sample_data)
     sample_data = {**sample_data, **update_dict, **extra_data}
