@@ -49,6 +49,7 @@ engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL,
     future=True,
     # echo=True,
+
 )
 
 # expire_on_commit=False will prevent attributes from being expired
@@ -57,6 +58,7 @@ AsyncSessionFactory = async_sessionmaker(
     engine,
     autoflush=False,
     expire_on_commit=False,
+    
 )
 
 # Dependency
@@ -65,4 +67,7 @@ async def get_async_db() -> AsyncGenerator:
     async with AsyncSessionFactory() as session:
         # logger.debug(f"ASYNC Pool: {engine.pool.status()}")
         # print(session)
-        yield session
+        try:
+            yield session
+        finally:
+            await session.close()

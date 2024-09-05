@@ -54,6 +54,11 @@ class Customer(Base):
     parameters = relationship('TestingParameter', back_populates='customer')
     front_desks = relationship("FrontDesk", back_populates="customer")
     batches = relationship("Batch", back_populates="customer")
+    invoices = relationship(
+        "Invoice",
+        back_populates="customer",
+        lazy="selectin",
+    )
 
 
 class ContactPerson(Base):

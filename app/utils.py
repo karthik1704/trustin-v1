@@ -99,6 +99,23 @@ def get_unique_code_registration(unique_number: int, code: str) -> str:
     print(new_code)
     return new_code
 
+def get_unique_code_invoice(unique_number: int, code: str) -> str:
+    setup_fiscal_calendar(start_month=4)
+
+    start_year = FiscalYear.current().start.strftime("%Y")[-2:]
+    end_year = FiscalYear.current().end.strftime("%Y")[-2:]
+    if code is not None:
+        code_years = code.split("/")[1]
+        code_end_year = code_years.split("-")[1]
+        if code_end_year == start_year:
+            unique_number = 1001
+    if start_number is not None:
+        unique_number = start_number
+    new_code = f"TAS/{start_year}-{end_year}/{unique_number:04}"
+
+    print(new_code)
+    return new_code
+
 
 def get_ulr_no(uniue_number: int) -> str:
     current_year = (

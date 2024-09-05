@@ -74,7 +74,7 @@ async def update_quotation(
         "updated_by": current_user["id"],
     }
     update_data = {**_data, **update_dict}
-    quotation.update_front_desk(update_data)
+    quotation.update_quotation(update_data)
 
     await db_session.commit()
     await db_session.refresh(quotation)
