@@ -133,7 +133,7 @@ async def create_invoice(
     invoice_data["discount"] = discount.quantize(
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )
-    invoice_data["sub_total"] = grand_total.quantize(
+    invoice_data["sub_total"] = sub_total.quantize(
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )
     invoice_data["grand_total"] = grand_total.quantize(
@@ -285,7 +285,7 @@ async def update_invoice(
     invoice_data["discount"] = discount.quantize(
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )
-    invoice_data["sub_total"] = grand_total.quantize(
+    invoice_data["sub_total"] = sub_total.quantize(
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )
     invoice_data["grand_total"] = grand_total.quantize(
