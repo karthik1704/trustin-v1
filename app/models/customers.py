@@ -57,7 +57,7 @@ class Customer(Base):
     invoices = relationship(
         "Invoice",
         back_populates="customer",
-        lazy="selectin",
+        # lazy="selectin",
     )
 
 

@@ -23,7 +23,9 @@ class Role(Base):
     __tablename__ = "roles"
     id = Column(Integer, primary_key=True)
     name = Column(String)
+
     sample_workflow_role = relationship("SampleWorkflow", back_populates="role",  lazy="selectin")
+    invoice_workflow_role = relationship("InvoiceWorkflow", back_populates="role",  lazy="selectin")
     users = relationship("User",back_populates="role")
 
     @classmethod
@@ -38,6 +40,7 @@ class Department(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)    
     sample_workflow_department = relationship("SampleWorkflow", back_populates="department",  lazy="selectin")
+    invoice_workflow_department = relationship("InvoiceWorkflow", back_populates="department",  lazy="selectin")
     front_desks = relationship("FrontDesk",back_populates="department", uselist=True,   lazy="selectin")
     users = relationship("User",back_populates="department")
 
@@ -91,6 +94,13 @@ class User(Base):
     sample_history_assignee = relationship("SampleHistory", foreign_keys="[SampleHistory.assigned_to]",   back_populates="assignee")
     sample_history_created = relationship("SampleHistory", foreign_keys="[SampleHistory.created_by]",   back_populates="created_by_user")
     email_statuses = relationship('EmailStatus', back_populates='emailed_user')
+
+    # Invoice Workflow
+    # invoice_assignee = relationship("Sample", foreign_keys="[Sample.assigned_to]", back_populates="assignee")
+
+    invoice_workflow_assignee = relationship("InvoiceWorkflow", foreign_keys="[InvoiceWorkflow.assigned_to]",   back_populates="assignee")
+    invoice_history_created = relationship("InvoiceHistory", foreign_keys="[InvoiceHistory.created_by]",   back_populates="created_by_user")
+    invoice_history_assignee = relationship("InvoiceHistory", foreign_keys="[InvoiceHistory.assigned_to]",   back_populates="assignee")
     # sample_created = relationship("Sample", foreign_keys="[Sample.created_by]", back_populates="created")
 
 class MenuControlList(Base):
