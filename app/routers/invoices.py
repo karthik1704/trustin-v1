@@ -252,7 +252,7 @@ async def update_invoice(
 
     # Calculate SGST, CGST, discount, and grand_total based on invoice_type
     discount = Decimal(invoice_data.get("discount", 0))
-
+    print("sub_total", sub_total)
     # Calculate totals based on invoice_type
     if invoice_data.get("invoice_type") == "EXEMPTED_CUSTOMER":
         sgst = Decimal(0)
@@ -279,18 +279,13 @@ async def update_invoice(
         total_after_discount = sub_total - discount
         grand_total = total_after_discount + igst
 
-    invoice_data["sgst"] = sgst.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    invoice_data["cgst"] = cgst.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    invoice_data["igst"] = igst.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    invoice_data["discount"] = discount.quantize(
-        Decimal("0.01"), rounding=ROUND_HALF_UP
-    )
-    invoice_data["sub_total"] = sub_total.quantize(
-        Decimal("0.01"), rounding=ROUND_HALF_UP
-    )
-    invoice_data["grand_total"] = grand_total.quantize(
-        Decimal("0.01"), rounding=ROUND_HALF_UP
-    )
+    # Update invoice with new calculated values
+    invoice.sgst = sgst.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    invoice.cgst = cgst.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    invoice.igst = igst.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    invoice.discount = discount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    invoice.sub_total = sub_total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    invoice.grand_total = grand_total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     # Commit all changes in a single transaction
     await db_session.commit()
