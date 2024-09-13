@@ -65,7 +65,7 @@ async def get_dashboard_data(
     product_count = await db_session.scalar(select(func.count()).select_from(Product))
     # trf_count = await db_session.scalar(select(func.count()).select_from(TRF))
     registration_count = select(func.count()).select_from(Registration)
-    invoice_count = select(func.count()).select_from(Invoice)
+    # invoice_count = select(func.count()).select_from(Invoice)
     print(start_date_str)
     print(start_date_str)
     start_date: datetime | None = None
@@ -81,14 +81,14 @@ async def get_dashboard_data(
             Registration.created_at <= end_date
         )
     registration_count = await db_session.scalar(registration_count)
-    invoice_count = await db_session.scalar(invoice_count)  # Execute the invoice_count query
+    # invoice_count = await db_session.scalar(invoice_count)  # Execute the invoice_count query
 
     # followup_count = await db_session.scalar(select(func.count()).select_from(CustomerFollowUp).where(CustomerFollowUp.marketing_status.notin_(["WON", "LOST"])))
 
     result: Dict[str, Any] = {
         "customer": customer_count,
         "product": product_count,
-        "invoice_count": invoice_count,
+        # "invoice_count": invoice_count,
         "registration_count": registration_count,
         # "followup_count" : followup_count
     }
