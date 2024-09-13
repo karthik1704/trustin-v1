@@ -10,7 +10,7 @@ from app.schemas.users import DepartmentSchema, RoleSchema, UserSchema
 class InvoiceSchema(BaseModel):
     id: Optional[int]
     invoice_code: Optional[str]
-    invoice_mode: str  # "INVOICE" | "PERFORMA_INVOICE"
+    invoice_mode: str | None # "INVOICE" | "PERFORMA_INVOICE"
     invoice_type: str
     customer_id: int
     customer_address: str
