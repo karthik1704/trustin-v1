@@ -111,7 +111,7 @@ def get_unique_code_invoice(unique_number: int, code: str, invoice_mode:str) -> 
             unique_number = 1
     # if start_number is not None:
     #     unique_number = start_number
-    new_code = f"TAS/{'I' if invoice_mode == 'INVOICE' else "PI"}/{start_year}-{end_year}/{unique_number:04}"
+    new_code = f"TAS/{'I' if invoice_mode == 'INVOICE' else 'PI'}/{start_year}-{end_year}/{unique_number:04}"
 
     print(new_code)
     return new_code
