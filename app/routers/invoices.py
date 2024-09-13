@@ -64,6 +64,8 @@ async def get_invoice(id: int, db_session: db_dep, current_user: user_dep):
 SGST_RATE = Decimal("0.09")  # 9% SGST
 CGST_RATE = Decimal("0.09")  # 9% CGST
 IGST_RATE = Decimal("0.18")  # 18% IGST
+PERFORMA_SGST_RATE = Decimal("0.18")  # 18% SGST
+PERFORMA_CGST_RATE = Decimal("0.18")  # 18% CGST
 
 
 @router.post("/", status_code=201)
@@ -102,30 +104,57 @@ async def create_invoice(
     discount = Decimal(invoice_data.get("discount", 0))
     print(invoice_data.get("invoice_type"))
     # Calculate totals based on invoice_type
-    if invoice_data.get("invoice_type") == "EXEMPTED_CUSTOMER":
-        sgst = Decimal(0)
-        cgst = Decimal(0)
-        igst = Decimal(0)
-        total_after_discount = sub_total - discount
-        grand_total = total_after_discount
-    elif invoice_data.get("invoice_type") == "TAMILNADU_CUSTOMER":
-        sgst = sub_total * SGST_RATE
-        cgst = sub_total * CGST_RATE
-        igst = Decimal(0)
-        total_after_discount = sub_total - discount
-        grand_total = total_after_discount + sgst + cgst
-    elif invoice_data.get("invoice_type") == "USD":
-        sgst = Decimal(0)
-        cgst = Decimal(0)
-        igst = Decimal(0)
-        total_after_discount = sub_total - discount
-        grand_total = total_after_discount
-    elif invoice_data.get("invoice_type") == "OTHER_STATE_CUSTOMER":
-        sgst = Decimal(0)
-        cgst = Decimal(0)
-        igst = sub_total * IGST_RATE
-        total_after_discount = sub_total - discount
-        grand_total = total_after_discount + igst
+    if invoice_data.get("invoice_mode") == "INVOICE":
+        if invoice_data.get("invoice_type") == "EXEMPTED_CUSTOMER":
+            sgst = Decimal(0)
+            cgst = Decimal(0)
+            igst = Decimal(0)
+            total_after_discount = sub_total - discount
+            grand_total = total_after_discount
+        elif invoice_data.get("invoice_type") == "TAMILNADU_CUSTOMER":
+            sgst = sub_total * SGST_RATE
+            cgst = sub_total * CGST_RATE
+            igst = Decimal(0)
+            total_after_discount = sub_total - discount
+            grand_total = total_after_discount + sgst + cgst
+        elif invoice_data.get("invoice_type") == "USD":
+            sgst = Decimal(0)
+            cgst = Decimal(0)
+            igst = Decimal(0)
+            total_after_discount = sub_total - discount
+            grand_total = total_after_discount
+        elif invoice_data.get("invoice_type") == "OTHER_STATE_CUSTOMER":
+            sgst = Decimal(0)
+            cgst = Decimal(0)
+            igst = sub_total * IGST_RATE
+            total_after_discount = sub_total - discount
+            grand_total = total_after_discount + igst
+
+    if invoice_data.get("invoice_mode") == "PERFORMA_INVOICE":
+        if invoice_data.get("invoice_type") == "PERFORMA_EXEMPTED_CUSTOMER":
+            sgst = Decimal(0)
+            cgst = Decimal(0)
+            igst = Decimal(0)
+            total_after_discount = sub_total - discount
+            grand_total = total_after_discount
+        elif invoice_data.get("invoice_type") == "PERFORMA_TAMILNADU_CUSTOMER":
+            sgst = sub_total * PERFORMA_SGST_RATE
+            cgst = sub_total * PERFORMA_CGST_RATE
+            igst = Decimal(0)
+            total_after_discount = sub_total - discount
+            grand_total = total_after_discount + sgst + cgst
+        elif invoice_data.get("invoice_type") == "PERFORMA_USD":
+            sgst = Decimal(0)
+            cgst = Decimal(0)
+            igst = Decimal(0)
+            total_after_discount = sub_total - discount
+            grand_total = total_after_discount
+        elif invoice_data.get("invoice_type") == "PERFORMA_OTHER_STATE_CUSTOMER":
+            sgst = Decimal(0)
+            cgst = Decimal(0)
+            igst = sub_total * IGST_RATE
+            total_after_discount = sub_total - discount
+            grand_total = total_after_discount + igst
 
     invoice_data["sgst"] = sgst.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     invoice_data["cgst"] = cgst.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
@@ -136,12 +165,12 @@ async def create_invoice(
     invoice_data["sub_total"] = sub_total.quantize(
         Decimal("0.01"), rounding=ROUND_HALF_UP
     )
-    invoice_data["grand_total"] = grand_total.quantize(
-        Decimal("0.01"), rounding=ROUND_HALF_UP
-    )
-
+    # invoice_data["grand_total"] = grand_total.quantize(
+    #     Decimal("0.01"), rounding=ROUND_HALF_UP
+    # ) 
+    invoice_data["grand_total"] = round(grand_total, 2)
     # Generate invoice code and create invoice
-    code = await Invoice.generate_next_code(db_session)
+    code = await Invoice.generate_next_code(db_session, invoice_data.get("invoice_mode"))
     invoice_data["invoice_code"] = code
 
     if invoice_data.get("invoice_type") == "USD":
@@ -285,7 +314,7 @@ async def update_invoice(
     invoice.igst = igst.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     invoice.discount = discount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     invoice.sub_total = sub_total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    invoice.grand_total = grand_total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    invoice.grand_total = round(grand_total, 2)
 
     # Commit all changes in a single transaction
     await db_session.commit()

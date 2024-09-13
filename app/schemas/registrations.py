@@ -286,7 +286,7 @@ class SampleSchema(BaseModel):
     batch_or_lot_no: str
     manufactured_date: Optional[str]
     test_method: Optional[str]
-    abbreviations: Optional[str]
+    abbreviations: Optional[List[str]]
     statement_of_conformity: Optional[str]
     reason: Optional[str]
     expiry_date: Optional[str]
@@ -701,9 +701,9 @@ class PatchSample(BaseModel):
     testing_start_date: Optional[date] = None
     testing_end_date: Optional[date] = None
     under_cdsco:Optional[bool] = None
-    show_status_report:Optional[bool] = None
+    show_status_report:Optional[bool] = None 
     statement_of_conformity:Optional[str] = None
-    abbreviations:Optional[str] = None
+    abbreviations:Optional[List[str]] = None
     reason:Optional[str] = None
     samples_received:Optional[bool] = None
     nabl_logo:Optional[bool] = None

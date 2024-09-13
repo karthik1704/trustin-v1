@@ -3,7 +3,7 @@ from typing import Annotated
 import datetime
 from fastapi import APIRouter, Depends, Path, status, HTTPException, Request
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import or_, select
+from sqlalchemy import false, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 
@@ -243,10 +243,12 @@ async def patch_sample(
   
    
     if sample.status_id==8 :
-        if  not sample.report_no:
+        if  not sample.report_no and sample.genreate_report_no:
             next_code = await Sample.generate_test_report_no_next_code(db_session)
             extra_data['report_no'] = next_code
-        else:
+            sample.genreate_report_no = False
+
+        elif sample.report_no and sample.genreate_report_no:
         # If report_no exists, add or increment -A1
             existing_report_no = sample.report_no
             if '-A' in existing_report_no:
@@ -261,7 +263,17 @@ async def patch_sample(
             extra_data['ulr_no']=next_ulr_code 
        
     print("sample", sample_data)
+    print('show_status_report',sample_data.get('show_status_report',None))
     sample_data = {**sample_data, **update_dict, **extra_data}
+    
+    # # Ensure discipline and show_status_report are updated correctly
+    # if "discipline" in sample_data:
+    #     sample.discipline = sample_data["discipline"]
+    if "show_status_report" in sample_data:
+        sample.show_status_report = sample_data["show_status_report"]
+    
+    # await sample.update_sample(sample_data)
+
     sample_detail = await SampleDetail.get_one(
         db_session,
         [
@@ -273,7 +285,9 @@ async def patch_sample(
     sample_detail_data = {"authorized_sign_id":authorized_sign_id, **sample_data, **update_dict, }
     sample_detail_data.pop("nabl_logo", None)
     sample_detail_data.pop("under_cdsco", None)
-    sample_detail_data.pop("show_status", None)
+    sample_detail_data.pop("show_status_report", None)
+    sample_detail_data.pop("discipline", None)
+    print("290 sample_data",sample_data)
     if sample_detail is not None:
         await sample_detail.update_sample_detail(sample_detail_data)
     else:

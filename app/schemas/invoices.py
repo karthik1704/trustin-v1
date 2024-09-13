@@ -10,6 +10,7 @@ from app.schemas.users import DepartmentSchema, RoleSchema, UserSchema
 class InvoiceSchema(BaseModel):
     id: Optional[int]
     invoice_code: Optional[str]
+    invoice_mode: str  # "INVOICE" | "PERFORMA_INVOICE"
     invoice_type: str
     customer_id: int
     customer_address: str
@@ -29,7 +30,10 @@ class InvoiceSchema(BaseModel):
     note: Optional[str]
     currency: str
     tested_type: str
-
+    contact_person_name: Optional[str]
+    contact_phone: Optional[str]    
+    authorized_sign_id: Optional[int]
+    authorized_sign: Optional[UserSchema]
     created_at: Optional[datetime]
     updated_at: Optional[datetime]
     created_by: int
@@ -113,6 +117,9 @@ class InvoiceCreate(BaseModel):
     discount: Optional[Decimal] =None
     currency: str
     tested_type: str
+    contact_person_name: Optional[str]
+    contact_phone: Optional[str]
+    invoice_mode: str  # "INVOICE" | "PERFORMA_INVOICE"
     parameters:Optional[List[InvoiceTestParameterCreate]]
 
 
@@ -132,6 +139,8 @@ class InvoiceUpdate(BaseModel):
     customer_ref_no: str
     quotation_ref_no: str
     sample_id_nos: str
+    contact_person_name: Optional[str]
+    contact_phone: Optional[str]
     
    
 
@@ -150,4 +159,5 @@ class PatchInvoice(BaseModel):
     comments: Optional[str] | None
     lut_arn:Optional[str] | None = None
     note:Optional[str] | None = None
+    authorized_sign_id: Optional[int] | None = None
    

@@ -26,6 +26,7 @@ from sqlalchemy import select, desc
 
 from app.models import Base
 from app.models.customers import Customer
+from app.models.users import User
 from app.utils import get_unique_code_invoice
 
 
@@ -73,9 +74,12 @@ class Invoice(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     invoice_code: Mapped[str] = mapped_column(String, nullable=True)
     invoice_type: Mapped[str]
+    invoice_mode: Mapped[Optional[str]]
     customer_id: Mapped[int] = mapped_column(Integer, ForeignKey(Customer.id))
     customer_address: Mapped[str] = mapped_column(Text)
     customer_email: Mapped[str]
+    contact_person_name:Mapped[Optional[str]]
+    contact_phone:Mapped[Optional[str]]
     customer_gst: Mapped[str]
     customer_ref_no: Mapped[str]
     quotation_ref_no: Mapped[str]
@@ -106,6 +110,7 @@ class Invoice(Base):
     tested_type: Mapped[str]
     lut_arn:Mapped[Optional[str]]
     note:Mapped[Optional[str]]
+    authorized_sign_id:Mapped[Optional[int]] = mapped_column(Integer, ForeignKey(User.id), nullable=True)
 
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -130,7 +135,7 @@ class Invoice(Base):
     status_data = relationship("InvoiceStatus", back_populates="invoice", lazy="selectin")
     invoice_history = relationship("InvoiceHistory", back_populates="invoice", lazy="selectin")
     invoice_workflows = relationship("InvoiceWorkflow", back_populates="invoice", lazy="selectin")
-
+    authorized_sign = relationship("User", back_populates="invoice_authorized_sign", foreign_keys=[authorized_sign_id], lazy="selectin")
 
     @classmethod
     async def get_all_with_pagination(
@@ -171,7 +176,7 @@ class Invoice(Base):
 
 
     @classmethod
-    async def generate_next_code(cls, database_session):
+    async def generate_next_code(cls, database_session, invoice_mode):
 
         _stmt = select(cls.invoice_code).order_by(desc(cls.invoice_code))
         _result = await database_session.execute(_stmt)
@@ -180,10 +185,10 @@ class Invoice(Base):
         if highest_code:
             highest_code_int = int(highest_code.split(f"/")[-1]) + 1
         else:
-            highest_code_int = 1001
+            highest_code_int = 1
         # Generate the new code by combining the prefix and the incremented integer
         new_code = get_unique_code_invoice(
-            highest_code_int, highest_code
+            highest_code_int, highest_code, invoice_mode
         )  # Adjust the format based on your requirements
         # database_session.close()
         return new_code

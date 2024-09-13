@@ -8,6 +8,7 @@ from typing import List, Optional
 
 from app.dependencies.auth import get_current_user
 from app.models.customers import Customer, CustomerFollowUp
+from app.models.invoices import Invoice
 from app.models.samples import TestType, TestingParameter, Product
 from app.models.users import User
 from app.models.registrations import (
@@ -64,6 +65,7 @@ async def get_dashboard_data(
     product_count = await db_session.scalar(select(func.count()).select_from(Product))
     # trf_count = await db_session.scalar(select(func.count()).select_from(TRF))
     registration_count = select(func.count()).select_from(Registration)
+    invoice_count = select(func.count()).select_from(Invoice)
     print(start_date_str)
     print(start_date_str)
     start_date: datetime | None = None
@@ -79,11 +81,14 @@ async def get_dashboard_data(
             Registration.created_at <= end_date
         )
     registration_count = await db_session.scalar(registration_count)
+    invoice_count = await db_session.scalar(invoice_count)  # Execute the invoice_count query
+
     # followup_count = await db_session.scalar(select(func.count()).select_from(CustomerFollowUp).where(CustomerFollowUp.marketing_status.notin_(["WON", "LOST"])))
 
     result: Dict[str, Any] = {
         "customer": customer_count,
         "product": product_count,
+        "invoice_count": invoice_count,
         "registration_count": registration_count,
         # "followup_count" : followup_count
     }

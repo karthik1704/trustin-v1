@@ -101,6 +101,7 @@ class User(Base):
     invoice_workflow_assignee = relationship("InvoiceWorkflow", foreign_keys="[InvoiceWorkflow.assigned_to]",   back_populates="assignee")
     invoice_history_created = relationship("InvoiceHistory", foreign_keys="[InvoiceHistory.created_by]",   back_populates="created_by_user")
     invoice_history_assignee = relationship("InvoiceHistory", foreign_keys="[InvoiceHistory.assigned_to]",   back_populates="assignee")
+    invoice_authorized_sign = relationship("Invoice", back_populates="authorized_sign", foreign_keys="[Invoice.authorized_sign_id]", lazy="selectin")
     # sample_created = relationship("Sample", foreign_keys="[Sample.created_by]", back_populates="created")
 
 class MenuControlList(Base):

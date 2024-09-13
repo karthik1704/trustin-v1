@@ -1,4 +1,5 @@
 from sqlalchemy import (
+    ARRAY,
     Column,
     Integer,
     Nullable,
@@ -897,12 +898,13 @@ class Sample(Base):
     under_cdsco: Mapped[Optional[bool]] = mapped_column(default=False)
     samples_received: Mapped[Optional[bool]] = mapped_column(default=False)
     show_status_report: Mapped[Optional[bool]] = mapped_column(default=True)
+    genreate_report_no: Mapped[Optional[bool]] = mapped_column(default=True)
     statement_of_conformity:Mapped[Optional[str]] = mapped_column(Text)
     reason:Mapped[Optional[str]] = mapped_column(Text)
     test_method:Mapped[Optional[str]] 
     ulr_no:Mapped[Optional[str]]
+    abbreviations: Mapped[Optional[List[str]]] = mapped_column(ARRAY(String), nullable=True)
     report_no:Mapped[Optional[str]]
-    abbreviations:Mapped[Optional[str]]
     discipline:Mapped[Optional[str]]
     group:Mapped[Optional[str]]
     report_no:Mapped[Optional[str]]
@@ -1026,10 +1028,9 @@ class Sample(Base):
 
         _stmt = (
             select(cls.report_no)
-            .where( cls.report_no !=None)
-            .order_by(
-                desc(cls.report_no)
-            )  # Assuming `code` is the column you want to order by
+            .where(cls.report_no != None)
+            .order_by(desc(cls.id))
+            .limit(1)
         )
         _result = await database_session.execute(_stmt)
         if _result:
@@ -1037,7 +1038,9 @@ class Sample(Base):
             highest_code = _result.scalars().first()
         if highest_code:
             base_report_no = highest_code.split('-A')[0] if '-A' in highest_code else highest_code
+            print('base_report_no',base_report_no)
             highest_code_int = int(base_report_no.split(f"/")[-1]) + 1
+            print("highest_code_int",highest_code_int)
         else:
             highest_code_int = TEST_REPORT_START_NUMBER if TEST_REPORT_START_NUMBER is not None else  1
         # Generate the new code by combining the prefix and the incremented integer
@@ -1222,7 +1225,7 @@ class Sample(Base):
         return _result.scalars().first()
 
     async def update_sample(self, updated_data):
-
+        print("updated_data",updated_data)
         for field, value in updated_data.items():
             setattr(self, field, value) if value else None
 
