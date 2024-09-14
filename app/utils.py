@@ -105,8 +105,11 @@ def get_unique_code_invoice(unique_number: int, code: str, invoice_mode:str) -> 
     start_year = FiscalYear.current().start.strftime("%Y")[-2:]
     end_year = FiscalYear.current().end.strftime("%Y")[-2:]
     if code is not None:
-        code_years = code.split("/")[1]
+        print(code)
+        code_years = code.split("/")[2]
+        print(code_years)
         code_end_year = code_years.split("-")[1]
+        print(code_end_year)
         if code_end_year == start_year:
             unique_number = 1
     # if start_number is not None:
