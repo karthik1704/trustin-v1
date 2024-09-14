@@ -1,6 +1,6 @@
 from datetime import datetime 
 from decimal import Decimal
-from typing import List, Optional
+from typing import List, Literal, Optional
 from pydantic import BaseModel
 
 from app.schemas.customers import CustomerSchema
@@ -10,7 +10,7 @@ from app.schemas.users import DepartmentSchema, RoleSchema, UserSchema
 class InvoiceSchema(BaseModel):
     id: Optional[int]
     invoice_code: Optional[str]
-    invoice_mode: str | None # "INVOICE" | "PERFORMA_INVOICE"
+    invoice_mode: Optional[str] # "INVOICE" | "PERFORMA_INVOICE"
     invoice_type: str
     customer_id: int
     customer_address: str
@@ -106,6 +106,7 @@ class InvoiceTestParameterCreate(BaseModel):
 
 
 class InvoiceCreate(BaseModel):
+    invoice_mode: Literal["INVOICE", "PERFORMA_INVOICE"]
     invoice_type: str
     customer_id: int
     customer_address: str
@@ -119,7 +120,6 @@ class InvoiceCreate(BaseModel):
     tested_type: str
     contact_person_name: Optional[str]
     contact_phone: Optional[str]
-    invoice_mode: str  # "INVOICE" | "PERFORMA_INVOICE"
     parameters:Optional[List[InvoiceTestParameterCreate]]
 
 
