@@ -168,7 +168,9 @@ async def create_invoice(
     # invoice_data["grand_total"] = grand_total.quantize(
     #     Decimal("0.01"), rounding=ROUND_HALF_UP
     # ) 
-    invoice_data["grand_total"] = round(grand_total, 2)
+    # invoice_data["grand_total"] = round(grand_total, 2)
+    rounded_total = round(grand_total)
+    invoice_data["grand_total"] = Decimal(f"{rounded_total:.2f}")
     # Generate invoice code and create invoice
     code = await Invoice.generate_next_code(db_session, invoice_data.get("invoice_mode"))
     invoice_data["invoice_code"] = code
@@ -343,7 +345,9 @@ async def update_invoice(
     invoice.igst = igst.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     invoice.discount = discount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     invoice.sub_total = sub_total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    invoice.grand_total = round(grand_total, 2)
+    # invoice.grand_total = round(grand_total, 2)
+    rounded_total = round(grand_total)
+    invoice.grand_total = Decimal(f"{rounded_total:.2f}")
 
     # Commit all changes in a single transaction
     await db_session.commit()
