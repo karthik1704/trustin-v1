@@ -64,8 +64,8 @@ async def get_invoice(id: int, db_session: db_dep, current_user: user_dep):
 SGST_RATE = Decimal("0.09")  # 9% SGST
 CGST_RATE = Decimal("0.09")  # 9% CGST
 IGST_RATE = Decimal("0.18")  # 18% IGST
-PERFORMA_SGST_RATE = Decimal("0.18")  # 18% SGST
-PERFORMA_CGST_RATE = Decimal("0.18")  # 18% CGST
+PROFORMA_SGST_RATE = Decimal("0.09")  # 9% SGST
+PROFORMA_CGST_RATE = Decimal("0.09")  # 9% CGST
 
 
 @router.post("/", status_code=201)
@@ -130,26 +130,26 @@ async def create_invoice(
             total_after_discount = sub_total - discount
             grand_total = total_after_discount + igst
 
-    if invoice_data.get("invoice_mode") == "PERFORMA_INVOICE":
-        if invoice_data.get("invoice_type") == "PERFORMA_EXEMPTED_CUSTOMER":
+    if invoice_data.get("invoice_mode") == "PROFORMA_INVOICE":
+        if invoice_data.get("invoice_type") == "PROFORMA_EXEMPTED_CUSTOMER":
             sgst = Decimal(0)
             cgst = Decimal(0)
             igst = Decimal(0)
             total_after_discount = sub_total - discount
             grand_total = total_after_discount
-        elif invoice_data.get("invoice_type") == "PERFORMA_TAMILNADU_CUSTOMER":
-            sgst = sub_total * PERFORMA_SGST_RATE
-            cgst = sub_total * PERFORMA_CGST_RATE
+        elif invoice_data.get("invoice_type") == "PROFORMA_TAMILNADU_CUSTOMER":
+            sgst = sub_total * PROFORMA_SGST_RATE
+            cgst = sub_total * PROFORMA_CGST_RATE
             igst = Decimal(0)
             total_after_discount = sub_total - discount
             grand_total = total_after_discount + sgst + cgst
-        elif invoice_data.get("invoice_type") == "PERFORMA_USD":
+        elif invoice_data.get("invoice_type") == "PROFORMA_USD":
             sgst = Decimal(0)
             cgst = Decimal(0)
             igst = Decimal(0)
             total_after_discount = sub_total - discount
             grand_total = total_after_discount
-        elif invoice_data.get("invoice_type") == "PERFORMA_OTHER_STATE_CUSTOMER":
+        elif invoice_data.get("invoice_type") == "PROFORMA_OTHER_STATE_CUSTOMER":
             sgst = Decimal(0)
             cgst = Decimal(0)
             igst = sub_total * IGST_RATE
@@ -313,26 +313,26 @@ async def update_invoice(
             grand_total = total_after_discount + igst
 
     
-    if invoice.invoice_mode == "PERFORMA_INVOICE":
-        if invoice_data.get("invoice_type") == "PERFORMA_EXEMPTED_CUSTOMER":
+    if invoice.invoice_mode == "PROFORMA_INVOICE":
+        if invoice_data.get("invoice_type") == "PROFORMA_EXEMPTED_CUSTOMER":
             sgst = Decimal(0)
             cgst = Decimal(0)
             igst = Decimal(0)
             total_after_discount = sub_total - discount
             grand_total = total_after_discount
-        elif invoice_data.get("invoice_type") == "PERFORMA_TAMILNADU_CUSTOMER":
-            sgst = sub_total * PERFORMA_SGST_RATE
-            cgst = sub_total * PERFORMA_CGST_RATE
+        elif invoice_data.get("invoice_type") == "PROFORMA_TAMILNADU_CUSTOMER":
+            sgst = sub_total * PROFORMA_SGST_RATE
+            cgst = sub_total * PROFORMA_CGST_RATE
             igst = Decimal(0)
             total_after_discount = sub_total - discount
             grand_total = total_after_discount + sgst + cgst
-        elif invoice_data.get("invoice_type") == "PERFORMA_USD":
+        elif invoice_data.get("invoice_type") == "PROFORMA_USD":
             sgst = Decimal(0)
             cgst = Decimal(0)
             igst = Decimal(0)
             total_after_discount = sub_total - discount
             grand_total = total_after_discount
-        elif invoice_data.get("invoice_type") == "PERFORMA_OTHER_STATE_CUSTOMER":
+        elif invoice_data.get("invoice_type") == "PROFORMA_OTHER_STATE_CUSTOMER":
             sgst = Decimal(0)
             cgst = Decimal(0)
             igst = sub_total * IGST_RATE
