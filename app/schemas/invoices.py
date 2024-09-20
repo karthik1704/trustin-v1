@@ -106,7 +106,7 @@ class InvoiceTestParameterCreate(BaseModel):
 
 
 class InvoiceCreate(BaseModel):
-    invoice_mode: Literal["INVOICE", "PERFORMA_INVOICE"]
+    invoice_mode: Literal["INVOICE", "PROFORMA_INVOICE"]
     invoice_type: str
     customer_id: int
     customer_address: str

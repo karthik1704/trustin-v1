@@ -178,7 +178,7 @@ class Invoice(Base):
     @classmethod
     async def generate_next_code(cls, database_session, invoice_mode):
 
-        _stmt = select(cls.invoice_code).order_by(desc(cls.invoice_code))
+        _stmt = select(cls.invoice_code).order_by(desc(cls.id))
         _result = await database_session.execute(_stmt)
         if _result:
             highest_code = _result.scalars().first()
