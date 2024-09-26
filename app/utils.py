@@ -79,10 +79,10 @@ def get_unique_para_code(prefix: str, unique_number: int) -> str:
     return new_code
 
 
-start_number: int | None = None
+start_number: int | None = 5680
 
 
-def get_unique_code_registration(unique_number: int, code: str) -> str:
+def get_unique_code_registration(unique_number: int|None, code: str|None) -> str:
     setup_fiscal_calendar(start_month=4)
 
     start_year = FiscalYear.current().start.strftime("%Y")[-2:]
@@ -92,7 +92,7 @@ def get_unique_code_registration(unique_number: int, code: str) -> str:
         code_end_year = code_years.split("-")[1]
         if code_end_year == start_year:
             unique_number = 1001
-    if start_number is not None:
+    if code is None and start_number is not None:
         unique_number = start_number
     new_code = f"TAS/{start_year}-{end_year}/{unique_number:04}"
 
